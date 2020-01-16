@@ -11,7 +11,7 @@ if(EOSIO_ROOT STREQUAL "" OR NOT EOSIO_ROOT)
 endif()
 
 if(EOSIO_CONTRACT_DIR STREQUAL "" OR NOT EOSIO_CONTRACT_DIR)
-   set(EOSIO_CONTRACT_DIR "${CMAKE_SOURCE_DIR}/../../../eosio.contracts/build")
+   set(EOSIO_CONTRACT_DIR "/Users/necklace/work/eos/eosio.contracts/build/contracts")
 endif()
 
 list(APPEND CMAKE_MODULE_PATH ${EOSIO_ROOT}/lib/cmake/eosio)

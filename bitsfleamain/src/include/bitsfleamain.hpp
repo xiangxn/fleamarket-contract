@@ -3,22 +3,31 @@
 #include <eosio/eosio.hpp>
 #include <eosio/asset.hpp>
 #include <eosio/transaction.hpp>
+#include <eosio/crypto.hpp>
 #include <string>
 
 #include "global.hpp"
-#include "data.hpp"
+#include "types.hpp"
 
 #include "token/token_stats.hpp"
 #include "token/token_balance.hpp"
+
+#include "user.hpp"
+#include "referrer.hpp"
 
 using namespace eosio;
 
 namespace rareteam {
 
-    class [[eosio::contract("bitsfleamain")]] fleamain : public contract {
+    CONTRACT bitsfleamain : public contract {
     private:
+        /**
+         * Whether it has been initialized
+         */ 
+        bool                    _is_init = false;
         flea_global_singleton   _global_table;
         global                  _global;
+        user_index              _user_table;
 
         global get_default_global() {
             global g;
@@ -31,19 +40,17 @@ namespace rareteam {
         /*****token end*****/
 
     public:
-        fleamain( name receiver, name code, datastream<const char*> ds );
-        ~fleamain() {
-            _global_table.set( _global, _self );
+        bitsfleamain( name receiver, name code, datastream<const char*> ds );
+        ~bitsfleamain() {
+            if( _is_init ){
+                _global_table.set( _global, _self );
+            }
         }
 
-        /*****deposit/withdraw*****/ 
-        ACTION deposit( name from, name to, asset quantity, string memo );
-
-        ACTION withdraw( const name& to, const asset& quantity );
-        /*****deposit/withdraw end*****/
-
         /*****fleamain management*****/
+        ACTION init();
         ACTION reset();
+        ACTION test(const string& para);
 
         void OnError( const onerror& error );
         /*****fleamain management end*****/
@@ -56,6 +63,10 @@ namespace rareteam {
         ACTION claim( name to, asset quantity );
         ACTION closetoken( name owner, const asset& symbol );
         /*****Token management end*****/
+
+        /********platform*********/
+        ACTION reguser( const name& eosid, const string& nickname, const checksum256& phone_hash, const string& phone_encrypt, uint64_t referrer );
+        /********platform End*****/
 
     public:
         // static const user& GetUser( const name& tokenContractAccount, const name& account )

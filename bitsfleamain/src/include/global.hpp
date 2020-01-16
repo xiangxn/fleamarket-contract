@@ -4,7 +4,7 @@
 #include <eosio/singleton.hpp>
 #include <string>
 
-#include "data.hpp"
+#include "types.hpp"
 
 using namespace std;
 

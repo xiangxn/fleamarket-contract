@@ -2,28 +2,34 @@
 
 #include <string>
 #include <math.h>
+#include <eosio/eosio.hpp>
+#include <eosio/crypto.hpp>
+#include "base58.hpp"
 
 using namespace std;
+using namespace eosio;
 
 namespace rareteam {
 
-   void merge_hash(capi_checksum256 &s1, capi_checksum256 s2) {
-      for (int i = 0; i < 32; ++i) {
-         s1.hash[i] ^= s2.hash[31-i];
-      }
-   }
-
-   bool is_zero(const capi_checksum256& a) {
-      const uint64_t *p64 = reinterpret_cast<const uint64_t*>(&a);
+   bool is_zero(const checksum256& hash) {
+      auto hash_data = hash.extract_as_byte_array();
+      const uint64_t *p64 = reinterpret_cast<const uint64_t*>( hash_data.data() );
       return p64[0] == 0 && p64[1] == 0 && p64[2] == 0 && p64[3] == 0;
    }
 
-   void set_zero(const capi_checksum256& a) {
-      memset( (void *)&a, 0, sizeof(capi_checksum256) );
+   uint64_t get_uint64( const checksum256 hash, int32_t index = 0 ) {
+      auto hash_data = hash.extract_as_byte_array();
+      const uint64_t *p64 = reinterpret_cast<const uint64_t*>( hash_data.data() );
+      if(index > 3 ) index = 3;
+      return p64[index];
    }
 
-   bool is_equal(const capi_checksum256& a, const capi_checksum256& b) {
-      return memcmp((void *)&a, (const void *)&b, sizeof(capi_checksum256)) == 0;
+   void set_zero(const checksum256& a )  {
+      memset( (void *)a.data(), 0, 32 );
+   }
+
+   bool is_equal(const checksum256& a, const checksum256& b) {
+      return memcmp((void *)a.data(), (const void *)b.data(), a.size()) == 0;
    }
 
    vector<string> split(const string& str, const string& delim) {  
@@ -48,7 +54,7 @@ namespace rareteam {
       if (c >= '0' && c <= '9') return c - '0';
       if (c >= 'a' && c <= 'f') return c - 'a' + 10;
       if (c >= 'A' && c <= 'F') return c - 'A' + 10;
-      eosio_assert(false, "Invalid hex character");
+      check(false, "Invalid hex character");
       return 0;
    }
 
@@ -68,11 +74,33 @@ namespace rareteam {
       return out_pos - (uint8_t*)out_data;
    }
 
-   capi_checksum256 hex_to_sha256(const std::string& hex_str) {
-      eosio_assert(hex_str.length() == 64, "invalid sha256");
-      capi_checksum256 checksum;
-      from_hex(hex_str, (char*)checksum.hash, sizeof(checksum.hash));
+   checksum256 hex_to_sha256(const std::string& hex_str) {
+      check(hex_str.length() == 64, "invalid sha256");
+      checksum256 checksum;
+      from_hex(hex_str, (char*)checksum.data(), 32);
       return checksum;
+   }
+
+   string to_hex(uint8_t const * input, size_t length) {
+      std::string output;
+      std::string hex = "0123456789ABCDEF";
+
+      for (size_t i = 0; i < length; i++) {
+         output += hex[(input[i] & 0xF0) >> 4];
+         output += hex[input[i] & 0x0F];
+         //output += " ";
+      }
+
+      return output;
+   }
+
+   string to_hex(const char* input,size_t length) {
+      return to_hex(reinterpret_cast<const uint8_t*>(input),length);
+   }
+
+   string sha256_to_hex(const checksum256& hash )
+   {
+      return to_hex( (char*)hash.data(), 32 );
    }
 
    uint64_t get_send_id( uint128_t sender_id )
@@ -132,6 +160,60 @@ namespace rareteam {
          return str.length() >= 3 && str.length() <= 12;
       }
       return word;
+   }
+
+   signature str_to_sig(const string& sig, const bool& checksumming = true) {
+      const auto pivot = sig.find('_');
+      check(pivot != string::npos, "No delimiter in signature");
+      const auto prefix_str = sig.substr(0, pivot);
+      check(prefix_str == "SIG", "Signature Key has invalid prefix");
+      const auto next_pivot = sig.find('_', pivot + 1);
+      check(next_pivot != string::npos, "No curve in signature");
+      const auto curve = sig.substr(pivot + 1, next_pivot - pivot - 1);
+      check(curve == "K1" || curve == "R1", "Incorrect curve");
+      const bool k1 = curve == "K1";
+      auto data_str = sig.substr(next_pivot + 1);
+      check(!data_str.empty(), "Signature has no data");
+      vector<unsigned char> vch;
+
+      check(decode_base58(data_str, vch), "Decode signature failed");
+
+      check(vch.size() == 69, "Invalid signature");
+
+      if (checksumming) {
+         array<unsigned char, 67> check_data;
+         copy_n(vch.begin(), 65, check_data.begin());
+         check_data[65] = k1 ? 'K' : 'R';
+         check_data[66] = '1';
+
+         checksum160 check_sig = ripemd160(reinterpret_cast<char*>(check_data.data()), 67);
+         check(memcmp(check_sig.extract_as_byte_array().data(), &vch.end()[-4], 4) == 0, "Signature checksum mismatch");
+      }
+
+      signature _sig,_sig2;
+      unsigned int type = k1 ? 0 : 1;
+      _sig.type = (uint8_t)type;
+      copy_n(vch.begin(), 65, _sig.data.begin());
+      return _sig;
+   }
+
+   public_key str_to_pub(const string& pubkey, const string& pubkey_prefix = "EOS", const bool& checksumming = true) {
+      auto base58substr = pubkey.substr(pubkey_prefix.length());
+      vector<unsigned char> vch;
+      check(decode_base58(base58substr, vch), "Decode public key failed");
+      check(vch.size() == 37, "Invalid public key");
+      if (checksumming) {
+         array<unsigned char, 33> pubkey_data;
+         copy_n(vch.begin(), 33, pubkey_data.begin());
+
+         checksum160 check_pubkey = ripemd160(reinterpret_cast<char*>(pubkey_data.data()), 33);
+
+         check(memcmp(check_pubkey.extract_as_byte_array().data(), &vch.end()[-4], 4) == 0, "Public key checksum mismatch");
+      }
+      public_key _pub_key;
+      _pub_key.type = 0;
+      copy_n(vch.begin(), 33, _pub_key.data.begin());
+      return _pub_key;
    }
 
 }

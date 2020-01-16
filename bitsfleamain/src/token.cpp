@@ -6,7 +6,7 @@
 
 namespace rareteam {
 
-   void fleamain::create( name issuer, asset maximum_supply, int16_t team )
+   void bitsfleamain::create( name issuer, asset maximum_supply, int16_t team )
    {
       require_auth( _self );
 
@@ -29,7 +29,7 @@ namespace rareteam {
       });
    }
 
-   void fleamain::claim( name to, asset quantity )
+   void bitsfleamain::claim( name to, asset quantity )
    {
       require_auth( _self );
 
@@ -65,7 +65,7 @@ namespace rareteam {
       }
    }
 
-   void fleamain::issue( name to, asset quantity, string memo )
+   void bitsfleamain::issue( name to, asset quantity, string memo )
    {
       auto sym = quantity.symbol;
       check( sym.is_valid(), "invalid symbol name" );
@@ -96,7 +96,7 @@ namespace rareteam {
       }
    }
 
-   void fleamain::retire( asset quantity, string memo )
+   void bitsfleamain::retire( asset quantity, string memo )
    {
       auto sym = quantity.symbol;
       check( sym.is_valid(), "invalid symbol name" );
@@ -120,7 +120,7 @@ namespace rareteam {
       sub_balance( st.issuer, quantity );
    }
 
-   void fleamain::transfer( name from, name to, asset quantity, string memo )
+   void bitsfleamain::transfer( name from, name to, asset quantity, string memo )
    {
       check( from != to, "cannot transfer to self" );
       require_auth( from );
@@ -143,7 +143,7 @@ namespace rareteam {
       add_balance( to, quantity, payer );
    }
 
-   void fleamain::closetoken( name owner, const asset& symbol )
+   void bitsfleamain::closetoken( name owner, const asset& symbol )
    {
       auto auth = has_auth( owner ) ? owner : _self;
       require_auth( auth );
@@ -154,7 +154,7 @@ namespace rareteam {
       acnts.erase( it );
    }
 
-   void fleamain::sub_balance( name owner, asset value ) {
+   void bitsfleamain::sub_balance( name owner, asset value ) {
       balances from_acnts( _self, owner.value );
 
       const auto& from = from_acnts.get( value.symbol.code().raw(), "no balance object found" );
@@ -165,7 +165,7 @@ namespace rareteam {
       });
    }
 
-   void fleamain::add_balance( name owner, asset value, name ram_payer )
+   void bitsfleamain::add_balance( name owner, asset value, name ram_payer )
    {
       balances to_acnts( _self, owner.value );
       auto to = to_acnts.find( value.symbol.code().raw() );
