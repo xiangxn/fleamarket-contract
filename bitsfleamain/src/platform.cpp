@@ -34,6 +34,7 @@ namespace rareteam {
             u.nickname = nickname;
             u.phone_hash = phone_hash;
             u.phone_encrypt = phone_encrypt;
+            u.credit_value = _global.credit_base_score;
             u.last_active_time = time_point_sec(current_time_point().sec_since_epoch());
             if( referrer > 0 ) {
                 u.referrer = referrer;

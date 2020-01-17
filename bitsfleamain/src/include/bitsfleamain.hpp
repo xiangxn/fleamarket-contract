@@ -14,6 +14,8 @@
 
 #include "user.hpp"
 #include "referrer.hpp"
+#include "product.hpp"
+#include "review.hpp"
 
 using namespace eosio;
 
