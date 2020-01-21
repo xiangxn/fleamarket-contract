@@ -44,7 +44,7 @@ namespace rareteam {
         /**
          * Lower credit limit for reviewers
          */
-        int32_t credit_reviewer_limit = 600;
+        int32_t credit_reviewer_limit = 500;
         /*******************credit related End***********/
 
         /*******************reviewer related**************************/

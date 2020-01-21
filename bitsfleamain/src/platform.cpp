@@ -55,7 +55,46 @@ namespace rareteam {
             });
         }
         _global.total_users += 1;
+    }
 
+    void bitsfleamain::applyreview( uint64_t uid, const name& eosid )
+    {
+        require_auth( eosid );
+
+        check( is_account(eosid), "Invalid account eosid" );
+        auto& user = _user_table.get( uid, "Invalid account id" );
+        check( user.credit_value >= _global.credit_reviewer_limit, "Insufficient credit value" );
+
+        reviewer_index rev_table( _self, _self.value );
+        auto itr = rev_table.find( uid );
+        check( itr == rev_table.end(), "Already reviewer" );
+
+        auto rev_itr = rev_table.emplace( _self, [&]( auto& r ){
+            r.id = rev_table.available_primary_key();
+            r.uid = uid;
+            r.eosid = eosid;
+            r.voted_count = 0;
+            r.create_time = time_point_sec(current_time_point().sec_since_epoch());
+            r.last_active_time = time_point_sec(current_time_point().sec_since_epoch());
+        });
+    }
+
+    void bitsfleamain::votereviewer( uint64_t voter_uid, const name& voter_eosid, uint64_t reviewer_uid, bool is_support )
+    {
+        require_auth( voter_eosid );
+        reviewer_index rev_table( _self, _self.value );
+        auto itr = rev_table.find( reviewer_uid );
+        check( itr != rev_table.end(), "The reviewer uid is not a reviewer" );
+
+        rev_table.modify( itr, same_payer, [&]( auto& r ){
+            if( is_support ){
+                r.voted_count += 1;
+            }else{
+                r.voted_count -= 1;
+            }
+            if( r.voted_count < 0 ) r.voted_count = 0;
+        });
+        //TODO: point logic
 
     }
     

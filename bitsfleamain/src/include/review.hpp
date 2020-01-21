@@ -33,9 +33,9 @@ namespace rareteam
         uint64_t pid = 0;
         uint64_t reviewer_uid = 0;
         /**
-         * Whether the product passed the audit
+         * Whether the product delisted the audit
          */ 
-        bool is_pass = false;
+        bool is_delisted = false;
         string review_details;
         time_point_sec review_time;
 

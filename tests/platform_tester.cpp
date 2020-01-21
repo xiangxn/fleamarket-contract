@@ -89,6 +89,11 @@ public:
       return data.empty() ? fc::variant() : abi_ser.binary_to_variant( "User", data, abi_serializer_max_time );
    }
 
+   fc::variant get_product( uint64_t pid ) {
+      vector<char> data = get_row_by_account( N(bitsfleamain), N(bitsfleamain), N(products), pid );
+      return data.empty() ? fc::variant() : abi_ser.binary_to_variant( "Product", data, abi_serializer_max_time );
+   }
+
    abi_serializer abi_ser;
 };
 
@@ -126,6 +131,40 @@ BOOST_FIXTURE_TEST_CASE( recharge, platform_tester ) try {
 
    user = get_user(1);
    BOOST_REQUIRE_EQUAL( user["nickname"].as_string(),"player1");
+
+   //market
+   auto pro_info = mutable_variant_object()("pid",0)
+                              ("title","title test")
+                              ("description","description 测试")
+                              ("photos","photos 测试")
+                              ("category",0)
+                              ("status",0)
+                              ("is_new",false)
+                              ("is_returns",false)
+                              ("sale_method",0)
+                              ("price",core_sym::from_string("100.0000"))
+                              ("transaction_method",1)
+                              ("postage",core_sym::from_string("1.0000"))
+                              ("position","位置")
+                              ("release_time","2020-01-20T00:00:00");
+   auto pa_onfo = mutable_variant_object()("id",0)
+                                          ("pid",0)
+                                          ("security",core_sym::from_string("1.0000"))
+                                          ("markup",1)
+                                          ("current_price",core_sym::from_string("1.0000"))
+                                          ("auction_times",0)
+                                          ("last_price_user",0)
+                                          ("start_time","2020-01-20T00:00:00")
+                                          ("end_time","2020-01-22T00:00:00");
+   auto para = mutable_variant_object()("uid", 0)
+                                     ("product",pro_info)
+                                     ("pa",pa_onfo);
+   base_tester::push_action( N(bitsfleamain), N(publish), N(bitsfleamain), para);
+
+   produce_blocks();
+
+   auto pro = get_product(0);
+   BOOST_REQUIRE_EQUAL( pro["title"].as_string(),"title test" );
                                 
 } FC_LOG_AND_RETHROW()
 

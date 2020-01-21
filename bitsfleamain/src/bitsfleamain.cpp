@@ -5,6 +5,7 @@
 
 #include "token.cpp"
 #include "platform.cpp"
+#include "market.cpp"
 
 using namespace eosio;
 

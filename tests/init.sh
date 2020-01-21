@@ -27,3 +27,5 @@ cleos push action bitsfleamain reguser '[player1,"player1","05FBED483A974456708E
 cleos push action bitsfleamain reguser '[player2,"player2","05FBED483A974456708EF12FCF3D278276E982234D775ECEE0DFA5CB49B8B494","05FBED483A974456708EF12FCF3D278276E982234D775ECEE0DFA5CB49B8B492",1]' -p bitsfleamain &&
 
 cleos get table bitsfleamain bitsfleamain users # &&
+
+# {"uid":0,"product":{"pid":0,"title":"title test","description":"description 测试","photos":"photos 测试","category":0,"status":0,"is_new":false,"is_returns":false,"sale_method":0,"price":"100.0000 EOS","transaction_method":1,"postage":"1.0000 EOS","position":"位置"},"pa":null}

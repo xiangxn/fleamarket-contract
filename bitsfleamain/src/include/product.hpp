@@ -14,9 +14,10 @@ using namespace eosio;
 namespace rareteam
 {
     enum ProductStatus : uint8_t {
-        NORMAL = 0,
+        PUBLISH = 0,
+        NORMAL,
+        COMPLETED,
         DELISTED,
-        CLOSED,
         LOCKED
     };
 
@@ -58,7 +59,7 @@ namespace rareteam
         string description;
         string photos;
         uint64_t category;
-        uint8_t status = ProductStatus::NORMAL;
+        uint8_t status = ProductStatus::PUBLISH;
         bool is_new = false;
         bool is_returns = false;
         /**
@@ -76,6 +77,7 @@ namespace rareteam
         time_point_sec release_time;
 
         uint64_t primary_key() const { return pid; }
+        uint64_t by_status() const { return uint64_t(status); }
 
     };
 
@@ -150,7 +152,9 @@ namespace rareteam
     };
 
     typedef eosio::multi_index<"categories"_n, Categories > Category_index;
-    typedef eosio::multi_index<"products"_n, Product > product_index;
+    typedef eosio::multi_index<"products"_n, Product,
+        indexed_by< "status"_n, const_mem_fun<Product, uint64_t, &Product::by_status> >
+    > product_index;
 
     typedef eosio::multi_index<"proauction"_n, ProductAuction,
         indexed_by< "auctionid"_n, const_mem_fun<ProductAuction, uint64_t,  &ProductAuction::by_auction_id> >
