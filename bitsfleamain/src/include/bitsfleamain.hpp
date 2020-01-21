@@ -68,7 +68,7 @@ namespace rareteam {
 
         /********platform*********/
         ACTION reguser( const name& eosid, const string& nickname, const checksum256& phone_hash, const string& phone_encrypt, uint64_t referrer );
-        ACTION applyreview( uint64_t uid, const name& eosid );
+        ACTION appreviewer( uint64_t uid, const name& eosid );
         ACTION votereviewer( uint64_t voter_uid, const name& voter_eosid, uint64_t reviewer_uid, bool is_support );
         ACTION publish( uint64_t uid, const Product& product, const ProductAuction& pa );
         ACTION review( uint64_t reviewer_uid, const name& reviewer_eosid, uint64_t pid, bool is_delisted, string& memo );

@@ -57,7 +57,7 @@ namespace rareteam {
         _global.total_users += 1;
     }
 
-    void bitsfleamain::applyreview( uint64_t uid, const name& eosid )
+    void bitsfleamain::appreviewer( uint64_t uid, const name& eosid )
     {
         require_auth( eosid );
 
