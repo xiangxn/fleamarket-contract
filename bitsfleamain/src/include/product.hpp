@@ -13,34 +13,34 @@ using namespace eosio;
 
 namespace rareteam
 {
-    enum ProductStatus : uint8_t {
+    enum ProductStatus : uint32_t {
         PUBLISH = 0,
-        NORMAL,
-        COMPLETED,
-        DELISTED,
-        LOCKED
+        NORMAL = 100,
+        COMPLETED = 200,
+        DELISTED = 300,
+        LOCKED = 400
     };
 
-    enum OrderStatus : uint8_t {
+    enum OrderStatus : uint32_t {
         OS_PENDING_PAYMENT = 0,
-        OS_PAID,
-        OS_PENDING_SHIPMENT,
-        OS_SHIPPED,
-        OS_PENDING_RECEIPT,
-        OS_RECEIVED,
-        OS_COMPLETED,
-        OS_CANCELLED,
-        OS_ARBITRATION,
-        OS_RETURN
+        OS_PAID = 100,
+        OS_PENDING_SHIPMENT = 200,
+        OS_SHIPPED = 300,
+        OS_PENDING_RECEIPT = 400,
+        OS_RECEIVED = 500,
+        OS_COMPLETED = 600,
+        OS_CANCELLED = 700,
+        OS_ARBITRATION = 800,
+        OS_RETURN = 900
     };
 
-    enum ReturnStatus : uint8_t {
+    enum ReturnStatus : uint32_t {
         RS_PENDING_SHIPMENT = 0,
-        RS_SHIPPED,
-        RS_PENDING_RECEIPT,
-        RS_COMPLETED,
-        RS_CANCELLED,
-        RS_ARBITRATION
+        RS_SHIPPED = 100,
+        RS_PENDING_RECEIPT = 200,
+        RS_COMPLETED = 300,
+        RS_CANCELLED = 400,
+        RS_ARBITRATION = 500
     };
 
     struct [[eosio::table, eosio::contract("bitsfleamain")]] Categories
@@ -59,7 +59,7 @@ namespace rareteam
         string description;
         string photos;
         uint64_t category;
-        uint8_t status = ProductStatus::PUBLISH;
+        uint32_t status = ProductStatus::PUBLISH;
         bool is_new = false;
         bool is_returns = false;
         /**
@@ -108,7 +108,7 @@ namespace rareteam
         uint64_t seller_uid;
         uint64_t buyer_uid;
         asset price;
-        uint8_t status = OrderStatus::OS_PENDING_PAYMENT;
+        uint32_t status = OrderStatus::OS_PENDING_PAYMENT;
         string shipment_number;
         time_point_sec create_time;
         time_point_sec pay_time;
@@ -133,7 +133,7 @@ namespace rareteam
         uint64_t order_id;
         uint64_t pid;
         asset order_price;
-        uint8_t status = ReturnStatus::RS_PENDING_SHIPMENT;
+        uint32_t status = ReturnStatus::RS_PENDING_SHIPMENT;
         string shipment_number;
         time_point_sec create_time;
         time_point_sec ship_time;
