@@ -16,6 +16,7 @@ namespace rareteam {
         product_index pro_table( _self, _self.value );
         auto pro_itr = pro_table.emplace( _self, [&]( auto& p ) {
             p.pid = pro_table.available_primary_key();
+            p.uid = uid;
             p.title = product.title;
             p.description = product.description;
             p.photos = product.photos;
@@ -47,7 +48,7 @@ namespace rareteam {
         //TODO: point logic
     }
 
-    void bitsfleamain::review( uint64_t reviewer_uid, const name& reviewer_eosid, uint64_t pid, bool is_delisted, string& memo )
+    void bitsfleamain::review( uint64_t reviewer_uid, const name& reviewer_eosid, uint32_t pid, bool is_delisted, string& memo )
     {
         require_auth( reviewer_eosid );
 
@@ -74,6 +75,58 @@ namespace rareteam {
                 }
             });
         }
+        //TODO: point logic
+    }
+
+    void bitsfleamain::bidauction( uint64_t buyer_uid, const name& buyer_eosid, uint32_t pid, const asset& price )
+    {
+        require_auth( buyer_eosid );
+        check( is_account( buyer_eosid ), "Invalid account buyer_eosid" );
+        auto& user = _user_table.get( buyer_uid, "Invalid account buyer_uid" );
+
+        product_index pro_table( _self, _self.value );
+        auto& product = pro_table.get( pid, "Invalid product pid" );
+        check( product.price.symbol == price.symbol, "Invalid asset symbol" );
+
+        auction_index auction_table( _self, _self.value );
+        auto& auction = auction_table.get( pid, "Invalid auction product" );
+        auto now = time_point_sec(current_time_point().sec_since_epoch());
+        check( auction.start_time <= now, "Auction has not yet begin" );
+        check( auction.end_time > now, "The auction has ended" );
+        auto new_price = auction.current_price + auction.markup;
+        check( price.amount >= new_price.amount, "Bid is too low" );
+
+        auction_table.modify( auction, same_payer, [&](auto& a){
+            a.current_price = price;
+            a.auction_times += 1;
+            a.last_price_user = buyer_uid;
+        });
+    }
+
+    void bitsfleamain::placeorder( uint64_t buyer_uid, const name& buyer_eosid, uint32_t pid)
+    {
+        require_auth( buyer_eosid );
+        check( is_account( buyer_eosid ), "Invalid account buyer_eosid" );
+        auto& user = _user_table.get( buyer_uid, "Invalid account buyer_uid" );
+
+        product_index pro_table( _self, _self.value );
+        auto& product = pro_table.get( pid, "Invalid product pid" );
+
+        //create order
+        //fixed price
+        order_index order_table( _self, _self.value );
+        order_table.emplace( _self, [&](auto& o){
+            o.id = ((uint128_t(buyer_uid) << 64) | (uint128_t(pid) << 32)) | current_time_point().sec_since_epoch();
+            //o.id = pro_table.available_primary_key();
+            o.pid = pid;
+            o.seller_uid = product.uid;
+            o.buyer_uid = buyer_uid;
+            o.price = product.price;
+            o.postage = product.postage;
+            o.status = OrderStatus::OS_PENDING_PAYMENT;
+            o.create_time = time_point_sec(current_time_point().sec_since_epoch());
+            o.pay_time_out = time_point_sec(current_time_point().sec_since_epoch() + _global.pay_time_out);
+        });
         //TODO: point logic
     }
     

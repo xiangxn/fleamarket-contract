@@ -108,6 +108,21 @@ namespace rareteam {
       return uint64_t( sender_id >> 64 );
    }
 
+   string uint128ToString(const uint128_t& value)
+   {
+      const char* charmap = "0123456789";
+      std::string result;
+      result.reserve( 40 ); // max. 40 digits possible ( uint64_t has 20) 
+      uint128_t helper = value;
+
+      do {
+         result += charmap[ helper % 10 ];
+         helper /= 10;
+      } while ( helper );
+      std::reverse( result.begin(), result.end() );
+      return result;
+   }
+
    template<typename T>
    uint32_t get_size( T& table ) {
       uint32_t count = 0;

@@ -54,7 +54,8 @@ namespace rareteam
 
     struct [[eosio::table, eosio::contract("bitsfleamain")]] Product
     {
-        uint64_t pid;
+        uint32_t pid;
+        uint64_t uid = 0;
         string title;
         string description;
         string photos;
@@ -76,8 +77,9 @@ namespace rareteam
         string position;
         time_point_sec release_time;
 
-        uint64_t primary_key() const { return pid; }
+        uint64_t primary_key() const { return uint64_t(pid); }
         uint64_t by_status() const { return uint64_t(status); }
+        uint64_t by_uid() const { return uid; }
 
     };
 
@@ -85,29 +87,30 @@ namespace rareteam
     struct [[eosio::table, eosio::contract("bitsfleamain")]] ProductAuction
     {
         uint64_t id;
-        uint64_t pid;
+        uint32_t pid;
         /**
          * security deposit
          */ 
         asset security;
-        uint32_t markup = 0;
+        asset markup;
         asset current_price;
         uint32_t auction_times;
         uint64_t last_price_user = 0;
         time_point_sec start_time;
         time_point_sec end_time;
 
-        uint64_t primary_key() const { return pid; }
+        uint64_t primary_key() const { return uint64_t(pid); }
         uint64_t by_auction_id() const { return id; }
     };
 
     struct [[eosio::table, eosio::contract("bitsfleamain")]] Order
     {
-        uint64_t id;
-        uint64_t pid;
+        uint128_t id;
+        uint32_t pid;
         uint64_t seller_uid;
         uint64_t buyer_uid;
         asset price;
+        asset postage;
         uint32_t status = OrderStatus::OS_PENDING_PAYMENT;
         string shipment_number;
         time_point_sec create_time;
@@ -121,17 +124,19 @@ namespace rareteam
         /**
          * Delayed receipts times 
          */ 
-        uint32_t delayed_count;
+        uint32_t delayed_count = 0;
 
-        uint64_t primary_key() const { return id; }
-        uint64_t by_pid() const { return pid; }
+        uint128_t primary_key() const { return id; }
+        uint64_t by_pid() const { return uint64_t(pid); }
+        uint64_t by_seller() const { return seller_uid; }
+        uint64_t by_buyer() const { return buyer_uid; }
     };
 
     struct [[eosio::table, eosio::contract("bitsfleamain")]] ProReturn
     {
-        uint64_t id;
-        uint64_t order_id;
-        uint64_t pid;
+        uint32_t id;
+        uint128_t order_id;
+        uint32_t pid;
         asset order_price;
         uint32_t status = ReturnStatus::RS_PENDING_SHIPMENT;
         string shipment_number;
@@ -146,14 +151,15 @@ namespace rareteam
          */ 
         uint32_t delayed_count;
 
-        uint64_t primary_key() const { return order_id; }
-        uint64_t by_rid() const { return id; }
-        uint64_t by_pid() const { return pid; }
+        uint128_t primary_key() const { return order_id; }
+        uint64_t by_rid() const { return uint64_t(id); }
+        uint64_t by_pid() const { return uint64_t(pid); }
     };
 
     typedef eosio::multi_index<"categories"_n, Categories > Category_index;
     typedef eosio::multi_index<"products"_n, Product,
-        indexed_by< "status"_n, const_mem_fun<Product, uint64_t, &Product::by_status> >
+        indexed_by< "status"_n, const_mem_fun<Product, uint64_t, &Product::by_status> >,
+        indexed_by< "byuid"_n, const_mem_fun<Product, uint64_t, &Product::by_uid> >
     > product_index;
 
     typedef eosio::multi_index<"proauction"_n, ProductAuction,
@@ -161,7 +167,9 @@ namespace rareteam
     > auction_index;
 
     typedef eosio::multi_index<"orders"_n, Order,
-        indexed_by< "orderpid"_n, const_mem_fun<Order, uint64_t,  &Order::by_pid> >
+        indexed_by< "orderpid"_n, const_mem_fun<Order, uint64_t,  &Order::by_pid> >,
+        indexed_by< "byseller"_n, const_mem_fun<Order, uint64_t,  &Order::by_seller> >,
+        indexed_by< "bybuyer"_n, const_mem_fun<Order, uint64_t,  &Order::by_buyer> >
     > order_index;
 
     typedef eosio::multi_index<"returns"_n, ProReturn,

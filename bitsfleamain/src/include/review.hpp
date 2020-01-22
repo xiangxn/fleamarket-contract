@@ -30,7 +30,7 @@ namespace rareteam
     struct [[eosio::table, eosio::contract("bitsfleamain")]] ProductAudit
     {
         uint64_t id = 0;
-        uint64_t pid = 0;
+        uint32_t pid = 0;
         uint64_t reviewer_uid = 0;
         /**
          * Whether the product delisted the audit
@@ -39,7 +39,7 @@ namespace rareteam
         string review_details;
         time_point_sec review_time;
 
-        uint64_t primary_key() const { return pid; }
+        uint64_t primary_key() const { return uint64_t(pid); }
         uint64_t by_audit_id() const { return id; }
         uint64_t by_reviewer_id() const { return reviewer_uid; }
     };

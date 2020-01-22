@@ -81,6 +81,22 @@ namespace rareteam {
          * Team FMP share unlock days
          */ 
         uint32_t team_unlock_time = 365;
+        /**
+         * pay time out 8 hours
+         */ 
+        uint32_t pay_time_out = 8 * 60 * 60;
+        /**
+         * ship time out 24 hours
+         */ 
+        uint32_t ship_time_out = 24 * 60 * 60;
+        /**
+         * receipt time out 7 days
+         */ 
+        uint32_t receipt_time_out = 7 * 24 * 60 * 60;
+        /**
+         * Deferred up to 3 times
+         */ 
+        uint32_t max_deferr_times = 3;
     };
 
    typedef eosio::singleton< "global"_n, global> flea_global_singleton;

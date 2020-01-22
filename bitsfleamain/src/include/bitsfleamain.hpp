@@ -71,7 +71,9 @@ namespace rareteam {
         ACTION appreviewer( uint64_t uid, const name& eosid );
         ACTION votereviewer( uint64_t voter_uid, const name& voter_eosid, uint64_t reviewer_uid, bool is_support );
         ACTION publish( uint64_t uid, const Product& product, const ProductAuction& pa );
-        ACTION review( uint64_t reviewer_uid, const name& reviewer_eosid, uint64_t pid, bool is_delisted, string& memo );
+        ACTION review( uint64_t reviewer_uid, const name& reviewer_eosid, uint32_t pid, bool is_delisted, string& memo );
+        ACTION placeorder( uint64_t buyer_uid, const name& buyer_eosid, uint32_t pid);
+        void bidauction( uint64_t buyer_uid, const name& buyer_eosid, uint32_t pid, const asset& price );
         /********platform End*****/
 
     public:
