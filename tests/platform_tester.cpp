@@ -254,11 +254,15 @@ BOOST_FIXTURE_TEST_CASE( recharge, platform_tester ) try {
 
    //buyer_uid
    eosio::chain::uint128_t a = m>>64;
+   uint64_t aa = uint64_t(a);
+   BOOST_REQUIRE_EQUAL(aa,2);
    string astr = uint128ToString(a);
    BOOST_REQUIRE_EQUAL(astr,"2");
 
    //pid
    eosio::chain::uint128_t p = (m<<64)>>96;
+   uint32_t pp = uint32_t(p);
+   BOOST_REQUIRE_EQUAL(pp,1);
    string pstr = uint128ToString(p);
    BOOST_REQUIRE_EQUAL(pstr,"1");
 

@@ -41,6 +41,10 @@ namespace rareteam {
         void add_balance( name owner, asset value, name ram_payer );
         /*****token end*****/
 
+        void bidauction( uint64_t buyer_uid, const name& buyer_eosid, uint32_t pid, const asset& price );
+        void payorder( uint128_t order_id, const asset& quantity );
+        void endorder( const Order& order );
+
     public:
         bitsfleamain( name receiver, name code, datastream<const char*> ds );
         ~bitsfleamain() {
@@ -73,7 +77,10 @@ namespace rareteam {
         ACTION publish( uint64_t uid, const Product& product, const ProductAuction& pa );
         ACTION review( uint64_t reviewer_uid, const name& reviewer_eosid, uint32_t pid, bool is_delisted, string& memo );
         ACTION placeorder( uint64_t buyer_uid, const name& buyer_eosid, uint32_t pid);
-        void bidauction( uint64_t buyer_uid, const name& buyer_eosid, uint32_t pid, const asset& price );
+        ACTION shipment( uint64_t seller_uid, const name& seller_eosid, uint128_t order_id, const string& number );
+        ACTION conreceipt( uint64_t buyer_uid, const name& buyer_eosio, uint128_t order_id );
+        [[eosio::on_notify("eosio.token::transfer")]]
+        void OnEOSTransfer( const name& from, const name& to, const asset& quantity, const string& memo );
         /********platform End*****/
 
     public:

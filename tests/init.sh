@@ -22,9 +22,16 @@ cleos push action bitsfleamain init '[]' -p bitsfleamain &&
 
 cleos push action bitsfleamain reguser '[player,"player","05FBED483A974456708EF12FCF3D278276E982234D775ECEE0DFA5CB49B8B492","05FBED483A974456708EF12FCF3D278276E982234D775ECEE0DFA5CB49B8B492",0]' -p bitsfleamain &&
 
-cleos push action bitsfleamain reguser '[reviewer,"reviewer","05FBED483A974456708EF12FCF3D278276E982234D775ECEE0DFA5CB49B8B493","05FBED483A974456708EF12FCF3D278276E982234D775ECEE0DFA5CB49B8B492",0]' -p bitsfleamain &&
+cleos push action bitsfleamain reguser '[reviewer,"reviewer","05FBED483A974456708EF12FCF3D278276E982234D775ECEE0DFA5CB49B8B493","05FBED483A974456708EF12FCF3D278276E982234D775ECEE0DFA5CB49B8B493",0]' -p bitsfleamain &&
 
-cleos push action bitsfleamain reguser '[player1,"player1","05FBED483A974456708EF12FCF3D278276E982234D775ECEE0DFA5CB49B8B494","05FBED483A974456708EF12FCF3D278276E982234D775ECEE0DFA5CB49B8B492",1]' -p bitsfleamain &&
+cleos push action bitsfleamain reguser '[player1,"player1","05FBED483A974456708EF12FCF3D278276E982234D775ECEE0DFA5CB49B8B494","05FBED483A974456708EF12FCF3D278276E982234D775ECEE0DFA5CB49B8B493",1]' -p bitsfleamain &&
+
+cleos push action eosio.token issue '[ "player", "10000.0000 EOS", "memo" ]' -p eosio &&
+cleos push action eosio.token issue '[ "player1", "10000.0000 EOS", "memo" ]' -p eosio &&
+cleos push action eosio.token issue '[ "reviewer", "10000.0000 EOS", "memo" ]' -p eosio &&
+
+cleos set account permission bitsfleamain active '{"threshold": 1,"keys": [{"key": "EOS8M1jvYGgV2XuPqS2nbZaW9tRZfUjT1N88BxJVeF4jVFDLfSAzQ","weight": 1}],"accounts": [{"permission":{"actor":"bitsfleamain","permission":"eosio.code"},"weight":1}]}' owner -p bitsfleamain &&
+
 
 cleos get table bitsfleamain bitsfleamain users # &&
 

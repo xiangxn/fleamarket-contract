@@ -129,6 +129,112 @@ namespace rareteam {
         });
         //TODO: point logic
     }
+
+    void bitsfleamain::payorder( uint128_t order_id, const asset& quantity )
+    {
+        order_index order_table( _self, _self.value );
+        auto& order = order_table.get( order_id, "Invalid order id" );
+        check( order.price.symbol == quantity.symbol, "Invalid order symbol" );
+        check( quantity.amount == (order.postage + order.price).amount, "Invalid order amount" );
+
+        time_point_sec pay_time = time_point_sec(current_time_point().sec_since_epoch());
+        check( pay_time < order.pay_time_out, "Order has expired");
+        if( pay_time < order.pay_time_out ) {
+            order_table.modify( order, same_payer, [&](auto& o){
+                o.status = OrderStatus::OS_PENDING_SHIPMENT;
+                o.pay_time = pay_time;
+                o.ship_time_out = time_point_sec(current_time_point().sec_since_epoch() + _global.ship_time_out);
+            });
+        } else {
+            order_table.erase( order );
+            check( false, "Order has expired");
+        }
+    }
+
+    void bitsfleamain::OnEOSTransfer( const name& from, const name& to, const asset& quantity, const string& memo )
+    {
+        if( to != _self ) return;
+        require_auth( from );
+        if( quantity.symbol != SYS ) return;
+        check( quantity.amount > 0, "Invalid quantity" );
+        bool is_payorder = memo.find( string("payorder:") ) == 0;
+        if( !is_payorder ) return;
+
+        auto info = split( memo, ":" );
+        uint128_t order_id = get_orderid( info[1] );
+
+        payorder( order_id, quantity );
+    }
+
+    void bitsfleamain::shipment( uint64_t seller_uid, const name& seller_eosid, uint128_t order_id, const string& number)
+    {
+        require_auth( seller_eosid );
+
+        order_index order_table( _self, _self.value );
+        auto& order = order_table.get( order_id, "Invalid order id" );
+        check( seller_uid == order.seller_uid, "This order does not belong to you" );
+        check( order.status == OrderStatus::OS_PENDING_SHIPMENT, "This order is not ready for shipment" );
+
+        time_point_sec current_time = time_point_sec(current_time_point().sec_since_epoch());
+        order_table.modify( order, same_payer, [&](auto& o){
+            o.shipment_number = number;
+            o.ship_time = current_time;
+            o.status = OrderStatus::OS_PENDING_RECEIPT;
+            o.receipt_time_out = time_point_sec( current_time_point().sec_since_epoch() + _global.receipt_time_out );
+        });
+
+        // shipment delivery timeout
+        if( order.ship_time_out >= current_time ) {
+            //TODO: point logic
+        }
+
+    }
+
+    void bitsfleamain::endorder( const Order& order )
+    {
+        if( order.price.symbol == SYS ) { //EOS
+            auto& user = _user_table.get( order.seller_uid, "Invalid order seller_uid" );
+            auto total = order.price + order.postage;
+            auto income = asset( uint64_t(double(total.amount) * _global.fee_ratio), total.symbol );
+            auto amount = total - income;
+            
+            string memo = string("complete order ") + uint128ToString( order.id );
+            action( permission_level{_self, "active"_n}, "eosio.token"_n, "transfer"_n,
+                std::make_tuple( _self, user.eosid, amount, memo )
+            ).send();
+
+            vector<asset>::iterator itr = find_if( _global.income.begin(), _global.income.end(), [&](asset& a){
+                return a.symbol == SYS;
+            });
+            if( itr != _global.income.end() ) {
+                asset sys = (*itr) + income;
+                _global.income.erase( itr );
+                _global.income.push_back( sys );
+            } else {
+                _global.income.push_back( income );
+            }
+        }
+    }
+
+    void bitsfleamain::conreceipt( uint64_t buyer_uid, const name& buyer_eosio, uint128_t order_id )
+    {
+        require_auth( buyer_eosio );
+
+        order_index order_table( _self, _self.value );
+        auto& order = order_table.get( order_id, "Invalid order id" );
+        check( buyer_uid == order.buyer_uid, "This order does not belong to you" );
+
+        time_point_sec current_time = time_point_sec(current_time_point().sec_since_epoch());
+        order_table.modify( order, same_payer, [&](auto& o){
+            o.ship_time = current_time;
+            o.receipt_time = current_time;
+            o.status = OrderStatus::OS_COMPLETED;
+            o.end_time = current_time;
+        });
+        endorder( order );
+
+        //TODO: point logic
+    }
     
 
     

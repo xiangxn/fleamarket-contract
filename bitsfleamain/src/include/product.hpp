@@ -7,6 +7,7 @@
 #include <string>
 
 #include "types.hpp"
+#include "../../../tools/include/tool.hpp"
 
 using namespace std;
 using namespace eosio;
@@ -23,24 +24,20 @@ namespace rareteam
 
     enum OrderStatus : uint32_t {
         OS_PENDING_PAYMENT = 0,
-        OS_PAID = 100,
-        OS_PENDING_SHIPMENT = 200,
-        OS_SHIPPED = 300,
-        OS_PENDING_RECEIPT = 400,
-        OS_RECEIVED = 500,
-        OS_COMPLETED = 600,
-        OS_CANCELLED = 700,
-        OS_ARBITRATION = 800,
-        OS_RETURN = 900
+        OS_PENDING_SHIPMENT = 100,
+        OS_PENDING_RECEIPT = 200,
+        OS_COMPLETED = 300,
+        OS_CANCELLED = 400,
+        OS_ARBITRATION = 500,
+        OS_RETURN = 600
     };
 
     enum ReturnStatus : uint32_t {
         RS_PENDING_SHIPMENT = 0,
-        RS_SHIPPED = 100,
-        RS_PENDING_RECEIPT = 200,
-        RS_COMPLETED = 300,
-        RS_CANCELLED = 400,
-        RS_ARBITRATION = 500
+        RS_PENDING_RECEIPT = 100,
+        RS_COMPLETED = 200,
+        RS_CANCELLED = 300,
+        RS_ARBITRATION = 400
     };
 
     struct [[eosio::table, eosio::contract("bitsfleamain")]] Categories
@@ -176,6 +173,27 @@ namespace rareteam
         indexed_by< "returnpid"_n, const_mem_fun<ProReturn, uint64_t,  &ProReturn::by_pid> >,
         indexed_by< "returnrid"_n, const_mem_fun<ProReturn, uint64_t,  &ProReturn::by_rid> >
     > proreturn_index;
+
+
+    uint128_t get_orderid( const string& order_id_str )
+    {
+        check( order_id_str.length() == 34, "Invalid order id");
+        uint128_t order_id = 0;
+        from_hex( order_id_str.substr(2), reinterpret_cast<char*>(&order_id), sizeof(order_id) );
+        return order_id;
+    };
+
+    uint64_t get_buyer_uid_by_orderid( const uint128_t& orderid )
+    {
+        //to_uint64
+        return uint64_t(orderid >> 64);
+    };
+
+    uint32_t get_pid_by_orderid( const uint128_t& orderid )
+    {
+        //to_uint32
+        return uint32_t((orderid << 64) >> 96);
+    };
     
 
 } // namespace egame

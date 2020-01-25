@@ -16,15 +16,16 @@ namespace rareteam {
          */
         uint32_t total_users = 0;
 
-        /************************Points related************************/
         /**
-         * Credit limit for participation in referrals
+         * System fee ratio
          */ 
-        asset ref_limit_fmp = asset( 5000000, FMP );
+        double fee_ratio = 0.01;
+
+        /************************Points related************************/
         /**
          * the referral commission
          */ 
-        uint32_t ref_commission_scale = 1;
+        double ref_commission_scale = 0.01;
         /**
          * Points gift once by the system at the time of referral
          */ 
@@ -36,10 +37,15 @@ namespace rareteam {
         /************************Points related End************************/
 
         /*******************credit related***************/
+        
         /**
          * Basic credit score
          */ 
         int32_t credit_base_score = 500;
+        /**
+         * Credit limit for participation in referrals
+         */ 
+        int32_t credit_ref_limit = 500;
 
         /**
          * Lower credit limit for reviewers
