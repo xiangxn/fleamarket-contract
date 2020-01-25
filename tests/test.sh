@@ -17,3 +17,7 @@ cleos get table bitsfleamain bitsfleamain orders
 # cleos push action bitsfleamain shipment '[0,"player",0xaf562c5e000000000200000000000000,"229988222"]' -p player
 # cleos push action bitsfleamain conreceipt '[2,"player1",0xaf562c5e000000000200000000000000]' -p player1
 # cleos push action bitsfleamain returns '[2,"player1",0xaf562c5e000000000200000000000000,"商品与描述不符"]' -p player1
+# cleos push action bitsfleamain reshipment '[2,"player1",0xaf562c5e000000000200000000000000,"229988223"]' -p player1
+# cleos push action bitsfleamain reconreceipt '[0,"player",0xaf562c5e000000000200000000000000]' -p player
+
+cleos get table bitsfleamain bitsfleamain returns

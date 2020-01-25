@@ -195,7 +195,7 @@ namespace rareteam {
         order_index order_table( _self, _self.value );
         auto& order = order_table.get( order_id, "Invalid order id" );
         check( buyer_uid == order.buyer_uid, "This order does not belong to you" );
-        check( order.status == ReturnStatus::RS_PENDING_SHIPMENT, "This order is not ready for shipment" );
+        check( repro.status == ReturnStatus::RS_PENDING_SHIPMENT, "This order is not ready for shipment" );
 
         repro_table.modify( repro, same_payer, [&](auto& re){
             re.shipment_number = number;
