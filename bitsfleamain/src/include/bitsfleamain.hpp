@@ -44,6 +44,7 @@ namespace rareteam {
         void bidauction( uint64_t buyer_uid, const name& buyer_eosid, uint32_t pid, const asset& price );
         void payorder( uint128_t order_id, const asset& quantity );
         void endorder( const Order& order );
+        void refund( const Order& order );
 
     public:
         bitsfleamain( name receiver, name code, datastream<const char*> ds );
@@ -76,9 +77,13 @@ namespace rareteam {
         ACTION votereviewer( uint64_t voter_uid, const name& voter_eosid, uint64_t reviewer_uid, bool is_support );
         ACTION publish( uint64_t uid, const Product& product, const ProductAuction& pa );
         ACTION review( uint64_t reviewer_uid, const name& reviewer_eosid, uint32_t pid, bool is_delisted, string& memo );
+        ACTION pulloff( uint64_t seeler_uid, const name& seller_eosid, uint32_t pid );
         ACTION placeorder( uint64_t buyer_uid, const name& buyer_eosid, uint32_t pid);
         ACTION shipment( uint64_t seller_uid, const name& seller_eosid, uint128_t order_id, const string& number );
-        ACTION conreceipt( uint64_t buyer_uid, const name& buyer_eosio, uint128_t order_id );
+        ACTION reshipment( uint64_t buyer_uid, const name& buyer_eosid, uint128_t order_id, const string& number );
+        ACTION conreceipt( uint64_t buyer_uid, const name& buyer_eosid, uint128_t order_id );
+        ACTION reconreceipt( uint64_t seller_uid, const name& seller_eosid, uint128_t order_id );
+        ACTION returns( uint64_t buyer_uid, const name& buyer_eosid, uint128_t order_id, const string& reasons );
         [[eosio::on_notify("eosio.token::transfer")]]
         void OnEOSTransfer( const name& from, const name& to, const asset& quantity, const string& memo );
         /********platform End*****/

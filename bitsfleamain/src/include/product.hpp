@@ -109,7 +109,7 @@ namespace rareteam
         asset price;
         asset postage;
         uint32_t status = OrderStatus::OS_PENDING_PAYMENT;
-        string shipment_number;
+        string shipment_number = "";
         time_point_sec create_time;
         time_point_sec pay_time;
         time_point_sec pay_time_out;
@@ -136,7 +136,8 @@ namespace rareteam
         uint32_t pid;
         asset order_price;
         uint32_t status = ReturnStatus::RS_PENDING_SHIPMENT;
-        string shipment_number;
+        string reasons = "";
+        string shipment_number = "";
         time_point_sec create_time;
         time_point_sec ship_time;
         time_point_sec ship_time_out;
@@ -146,7 +147,7 @@ namespace rareteam
         /**
          * Delayed receipts times 
          */ 
-        uint32_t delayed_count;
+        uint32_t delayed_count = 0;
 
         uint128_t primary_key() const { return order_id; }
         uint64_t by_rid() const { return uint64_t(id); }
