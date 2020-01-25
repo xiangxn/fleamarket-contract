@@ -10,7 +10,7 @@ cleos push action bitsfleamain placeorder '[2,"player1",0]' -p player1 &&
 
 cleos get table bitsfleamain bitsfleamain orders 
 
-# pay
+# pay : order id 在上一行的输出中取
 # cleos transfer player1 bitsfleamain "101.0000 EOS" "payorder:0xaf562c5e000000000200000000000000" -p player1
 # cleos get currency balance eosio.token player1 EOS
 # cleos get currency balance eosio.token bitsfleamain EOS
