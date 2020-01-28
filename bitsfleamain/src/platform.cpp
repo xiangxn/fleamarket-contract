@@ -159,7 +159,7 @@ namespace rareteam {
             }
         } else if( arbitration.type == ArbitType::AT_COMPLAINT ) { //complaint
             check( plaintiff.is_reviewer == false, "Complaints can only be initiated by ordinary users" );
-        } else if ( c_arbit.type == ArbitType::AT_PRODUCT ) {
+        } else if ( arbitration.type == ArbitType::AT_PRODUCT ) {
             //TODO:Report product
         }
 
