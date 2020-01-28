@@ -13,6 +13,14 @@ using namespace eosio;
 
 namespace rareteam
 {
+
+    enum ArbitStatus : uint32_t {
+        AS_APPLY = 0,
+        AS_WAIT = 100,
+        AS_PROCESSING = 200,
+        AS_COMPLETED = 300
+    };
+
     struct [[eosio::table, eosio::contract("bitsfleamain")]] Reviewer
     {
         uint64_t id = 0;
@@ -46,22 +54,25 @@ namespace rareteam
 
     struct [[eosio::table, eosio::contract("bitsfleamain")]] Arbitration
     {
-        uint64_t id = 0;
-        uint64_t prosecutor = 0;
+        uint32_t id = 0;
+        uint64_t plaintiff = 0;
+        uint32_t pid = 0;
+        uint128_t order_id = 0;
+        uint32_t status = ArbitStatus::AS_APPLY;
         string title;
         string resume;
         string detailed;
-        time_point_sec create_tiem;
+        time_point_sec create_time;
         uint64_t defendant = 0;
-        string proof_content;
-        string arbitration_results;
+        string proof_content = "";
+        string arbitration_results = "";
         uint64_t winner = 0;
         time_point_sec start_time;
         time_point_sec end_time;
         vector<uint64_t> reviewers;
 
-        uint64_t primary_key() const { return id; }
-        uint64_t by_prosecutor() const { return prosecutor; }
+        uint64_t primary_key() const { return uint64_t(id); }
+        uint64_t by_plaintiff() const { return plaintiff; }
         uint64_t by_defendant() const { return defendant; }
     };
 
@@ -76,7 +87,7 @@ namespace rareteam
     > proaudit_index;
 
     typedef eosio::multi_index<"arbitrations"_n, Arbitration,
-        indexed_by< "prosecutor"_n, const_mem_fun<Arbitration, uint64_t,  &Arbitration::by_prosecutor> >,
+        indexed_by< "plaintiff"_n, const_mem_fun<Arbitration, uint64_t,  &Arbitration::by_plaintiff> >,
         indexed_by< "defendant"_n, const_mem_fun<Arbitration, uint64_t,  &Arbitration::by_defendant> >
     > arbitration_index;
 }

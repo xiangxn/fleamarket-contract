@@ -45,6 +45,7 @@ namespace rareteam {
         void payorder( uint128_t order_id, const asset& quantity );
         void endorder( const Order& order );
         void refund( const Order& order );
+        bool CheckReviewer( uint64_t reviewer_uid, bool is_new = false );
 
     public:
         bitsfleamain( name receiver, name code, datastream<const char*> ds );
@@ -84,6 +85,9 @@ namespace rareteam {
         ACTION conreceipt( uint64_t buyer_uid, const name& buyer_eosid, uint128_t order_id );
         ACTION reconreceipt( uint64_t seller_uid, const name& seller_eosid, uint128_t order_id );
         ACTION returns( uint64_t buyer_uid, const name& buyer_eosid, uint128_t order_id, const string& reasons );
+        ACTION applyarbit( uint64_t plaintiff_uid, const name& plaintiff_eosid, const Arbitration& arbitration );
+        ACTION inarbit( uint64_t reviewer_uid, const name& reviewer_eosid, uint32_t arbit_id );
+        ACTION updatearbit( const Arbitration& arbit );
         [[eosio::on_notify("eosio.token::transfer")]]
         void OnEOSTransfer( const name& from, const name& to, const asset& quantity, const string& memo );
         /********platform End*****/

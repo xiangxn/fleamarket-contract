@@ -57,13 +57,38 @@ namespace rareteam {
         _global.total_users += 1;
     }
 
+    bool bitsfleamain::CheckReviewer( uint64_t reviewer_uid, bool is_new )
+    {
+        auto& user = _user_table.get( reviewer_uid, "Invalid account id" );
+        if( user.credit_value >= _global.credit_reviewer_limit ) {
+            if( is_new )
+            {
+                return true;
+            }
+            else
+            {
+                return user.is_reviewer;
+            }
+            
+        } else {
+            _user_table.modify( user, same_payer, [&](auto& u){
+                u.is_reviewer = false;
+            });
+            reviewer_index reviewer_table( _self, _self.value );
+            auto itr = reviewer_table.find( reviewer_uid );
+            if( itr != reviewer_table.end() ) {
+                reviewer_table.erase( itr );
+            }
+            return false;
+        }
+    }
+
     void bitsfleamain::appreviewer( uint64_t uid, const name& eosid )
     {
         require_auth( eosid );
 
         check( is_account(eosid), "Invalid account eosid" );
-        auto& user = _user_table.get( uid, "Invalid account id" );
-        check( user.credit_value >= _global.credit_reviewer_limit, "Insufficient credit value" );
+        check( CheckReviewer( uid, true ), "Insufficient credit value" );
 
         reviewer_index rev_table( _self, _self.value );
         auto itr = rev_table.find( uid );
@@ -96,6 +121,152 @@ namespace rareteam {
         });
         //TODO: point logic
 
+    }
+
+    void bitsfleamain::applyarbit( uint64_t plaintiff_uid, const name& plaintiff_eosid, const Arbitration& arbitration )
+    {
+        require_auth( plaintiff_eosid );
+
+        auto& plaintiff = _user_table.get( plaintiff_uid, "Invalid account plaintiff uid" );
+        auto& defendant = _user_table.get( arbitration.defendant, "Invalid account defendant uid" );
+
+        product_index pro_table( _self, _self.value );
+        auto pro_itr = pro_table.find( arbitration.pid );
+        if( pro_itr != pro_table.end() ) {
+            pro_table.modify( pro_itr, same_payer, [&](auto& p){
+                p.status = ProductStatus::LOCKED;
+            });
+        }
+
+        //Usually initiated by the buyer
+        order_index order_table( _self, _self.value );
+        auto order_itr = order_table.find( arbitration.order_id );
+        if( order_itr != order_table.end() ) {
+            check( order_itr->status == OrderStatus::OS_PENDING_RECEIPT, "apply for arbitration until payment has been made and order is not completed");
+            order_table.modify( order_itr, same_payer, [&](auto& o){
+                o.status = OrderStatus::OS_ARBITRATION;
+            });
+        }
+
+        //Usually initiated by the merchant
+        proreturn_index res_table( _self, _self.value );
+        auto res_itr = res_table.find( arbitration.order_id );
+        if( res_itr != res_table.end() ) {
+            check( res_itr->status == ReturnStatus::RS_PENDING_RECEIPT, "Initiation of arbitration without confirmation of receipt" );
+            res_table.modify( res_itr, same_payer, [&](auto& r){
+                r.status = ReturnStatus::RS_ARBITRATION;
+            });
+        }
+
+        arbitration_index arbit_table( _self, _self.value );
+        arbit_table.emplace( _self, [&](auto& a){
+            a.id = arbit_table.available_primary_key();
+            a.plaintiff = plaintiff_uid;
+            a.pid = arbitration.pid;
+            a.order_id = arbitration.order_id;
+            a.status = ArbitStatus::AS_APPLY;
+            a.title = arbitration.title;
+            a.resume = arbitration.resume;
+            a.detailed = arbitration.detailed;
+            a.create_time = time_point_sec(current_time_point().sec_since_epoch());
+            a.defendant = arbitration.defendant;
+            a.proof_content = arbitration.proof_content;
+        });
+    }
+
+    void bitsfleamain::inarbit( uint64_t reviewer_uid, const name& reviewer_eosid, uint32_t arbit_id )
+    {
+        require_auth( reviewer_eosid );
+
+        check( CheckReviewer( reviewer_uid ), "Invalid reviewer uid" );
+
+        arbitration_index arbit_table( _self, _self.value );
+        auto& arbit = arbit_table.get( uint64_t(arbit_id), "Invalid arbit id" );
+        if( arbit.reviewers.size() < _global.review_min_count ) {
+            arbit_table.modify( arbit, same_payer, [&](auto& a){
+                a.reviewers.push_back( reviewer_uid );
+                if( a.reviewers.size() >= _global.review_min_count ){
+                    a.status = ArbitStatus::AS_PROCESSING;
+                    a.start_time = time_point_sec(current_time_point().sec_since_epoch());
+                } else {
+                    a.status = ArbitStatus::AS_WAIT;
+                }
+            });
+        }
+    }
+
+    void bitsfleamain::updatearbit( const Arbitration& arbit )
+    {
+        check( arbit.id >= 0, "Invalid arbit id" );
+        arbitration_index arbit_table( _self, _self.value );
+        auto& c_arbit = arbit_table.get( uint64_t(arbit.id), "Invalid arbit id" );
+        check( c_arbit.reviewers.size() >= _global.review_min_count, "Invalid arbit update reviewer too little" );
+
+        uint32_t auths = 0;
+        uint32_t all = c_arbit.reviewers.size();
+        for( uint32_t i=0; i<all; i++ ){
+            auto& u = _user_table.get( c_arbit.reviewers[i], "Invalid uid" );
+            if( has_auth( u.eosid ) ) auths += 1;
+        }
+        if( auths >= (all/2)+1 ) {
+            arbit_table.modify( c_arbit, same_payer, [&](auto& a){
+                a.end_time = time_point_sec(current_time_point().sec_since_epoch());
+                a.status = ArbitStatus::AS_COMPLETED;
+                a.arbitration_results = arbit.arbitration_results;
+                a.winner = arbit.winner;
+            });
+            //order: Processing funds if there are orders
+            time_point_sec current_time = time_point_sec(current_time_point().sec_since_epoch());
+            order_index order_table( _self, _self.value );
+            auto order_itr = order_table.find( c_arbit.order_id );
+            if( order_itr != order_table.end() ) {
+                auto& order = (*order_itr);
+                proreturn_index repro_table( _self, _self.value );
+                auto repro_itr = repro_table.find( order.id );
+                if( c_arbit.winner == order.buyer_uid ) { // buyer win
+                    if( repro_itr != repro_table.end() ) { //initiated by the seller
+                        repro_table.modify( repro_itr, same_payer, [&](auto& r){
+                            r.status = ReturnStatus::RS_COMPLETED;
+                        });
+                        order_table.modify( order_itr, same_payer, [&](auto& o){
+                            o.status = OrderStatus::OS_CANCELLED;
+                            o.end_time = current_time;
+                        });
+                        refund( order );
+                    } else { //initiated by the buyer
+                        order_table.modify( order, same_payer, [&](auto& o){
+                            o.status = OrderStatus::OS_RETURN;
+                        });
+                        repro_table.emplace( _self, [&](auto& r){
+                            r.id = repro_table.available_primary_key();
+                            r.order_id = order.id;
+                            r.pid = order.pid;
+                            r.order_price = order.price;
+                            r.status = ReturnStatus::RS_PENDING_SHIPMENT;
+                            r.reasons = arbit.arbitration_results;
+                            r.create_time = current_time;
+                            r.ship_time_out = time_point_sec(current_time_point().sec_since_epoch() + _global.ship_time_out);
+                        });
+                    }
+                } else if ( c_arbit.winner == order.seller_uid ) { //seller win
+                    if( repro_itr != repro_table.end() ) { //initiated by the seller
+                        order_table.modify( order_itr, same_payer, [&](auto& o){ //Redeliver
+                            o.status = OrderStatus::OS_PENDING_SHIPMENT;
+                            o.ship_time_out = time_point_sec(current_time_point().sec_since_epoch() + _global.ship_time_out);
+                        });
+                    } else { //initiated by the buyer
+                        order_table.modify( order_itr, same_payer, [&](auto& o){
+                            o.status = OrderStatus::OS_COMPLETED;
+                            o.end_time = current_time;
+                        });
+                        endorder( order );
+                    }
+                }
+            }
+            //TODO: credit logic
+        } else {
+            check( false, "Incomplete signature for updatearbit" );
+        }
     }
     
 
