@@ -46,6 +46,8 @@ namespace rareteam {
         void endorder( const Order& order );
         void refund( const Order& order );
         bool CheckReviewer( uint64_t reviewer_uid, bool is_new = false );
+        void SubCredit( const User& user, uint32_t value, bool cancel_reviewer = false );
+        void SubCredit( uint64_t user_uid, uint32_t value, bool cancel_reviewer = false );
 
     public:
         bitsfleamain( name receiver, name code, datastream<const char*> ds );

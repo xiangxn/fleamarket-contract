@@ -137,25 +137,28 @@ namespace rareteam {
                 p.status = ProductStatus::LOCKED;
             });
         }
-
-        //Usually initiated by the buyer
-        order_index order_table( _self, _self.value );
-        auto order_itr = order_table.find( arbitration.order_id );
-        if( order_itr != order_table.end() ) {
-            check( order_itr->status == OrderStatus::OS_PENDING_RECEIPT, "apply for arbitration until payment has been made and order is not completed");
-            order_table.modify( order_itr, same_payer, [&](auto& o){
-                o.status = OrderStatus::OS_ARBITRATION;
-            });
-        }
-
-        //Usually initiated by the merchant
-        proreturn_index res_table( _self, _self.value );
-        auto res_itr = res_table.find( arbitration.order_id );
-        if( res_itr != res_table.end() ) {
-            check( res_itr->status == ReturnStatus::RS_PENDING_RECEIPT, "Initiation of arbitration without confirmation of receipt" );
-            res_table.modify( res_itr, same_payer, [&](auto& r){
-                r.status = ReturnStatus::RS_ARBITRATION;
-            });
+        
+        if( arbitration.type == ArbitType::AT_ORDER ) {
+            //Usually initiated by the buyer
+            order_index order_table( _self, _self.value );
+            auto order_itr = order_table.find( arbitration.order_id );
+            if( order_itr != order_table.end() ) {
+                check( order_itr->status == OrderStatus::OS_PENDING_RECEIPT, "apply for arbitration until payment has been made and order is not completed");
+                order_table.modify( order_itr, same_payer, [&](auto& o){
+                    o.status = OrderStatus::OS_ARBITRATION;
+                });
+            }
+            //Usually initiated by the seller
+            proreturn_index res_table( _self, _self.value );
+            auto res_itr = res_table.find( arbitration.order_id );
+            if( res_itr != res_table.end() ) {
+                check( res_itr->status == ReturnStatus::RS_PENDING_RECEIPT, "Initiation of arbitration without confirmation of receipt" );
+                res_table.modify( res_itr, same_payer, [&](auto& r){
+                    r.status = ReturnStatus::RS_ARBITRATION;
+                });
+            }
+        } else if( arbitration.type == ArbitType::AT_COMPLAINT ) { //complaint
+            check( plaintiff.is_reviewer == false, "Complaints can only be initiated by ordinary users" );
         }
 
         arbitration_index arbit_table( _self, _self.value );
@@ -165,6 +168,7 @@ namespace rareteam {
             a.pid = arbitration.pid;
             a.order_id = arbitration.order_id;
             a.status = ArbitStatus::AS_APPLY;
+            a.type = arbitration.type;
             a.title = arbitration.title;
             a.resume = arbitration.resume;
             a.detailed = arbitration.detailed;
@@ -216,57 +220,104 @@ namespace rareteam {
                 a.winner = arbit.winner;
             });
             //order: Processing funds if there are orders
-            time_point_sec current_time = time_point_sec(current_time_point().sec_since_epoch());
-            order_index order_table( _self, _self.value );
-            auto order_itr = order_table.find( c_arbit.order_id );
-            if( order_itr != order_table.end() ) {
-                auto& order = (*order_itr);
-                proreturn_index repro_table( _self, _self.value );
-                auto repro_itr = repro_table.find( order.id );
-                if( c_arbit.winner == order.buyer_uid ) { // buyer win
-                    if( repro_itr != repro_table.end() ) { //initiated by the seller
-                        repro_table.modify( repro_itr, same_payer, [&](auto& r){
-                            r.status = ReturnStatus::RS_COMPLETED;
-                        });
-                        order_table.modify( order_itr, same_payer, [&](auto& o){
-                            o.status = OrderStatus::OS_CANCELLED;
-                            o.end_time = current_time;
-                        });
-                        refund( order );
-                    } else { //initiated by the buyer
-                        order_table.modify( order, same_payer, [&](auto& o){
-                            o.status = OrderStatus::OS_RETURN;
-                        });
-                        repro_table.emplace( _self, [&](auto& r){
-                            r.id = repro_table.available_primary_key();
-                            r.order_id = order.id;
-                            r.pid = order.pid;
-                            r.order_price = order.price;
-                            r.status = ReturnStatus::RS_PENDING_SHIPMENT;
-                            r.reasons = arbit.arbitration_results;
-                            r.create_time = current_time;
-                            r.ship_time_out = time_point_sec(current_time_point().sec_since_epoch() + _global.ship_time_out);
-                        });
+            if( c_arbit.type == ArbitType::AT_ORDER ) {
+                time_point_sec current_time = time_point_sec(current_time_point().sec_since_epoch());
+                order_index order_table( _self, _self.value );
+                auto order_itr = order_table.find( c_arbit.order_id );
+                if( order_itr != order_table.end() ) {
+                    auto& order = (*order_itr);
+                    proreturn_index repro_table( _self, _self.value );
+                    auto repro_itr = repro_table.find( order.id );
+                    if( c_arbit.winner == order.buyer_uid ) { // buyer win
+                        if( repro_itr != repro_table.end() ) { //initiated by the seller
+                            repro_table.modify( repro_itr, same_payer, [&](auto& r){
+                                r.status = ReturnStatus::RS_COMPLETED;
+                            });
+                            order_table.modify( order_itr, same_payer, [&](auto& o){
+                                o.status = OrderStatus::OS_CANCELLED;
+                                o.end_time = current_time;
+                            });
+                            refund( order );
+                        } else { //initiated by the buyer
+                            order_table.modify( order, same_payer, [&](auto& o){
+                                o.status = OrderStatus::OS_RETURN;
+                            });
+                            repro_table.emplace( _self, [&](auto& r){
+                                r.id = repro_table.available_primary_key();
+                                r.order_id = order.id;
+                                r.pid = order.pid;
+                                r.order_price = order.price;
+                                r.status = ReturnStatus::RS_PENDING_SHIPMENT;
+                                r.reasons = arbit.arbitration_results;
+                                r.create_time = current_time;
+                                r.ship_time_out = time_point_sec(current_time_point().sec_since_epoch() + _global.ship_time_out);
+                            });
+                        }
+                        SubCredit( order.seller_uid, 100 );
+                    } else if ( c_arbit.winner == order.seller_uid ) { //seller win
+                        if( repro_itr != repro_table.end() ) { //initiated by the seller
+                            order_table.modify( order_itr, same_payer, [&](auto& o){ //Redeliver
+                                o.status = OrderStatus::OS_PENDING_SHIPMENT;
+                                o.ship_time_out = time_point_sec(current_time_point().sec_since_epoch() + _global.ship_time_out);
+                            });
+                        } else { //initiated by the buyer
+                            order_table.modify( order_itr, same_payer, [&](auto& o){
+                                o.status = OrderStatus::OS_COMPLETED;
+                                o.end_time = current_time;
+                            });
+                            endorder( order );
+                        }
+                        SubCredit( order.buyer_uid, 100 );
                     }
-                } else if ( c_arbit.winner == order.seller_uid ) { //seller win
-                    if( repro_itr != repro_table.end() ) { //initiated by the seller
-                        order_table.modify( order_itr, same_payer, [&](auto& o){ //Redeliver
-                            o.status = OrderStatus::OS_PENDING_SHIPMENT;
-                            o.ship_time_out = time_point_sec(current_time_point().sec_since_epoch() + _global.ship_time_out);
-                        });
-                    } else { //initiated by the buyer
-                        order_table.modify( order_itr, same_payer, [&](auto& o){
-                            o.status = OrderStatus::OS_COMPLETED;
-                            o.end_time = current_time;
-                        });
-                        endorder( order );
+                } else {
+                    arbit_table.erase( c_arbit );
+                }
+            } else if ( c_arbit.type == ArbitType::AT_COMPLAINT ) {
+                auto& plaintiff = _user_table.get( c_arbit.plaintiff, "Invalid plaintiff uid" );
+                auto& defendant = _user_table.get( c_arbit.defendant, "Invalid defendant uid" );
+                if( defendant.is_reviewer ) {
+                    if( c_arbit.winner == plaintiff.uid ) { //plaintiff win
+                        //sub defendant credit value and cancel reviewer
+                        SubCredit( defendant, 100, true );
+                    } else { //defendant win
+                        //sub plaintiff credit value
+                        SubCredit( plaintiff, 100 );
                     }
                 }
             }
-            //TODO: credit logic
         } else {
             check( false, "Incomplete signature for updatearbit" );
         }
+    }
+
+    void bitsfleamain::SubCredit( const User& user, uint32_t value, bool cancel_reviewer )
+    {
+        _user_table.modify( user, same_payer, [&](auto& u){
+            if( cancel_reviewer && u.is_reviewer ) {
+                u.is_reviewer = false;
+                if( u.credit_value >= _global.credit_reviewer_limit ) {
+                    u.credit_value = _global.credit_reviewer_limit - value;
+                } else {
+                    u.credit_value -= value;
+                }
+                //cancel reviewer
+                reviewer_index reviewer_table( _self, _self.value );
+                auto rev_itr = reviewer_table.find( u.uid );
+                if( rev_itr != reviewer_table.end() ) reviewer_table.erase( rev_itr );
+            } else {
+                u.credit_value -= value;
+            }
+            if( u.credit_value < 1 ) {
+                u.credit_value = 0;
+                u.status = UserStatus::LOCK;
+            }
+        });
+    }
+
+    void bitsfleamain::SubCredit( uint64_t user_uid, uint32_t value, bool cancel_reviewer )
+    {
+        auto& user = _user_table.get( user_uid, "Invalid user uid" );
+        SubCredit( user, value, cancel_reviewer );
     }
     
 

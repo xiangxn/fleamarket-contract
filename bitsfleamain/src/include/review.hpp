@@ -21,6 +21,11 @@ namespace rareteam
         AS_COMPLETED = 300
     };
 
+    enum ArbitType : uint32_t {
+        AT_ORDER = 0,
+        AT_COMPLAINT = 100
+    };
+
     struct [[eosio::table, eosio::contract("bitsfleamain")]] Reviewer
     {
         uint64_t id = 0;
@@ -58,6 +63,7 @@ namespace rareteam
         uint64_t plaintiff = 0;
         uint32_t pid = 0;
         uint128_t order_id = 0;
+        uint32_t type = ArbitType::AT_ORDER;
         uint32_t status = ArbitStatus::AS_APPLY;
         string title;
         string resume;
