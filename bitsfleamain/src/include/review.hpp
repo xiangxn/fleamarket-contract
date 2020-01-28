@@ -23,7 +23,8 @@ namespace rareteam
 
     enum ArbitType : uint32_t {
         AT_ORDER = 0,
-        AT_COMPLAINT = 100
+        AT_COMPLAINT = 100,
+        AT_PRODUCT = 200
     };
 
     struct [[eosio::table, eosio::contract("bitsfleamain")]] Reviewer

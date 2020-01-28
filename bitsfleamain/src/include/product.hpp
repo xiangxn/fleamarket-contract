@@ -60,6 +60,7 @@ namespace rareteam
         uint32_t status = ProductStatus::PUBLISH;
         bool is_new = false;
         bool is_returns = false;
+        uint64_t reviewer = 0;
         /**
          * 0 Buy Now, 1 Auction
          */ 

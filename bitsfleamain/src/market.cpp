@@ -89,6 +89,7 @@ namespace rareteam {
                 } else {
                     p.status = ProductStatus::NORMAL;
                 }
+                p.reviewer = reviewer_uid;
             });
         }
         //TODO: point logic
