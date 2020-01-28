@@ -159,6 +159,8 @@ namespace rareteam {
             }
         } else if( arbitration.type == ArbitType::AT_COMPLAINT ) { //complaint
             check( plaintiff.is_reviewer == false, "Complaints can only be initiated by ordinary users" );
+        } else if ( c_arbit.type == ArbitType::AT_PRODUCT ) {
+            //TODO:Report product
         }
 
         arbitration_index arbit_table( _self, _self.value );
@@ -188,7 +190,7 @@ namespace rareteam {
         auto& arbit = arbit_table.get( uint64_t(arbit_id), "Invalid arbit id" );
         check( reviewer_uid != arbit.plaintiff, "You cannot be the plaintiff or defendant" );
         check( reviewer_uid != arbit.defendant, "You cannot be the plaintiff or defendant" );
-        
+
         if( arbit.reviewers.size() < _global.review_min_count ) {
             arbit_table.modify( arbit, same_payer, [&](auto& a){
                 a.reviewers.push_back( reviewer_uid );
@@ -287,6 +289,8 @@ namespace rareteam {
                         SubCredit( plaintiff, 100 );
                     }
                 }
+            } else if ( c_arbit.type == ArbitType::AT_PRODUCT ) {
+                //TODO:Report product
             }
         } else {
             check( false, "Incomplete signature for updatearbit" );
