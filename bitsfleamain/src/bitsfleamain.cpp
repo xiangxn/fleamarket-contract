@@ -28,6 +28,13 @@ namespace rareteam {
         _is_init = true;
         _global = get_default_global();
         _global.project_start_time = time_point_sec(current_time_point().sec_since_epoch());
+        _global.ref_pool = asset( 1000000000000, FMP );
+        _global.transaction_pool = asset( 4000000000000, FMP );
+        _global.salary_pool = asset( 3000000000000, FMP );
+        //create FMP
+        action(permission_level{_self, "active"_n}, "bitsfleamain"_n, "create"_n,
+            std::make_tuple( _self, asset( 10000000000000, FMP ), 30 )
+        ).send();
     }
 
     void bitsfleamain::reset()
@@ -54,6 +61,8 @@ namespace rareteam {
     {
         
     }
+
+    
 
 
     

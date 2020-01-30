@@ -35,6 +35,8 @@ namespace rareteam
         uint32_t voted_count = 0;
         time_point_sec create_time;
         time_point_sec last_active_time;
+        vector<uint64_t> voter_approve;
+        vector<uint64_t> voter_against;
 
         uint64_t primary_key() const { return uid; }
         uint64_t by_rid() const { return id; }

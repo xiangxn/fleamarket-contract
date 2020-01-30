@@ -86,6 +86,7 @@ namespace rareteam {
             pro_table.modify( pro_itr, same_payer, [&]( auto& p ){
                 if( is_delisted ){
                     p.status = ProductStatus::DELISTED;
+                    SubCredit( pro_itr->uid, 5 );//delisted sub 5 credit 
                 } else {
                     p.status = ProductStatus::NORMAL;
                 }
@@ -146,7 +147,6 @@ namespace rareteam {
             o.create_time = time_point_sec(current_time_point().sec_since_epoch());
             o.pay_time_out = time_point_sec(current_time_point().sec_since_epoch() + _global.pay_time_out);
         });
-        //TODO: point logic
     }
 
     void bitsfleamain::payorder( uint128_t order_id, const asset& quantity )
@@ -198,12 +198,18 @@ namespace rareteam {
         check( buyer_uid == order.buyer_uid, "This order does not belong to you" );
         check( repro.status == ReturnStatus::RS_PENDING_SHIPMENT, "This order is not ready for shipment" );
 
+        time_point_sec current_time = time_point_sec(current_time_point().sec_since_epoch());
         repro_table.modify( repro, same_payer, [&](auto& re){
             re.shipment_number = number;
-            re.ship_time = time_point_sec(current_time_point().sec_since_epoch());
+            re.ship_time = current_time;
             re.status = ReturnStatus::RS_PENDING_RECEIPT;
             re.receipt_time_out = time_point_sec( current_time_point().sec_since_epoch() + _global.receipt_time_out );
         });
+
+        // shipment delivery timeout
+        if( current_time > order.ship_time_out ) {
+            SubCredit( buyer_uid, 5 );
+        }
     }
 
     void bitsfleamain::shipment( uint64_t seller_uid, const name& seller_eosid, uint128_t order_id, const string& number)
@@ -225,8 +231,8 @@ namespace rareteam {
         });
 
         // shipment delivery timeout
-        if( order.ship_time_out >= current_time ) {
-            //TODO: point logic
+        if( current_time > order.ship_time_out ) {
+            SubCredit( seller_uid, 5 );
         }
 
     }
@@ -297,6 +303,12 @@ namespace rareteam {
         });
         endorder( order );
 
+        if( current_time > order.receipt_time_out ) {
+            SubCredit( buyer_uid, 5 );
+        } else {
+            AddCredit( buyer_uid, 5 );
+        }
+
         //TODO: point logic
     }
 
@@ -321,8 +333,8 @@ namespace rareteam {
         //Refund
         refund( order );
         // receipt delivery timeout
-        if( order.receipt_time_out >= current_time ) {
-            //TODO: point logic
+        if( current_time > order.receipt_time_out ) {
+            SubCredit( seller_uid, 5 );
         }
     }
 

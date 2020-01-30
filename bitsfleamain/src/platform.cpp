@@ -53,6 +53,9 @@ namespace rareteam {
             _user_table.modify( ru_itr, same_payer, [&]( auto& ru ) {
                 ru.referral_total += 1;
             });
+            AddCredit( referrer, 1 );
+            //Reward Referrer Points
+            RewardReferrer( ru_itr->eosid );
         }
         _global.total_users += 1;
     }
@@ -62,14 +65,9 @@ namespace rareteam {
         auto& user = _user_table.get( reviewer_uid, "Invalid account id" );
         if( user.credit_value >= _global.credit_reviewer_limit ) {
             if( is_new )
-            {
                 return true;
-            }
             else
-            {
                 return user.is_reviewer;
-            }
-            
         } else {
             _user_table.modify( user, same_payer, [&](auto& u){
                 u.is_reviewer = false;
@@ -107,17 +105,34 @@ namespace rareteam {
     void bitsfleamain::votereviewer( uint64_t voter_uid, const name& voter_eosid, uint64_t reviewer_uid, bool is_support )
     {
         require_auth( voter_eosid );
+        auto& user = _user_table.get( reviewer_uid, "Invalid reviewer uid" );
         reviewer_index rev_table( _self, _self.value );
-        auto itr = rev_table.find( reviewer_uid );
-        check( itr != rev_table.end(), "The reviewer uid is not a reviewer" );
+        auto& reviewer = rev_table.get( reviewer_uid, "The reviewer uid is not a reviewer" );
+        if( is_support ) {
+            check( reviewer.voter_approve.size() < 100, "maximum of 100 peoples can vote" );
+        } else {
+            check( reviewer.voter_against.size() < 100, "maximum of 100 peoples can vote" );
+        }
 
-        rev_table.modify( itr, same_payer, [&]( auto& r ){
+        rev_table.modify( reviewer, same_payer, [&]( auto& r ){
             if( is_support ){
+                if( r.voted_count == 0 ){
+                     _user_table.modify( user, same_payer, [&](auto& u){
+                        u.is_reviewer = true;
+                    });
+                }
                 r.voted_count += 1;
+                r.voter_approve.push_back( voter_uid );
             }else{
                 r.voted_count -= 1;
+                r.voter_against.push_back( voter_uid );
+                if( r.voted_count <= 0 ) {
+                    r.voted_count = 0;
+                    _user_table.modify( user, same_payer, [&](auto& u){
+                        u.is_reviewer = false;
+                    });
+                }
             }
-            if( r.voted_count < 0 ) r.voted_count = 0;
         });
         //TODO: point logic
 
@@ -313,6 +328,9 @@ namespace rareteam {
                 if( rev_itr != reviewer_table.end() ) reviewer_table.erase( rev_itr );
             } else {
                 u.credit_value -= value;
+                if( u.credit_value < _global.credit_reviewer_limit && user.is_reviewer ) {
+                    u.is_reviewer = false;
+                }
             }
             if( u.credit_value < 1 ) {
                 u.credit_value = 0;
@@ -325,6 +343,28 @@ namespace rareteam {
     {
         auto& user = _user_table.get( user_uid, "Invalid user uid" );
         SubCredit( user, value, cancel_reviewer );
+    }
+
+    void bitsfleamain::AddCredit( const User& user, uint32_t value )
+    {
+        _user_table.modify( user, same_payer, [&](auto& u){
+            u.credit_value += value;
+        });
+    }
+    void bitsfleamain::AddCredit( uint64_t user_uid, uint32_t value )
+    {
+        auto& user = _user_table.get( user_uid, "Invalid user uid" );
+        AddCredit( user, value );
+    }
+
+    void bitsfleamain::RewardReferrer( const name& referrer )
+    {
+        if( _global.ref_sys_gift.amount > 0 && _global.ref_pool.amount >= _global.ref_sys_gift.amount ) {
+            action(permission_level{_self, "active"_n}, "bitsfleamain"_n, "issue"_n,
+                std::make_tuple( referrer, _global.ref_sys_gift, string("Reward referrer") )
+            ).send();
+            _global.ref_pool -= _global.ref_sys_gift;
+        }
     }
     
 

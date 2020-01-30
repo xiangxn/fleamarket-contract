@@ -59,9 +59,9 @@ namespace rareteam {
       });
       add_balance( st.issuer, quantity, st.issuer );
       if( to != st.issuer ) {
-         SEND_INLINE_ACTION( *this, transfer, { {st.issuer, "active"_n} },
-                           { st.issuer, to, quantity, string("team claim") }
-         );
+         action( permission_level{st.issuer, "active"_n}, "bitsfleamain"_n, "transfer"_n,
+                std::make_tuple( st.issuer, to, quantity, string("team claim") )
+         ).send();
       }
    }
 
@@ -81,7 +81,7 @@ namespace rareteam {
       check( quantity.amount > 0, "must issue positive quantity" );
 
       check( quantity.symbol == st.supply.symbol, "symbol precision mismatch" );
-      check( quantity.amount <= (st.max_supply.amount - st.team.amount) - (st.supply.amount - st.team_claim.amount) , "quantity exceeds available supply");
+      check( quantity.amount <= (st.max_supply.amount - st.supply.amount) - (st.team.amount - st.team_claim.amount) , "quantity exceeds available supply");
 
       statstable.modify( st, same_payer, [&]( auto& s ) {
          s.supply += quantity;
@@ -90,9 +90,9 @@ namespace rareteam {
       add_balance( st.issuer, quantity, st.issuer );
 
       if( to != st.issuer ) {
-         SEND_INLINE_ACTION( *this, transfer, { {st.issuer, "active"_n} },
-                           { st.issuer, to, quantity, memo }
-         );
+         action( permission_level{st.issuer, "active"_n}, "bitsfleamain"_n, "transfer"_n,
+                std::make_tuple( st.issuer, to, quantity, memo )
+         ).send();
       }
    }
 
@@ -163,6 +163,15 @@ namespace rareteam {
       from_acnts.modify( from, owner, [&]( auto& a ) {
          a.balance -= value;
       });
+      if( value.symbol == FMP ){
+         auto ueosid_idx = _user_table.get_index<"eosid"_n>();
+         auto u_itr = ueosid_idx.find( owner.value );
+         if( u_itr != ueosid_idx.end() ) {
+            ueosid_idx.modify( u_itr, same_payer, [&](auto& u){
+               u.point -= value;
+            });
+         }
+      }
    }
 
    void bitsfleamain::add_balance( name owner, asset value, name ram_payer )
@@ -177,6 +186,15 @@ namespace rareteam {
          to_acnts.modify( to, same_payer, [&]( auto& a ) {
             a.balance += value;
          });
+      }
+      if( value.symbol == FMP ){
+         auto ueosid_idx = _user_table.get_index<"eosid"_n>();
+         auto u_itr = ueosid_idx.find( owner.value );
+         if( u_itr != ueosid_idx.end() ) {
+            ueosid_idx.modify( u_itr, same_payer, [&](auto& u){
+               u.point += value;
+            });
+         }
       }
    }
 }

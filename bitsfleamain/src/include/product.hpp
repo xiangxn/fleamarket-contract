@@ -24,12 +24,13 @@ namespace rareteam
 
     enum OrderStatus : uint32_t {
         OS_PENDING_PAYMENT = 0,
-        OS_CANCELLED = 100,
-        OS_PENDING_SHIPMENT = 200,
-        OS_PENDING_RECEIPT = 300,
-        OS_COMPLETED = 400,
-        OS_ARBITRATION = 500,
-        OS_RETURN = 600
+        OS_PENDING_CONFIRM = 100,
+        OS_CANCELLED = 200,
+        OS_PENDING_SHIPMENT = 300,
+        OS_PENDING_RECEIPT = 400,
+        OS_COMPLETED = 500,
+        OS_ARBITRATION = 600,
+        OS_RETURN = 700
     };
 
     enum ReturnStatus : uint32_t {

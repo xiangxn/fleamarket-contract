@@ -32,6 +32,10 @@ cleos push action eosio.token issue '[ "reviewer", "10000.0000 EOS", "memo" ]' -
 
 cleos set account permission bitsfleamain active '{"threshold": 1,"keys": [{"key": "EOS8M1jvYGgV2XuPqS2nbZaW9tRZfUjT1N88BxJVeF4jVFDLfSAzQ","weight": 1}],"accounts": [{"permission":{"actor":"bitsfleamain","permission":"eosio.code"},"weight":1}]}' owner -p bitsfleamain &&
 
+cleos get table bitsfleamain bitsfleamain global &&
+
+# cleos get currency stats bitsfleamain FMP &&
+cleos get table bitsfleamain FMP stat &&
 
 cleos get table bitsfleamain bitsfleamain users # &&
 

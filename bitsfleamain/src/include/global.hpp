@@ -29,11 +29,19 @@ namespace rareteam {
         /**
          * Points gift once by the system at the time of referral
          */ 
-        asset ref_sys_gift = asset( 10, FMP );
+        asset ref_sys_gift = asset( 50000, FMP );
         /**
          * Referral gift pool
          */ 
         asset ref_pool = asset( 0, FMP );
+        /**
+         * transaction gift pool
+         */ 
+        asset transaction_pool = asset( 0, FMP );
+        /**
+         * salary gift pool
+         */ 
+        asset salary_pool = asset( 0, FMP );
         /************************Points related End************************/
 
         /*******************credit related***************/
@@ -63,17 +71,17 @@ namespace rareteam {
          */ 
         uint32_t review_max_count = 3000;
         /**
-         * Reviewer daily base salary
+         * Reviewer daily base salary (Not used)
          */ 
         asset review_salary_base = asset( 100000, FMP );
         /**
          * Review the salary of a product
          */ 
-        asset review_salary_product = asset( 20000, FMP );
+        asset review_salary_product = asset( 100000, FMP );
         /**
          * Reviewer's salary for each dispute
          */ 
-        asset review_salary_dispute = asset( 100000, FMP );
+        asset review_salary_dispute = asset( 200000, FMP );
         /*******************reviewer related End**************************/
         /**
          * Project profit list
