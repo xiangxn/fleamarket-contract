@@ -21,3 +21,6 @@ cleos get table bitsfleamain bitsfleamain orders
 # cleos push action bitsfleamain reconreceipt '[0,"player",0xaf562c5e000000000200000000000000]' -p player
 
 cleos get table bitsfleamain bitsfleamain returns
+
+# cleos get currency balance bitsfleamain player1 FMP
+# cleos get currency balance bitsfleamain reviewer FMP

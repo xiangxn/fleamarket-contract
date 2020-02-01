@@ -93,6 +93,7 @@ namespace rareteam {
         ACTION applyarbit( uint64_t plaintiff_uid, const name& plaintiff_eosid, const Arbitration& arbitration );
         ACTION inarbit( uint64_t reviewer_uid, const name& reviewer_eosid, uint32_t arbit_id );
         ACTION updatearbit( const Arbitration& arbit );
+        ACTION outpayorder( uint128_t order_id, const asset& quantity );
         [[eosio::on_notify("eosio.token::transfer")]]
         void OnEOSTransfer( const name& from, const name& to, const asset& quantity, const string& memo );
         /********platform End*****/

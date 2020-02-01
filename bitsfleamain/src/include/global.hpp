@@ -23,13 +23,13 @@ namespace rareteam {
 
         /************************Points related************************/
         /**
-         * the referral commission
+         * the referral commission rate
          */ 
-        double ref_commission_scale = 0.01;
+        double ref_commission_rate = 0.05;
         /**
          * Points gift once by the system at the time of referral
          */ 
-        asset ref_sys_gift = asset( 50000, FMP );
+        asset ref_sys_gift = asset( 10000, FMP );
         /**
          * Referral gift pool
          */ 
@@ -39,9 +39,21 @@ namespace rareteam {
          */ 
         asset transaction_pool = asset( 0, FMP );
         /**
+         * transaction gift rate
+         */ 
+        double transaction_gift_rate = 0.05;
+        /**
          * salary gift pool
          */ 
         asset salary_pool = asset( 0, FMP );
+        /**
+         * gift publish product point
+         */ 
+        asset gift_publish_product = asset( 5000, FMP );
+        /**
+         * Vote for reviewers for rewards
+         */ 
+        asset gift_vote = asset( 1000, FMP );
         /************************Points related End************************/
 
         /*******************credit related***************/
@@ -77,7 +89,7 @@ namespace rareteam {
         /**
          * Review the salary of a product
          */ 
-        asset review_salary_product = asset( 100000, FMP );
+        asset review_salary_product = asset( 50000, FMP );
         /**
          * Reviewer's salary for each dispute
          */ 

@@ -113,6 +113,10 @@ namespace rareteam {
         } else {
             check( reviewer.voter_against.size() < 100, "maximum of 100 peoples can vote" );
         }
+        auto it = find_if(reviewer.voter_approve.begin(), reviewer.voter_approve.end(), [&](auto& u){ return u == voter_uid; });
+        check( it == reviewer.voter_approve.end(), "You already voted" );
+        auto it2 = find_if(reviewer.voter_against.begin(), reviewer.voter_against.end(), [&](auto& u){ return u == voter_uid; });
+        check( it2 == reviewer.voter_against.end(), "You already voted" );
 
         rev_table.modify( reviewer, same_payer, [&]( auto& r ){
             if( is_support ){
@@ -134,7 +138,13 @@ namespace rareteam {
                 }
             }
         });
-        //TODO: point logic
+        // point logic
+        if( _global.gift_vote.amount > 0 && _global.transaction_pool.amount >= _global.gift_vote.amount ) {
+            action(permission_level{_self, "active"_n}, "bitsfleamain"_n, "issue"_n,
+                std::make_tuple( voter_eosid, _global.gift_vote, string("Reward voted") )
+            ).send();
+            _global.transaction_pool -= _global.gift_vote;
+        }
 
     }
 
@@ -176,6 +186,8 @@ namespace rareteam {
             check( plaintiff.is_reviewer == false, "Complaints can only be initiated by ordinary users" );
         } else if ( arbitration.type == ArbitType::AT_PRODUCT ) {
             //TODO:Report product
+        } else if ( arbitration.type == ArbitType::AT_ILLEGAL_INFO ) {
+            //TODO:ILLEGAL INFO
         }
 
         arbitration_index arbit_table( _self, _self.value );
@@ -306,6 +318,8 @@ namespace rareteam {
                 }
             } else if ( c_arbit.type == ArbitType::AT_PRODUCT ) {
                 //TODO:Report product
+            } else if ( c_arbit.type == ArbitType::AT_ILLEGAL_INFO ) {
+                //TODO:ILLEGAL INFO
             }
         } else {
             check( false, "Incomplete signature for updatearbit" );
@@ -365,6 +379,12 @@ namespace rareteam {
             ).send();
             _global.ref_pool -= _global.ref_sys_gift;
         }
+    }
+
+    void bitsfleamain::outpayorder( uint128_t order_id, const asset& quantity )
+    {
+        require_auth( _self );
+        payorder( order_id, quantity );
     }
     
 

@@ -45,7 +45,6 @@ namespace rareteam {
                 pa_item.end_time = pa.end_time;
             });
         }
-        //TODO: point logic
     }
 
     void bitsfleamain::pulloff( uint64_t seeler_uid, const name& seller_eosid, uint32_t pid )
@@ -92,8 +91,25 @@ namespace rareteam {
                 }
                 p.reviewer = reviewer_uid;
             });
+            // point logic
+            if( is_delisted ){
+                // reward publisher
+                if( _global.gift_publish_product.amount > 0 && _global.transaction_pool.amount >= _global.gift_publish_product.amount ) {
+                    auto& publisher = _user_table.get( pro_itr->uid, "Invalid uid for review");
+                    action(permission_level{_self, "active"_n}, "bitsfleamain"_n, "issue"_n,
+                        std::make_tuple( publisher.eosid, _global.gift_publish_product, string("Reward publish product") )
+                    ).send();
+                    _global.transaction_pool -= _global.gift_publish_product;
+                }
+            }
+            // reviewer salary
+            if( _global.salary_pool.amount >= _global.review_salary_product.amount ) {
+                action(permission_level{_self, "active"_n}, "bitsfleamain"_n, "issue"_n,
+                    std::make_tuple( reviewer_eosid, _global.review_salary_product, string("publish product salary") )
+                ).send();
+                _global.salary_pool -= _global.review_salary_product;
+            }
         }
-        //TODO: point logic
     }
 
     void bitsfleamain::bidauction( uint64_t buyer_uid, const name& buyer_eosid, uint32_t pid, const asset& price )
@@ -242,7 +258,7 @@ namespace rareteam {
         if( order.price.symbol == SYS ) { //EOS
             auto& user = _user_table.get( order.seller_uid, "Invalid order seller_uid" );
             auto total = order.price + order.postage;
-            auto income = asset( uint64_t(double(total.amount) * _global.fee_ratio), total.symbol );
+            auto income = asset( int64_t(double(total.amount) * _global.fee_ratio), total.symbol );
             auto amount = total - income;
             
             string memo = string("complete order ") + uint128ToString( order.id );
@@ -303,13 +319,30 @@ namespace rareteam {
         });
         endorder( order );
 
+        // credit
+        AddCredit( order.seller_uid, 5 );
         if( current_time > order.receipt_time_out ) {
             SubCredit( buyer_uid, 5 );
         } else {
             AddCredit( buyer_uid, 5 );
         }
-
-        //TODO: point logic
+        // points
+        int64_t val = int64_t(double(order.price.amount) * _global.transaction_gift_rate);
+        if( val > 1 && val <= (_global.transaction_pool.amount * 2) ) {
+            auto& seller = _user_table.get( order.seller_uid, "Invalid seller uid for conreceipt" );
+            asset point = asset( val, FMP );
+            transaction trx;
+            action a1 = action(permission_level{_self, "active"_n}, "bitsfleamain"_n, "issue"_n,
+                std::make_tuple( buyer_eosid, point, string("transaction gift") )
+            );
+            action a2 = action(permission_level{_self, "active"_n}, "bitsfleamain"_n, "issue"_n,
+                std::make_tuple( seller.eosid, point, string("transaction gift") )
+            );
+            trx.actions.emplace_back( a1 );
+            trx.actions.emplace_back( a2 );
+            trx.delay_sec = 5;
+            trx.send( (uint128_t(_self.value) << 64) | uint64_t(current_time_point().sec_since_epoch()) , _self, true);
+        }
     }
 
     void bitsfleamain::reconreceipt( uint64_t seller_uid, const name& seller_eosid, uint128_t order_id )
