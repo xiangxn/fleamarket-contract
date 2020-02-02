@@ -163,12 +163,12 @@ namespace rareteam {
       from_acnts.modify( from, owner, [&]( auto& a ) {
          a.balance -= value;
       });
-      if( value.symbol == FMP ){
+      if( value.symbol == FMP && _global.sync_data == false ){
          auto ueosid_idx = _user_table.get_index<"eosid"_n>();
          auto u_itr = ueosid_idx.find( owner.value );
          if( u_itr != ueosid_idx.end() ) {
             ueosid_idx.modify( u_itr, same_payer, [&](auto& u){
-               u.point -= value;
+               u.point = from.balance;
             });
          }
       }
@@ -187,12 +187,12 @@ namespace rareteam {
             a.balance += value;
          });
       }
-      if( value.symbol == FMP ){
+      if( value.symbol == FMP && _global.sync_data == false ){
          auto ueosid_idx = _user_table.get_index<"eosid"_n>();
          auto u_itr = ueosid_idx.find( owner.value );
          if( u_itr != ueosid_idx.end() ) {
             ueosid_idx.modify( u_itr, same_payer, [&](auto& u){
-               u.point += value;
+               u.point = to->balance;
             });
          }
       }

@@ -99,6 +99,8 @@ namespace rareteam {
          * Project profit list
          */ 
         vector<asset> income;
+        vector<asset> last_income;
+        vector<symbol> support_coin;
         /**
          * the project start time.
          */ 
@@ -123,6 +125,10 @@ namespace rareteam {
          * Deferred up to 3 times
          */ 
         uint32_t max_deferr_times = 3;
+        /**
+         * True when syncing data
+         */ 
+        bool sync_data = false;
     };
 
    typedef eosio::singleton< "global"_n, global> flea_global_singleton;

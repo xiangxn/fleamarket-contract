@@ -31,10 +31,20 @@ namespace rareteam {
         _global.ref_pool = asset( 1000000000000, FMP );
         _global.transaction_pool = asset( 3500000000000, FMP );
         _global.salary_pool = asset( 2000000000000, FMP );
+
+        _global.support_coin.push_back( FMP );
+        _global.support_coin.push_back( SYS );
+        symbol eos = symbol(symbol_code("EOS"), 4);
+        if( SYS != eos ) {
+            _global.support_coin.push_back( eos );
+        }
+        _global.support_coin.push_back( symbol(symbol_code("BTS"), 4) );
         //create FMP
         action(permission_level{_self, "active"_n}, "bitsfleamain"_n, "create"_n,
             std::make_tuple( _self, asset( 10000000000000, FMP ), 30 )
         ).send();
+
+
     }
 
     void bitsfleamain::reset()

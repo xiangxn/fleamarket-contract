@@ -24,3 +24,4 @@ cleos get table bitsfleamain bitsfleamain returns
 
 # cleos get currency balance bitsfleamain player1 FMP
 # cleos get currency balance bitsfleamain reviewer FMP
+# cleos push action bitsfleamain transfer '["reviewer","player","1.0000 FMP",""]' -p reviewer

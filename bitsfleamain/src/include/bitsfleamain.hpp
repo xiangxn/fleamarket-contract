@@ -54,6 +54,7 @@ namespace rareteam {
         void Settle( const Order& order, const User& seller, const User& buyer, const name& contract_name );
         bool IsLockUser( uint64_t user_uid );
         bool IsLockUser( const User& user );
+        bool CheckSymbol( const symbol& symbol );
 
     public:
         bitsfleamain( name receiver, name code, datastream<const char*> ds );
@@ -99,6 +100,8 @@ namespace rareteam {
         ACTION outpayorder( uint128_t order_id, const asset& quantity );
         ACTION deferreceipt( uint64_t user_uid, const name& user_eosid, uint128_t order_id );
         ACTION deferreturn( uint64_t user_uid, const name& user_eosid, uint128_t order_id );
+        ACTION startsync();
+        ACTION endsync();
         [[eosio::on_notify("eosio.token::transfer")]]
         void OnEOSTransfer( const name& from, const name& to, const asset& quantity, const string& memo );
         /********platform End*****/

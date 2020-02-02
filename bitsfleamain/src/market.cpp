@@ -13,6 +13,8 @@ namespace rareteam {
         require_auth( _self );
         auto& user = _user_table.get( uid, "Invalid account uid" );
         check( IsLockUser( user ) == false, "Account is locked" );
+        check( product.price.symbol == product.postage.symbol, "Inconsistent payment methods" );
+        check( CheckSymbol( product.price.symbol ), "This currency is not currently supported" );
 
         product_index pro_table( _self, _self.value );
         auto pro_itr = pro_table.emplace( _self, [&]( auto& p ) {
@@ -326,7 +328,6 @@ namespace rareteam {
 
         if( order.price.symbol == SYS ) { //EOS
             auto total = order.price + order.postage;
-            //auto income = asset( uint64_t(double(order.price.amount) * _global.fee_ratio), order.price.symbol );
             string memo = string("returns order ") + uint128ToString( order.id );
             transaction trx;
             action a1 = action( permission_level{_self, "active"_n}, "eosio.token"_n, "transfer"_n,

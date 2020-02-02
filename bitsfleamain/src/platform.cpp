@@ -401,6 +401,29 @@ namespace rareteam {
         return user.status == UserStatus::LOCK;
     }
     
+    void bitsfleamain::startsync()
+    {
+        require_auth( _self );
+        _global.sync_data = true;
+        vector<asset> tmp;
+        _global.last_income.swap( tmp );
+        for_each( _global.income.begin(), _global.income.end(), [&](auto& a){
+            _global.last_income.push_back( asset( a.amount, a.symbol) );
+        });
+        _global.income.swap( tmp );
+    }
+    void bitsfleamain::endsync()
+    {
+        require_auth( _self );
+        _global.sync_data = false;
+    }
 
+    bool bitsfleamain::CheckSymbol( const symbol& symbol )
+    {
+        auto itr = find_if( _global.support_coin.begin(), _global.support_coin.end(), [&](auto& s){
+            return s == symbol;
+        });
+        return itr != _global.support_coin.end();
+    }
     
 }
