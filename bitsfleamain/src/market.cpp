@@ -287,7 +287,7 @@ namespace rareteam {
         }
 
         vector<asset>::iterator itr = find_if( _global.income.begin(), _global.income.end(), [&](asset& a){
-            return a.symbol == SYS;
+            return a.symbol == total.symbol;
         });
         if( itr != _global.income.end() ) {
             asset sys = (*itr) + income;
