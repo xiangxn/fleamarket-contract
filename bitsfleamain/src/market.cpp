@@ -358,6 +358,13 @@ namespace rareteam {
             o.status = OrderStatus::OS_COMPLETED;
             o.end_time = current_time;
         });
+        product_index product_table( _self, _self.value );
+        auto pro_itr = product_table.find( order.pid );
+        if( pro_itr != product_table.end() ) {
+            product_table.modify( pro_itr, same_payer, [&](auto& p){
+                p.status = ProductStatus::COMPLETED;
+            });
+        }
         endorder( order );
 
         // credit
