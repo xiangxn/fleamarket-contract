@@ -308,7 +308,7 @@ namespace rareteam {
         _user_table.modify( buyer, same_payer, [&](auto& u){
             u.buy_total += 1;
         });
-        if( order.price.symbol == SYS ) { //EOS
+        if( order.price.symbol == SYS ) {
             Settle( order, seller, buyer, "eosio.token"_n );
         }
     }
@@ -412,7 +412,7 @@ namespace rareteam {
         order_index order_table( _self, _self.value );
         auto& order = order_table.get( order_id, "Invalid order id" );
         check( order.buyer_uid == user_uid, "This order does not belong to you" );
-        check( order.delayed_count < 3, "Has been postponed three times" );
+        check( order.delayed_count < _global.max_deferr_times, "Has been postponed three times" );
 
         order_table.modify( order, same_payer, [&](auto& o){
             o.receipt_time_out = time_point_sec( current_time_point().sec_since_epoch() + _global.receipt_time_out );
@@ -429,7 +429,7 @@ namespace rareteam {
         auto& order = order_table.get( order_id, "Invalid order id" );
         auto& proreturn = proreturn_table.get( order_id, "Invalid order id for returns table" );
         check( order.seller_uid == user_uid, "This order does not belong to you" );
-        check( proreturn.delayed_count < 3, "Has been postponed three times" );
+        check( proreturn.delayed_count < _global.max_deferr_times, "Has been postponed three times" );
 
         proreturn_table.modify( proreturn, same_payer, [&](auto& pr){
             pr.receipt_time_out = time_point_sec( current_time_point().sec_since_epoch() + _global.receipt_time_out );
