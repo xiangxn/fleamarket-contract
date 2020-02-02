@@ -12,6 +12,7 @@ namespace rareteam {
     {
         require_auth( _self );
         auto& user = _user_table.get( uid, "Invalid account uid" );
+        check( IsLockUser( user ) == false, "Account is locked" );
 
         product_index pro_table( _self, _self.value );
         auto pro_itr = pro_table.emplace( _self, [&]( auto& p ) {
@@ -47,7 +48,7 @@ namespace rareteam {
         }
     }
 
-    void bitsfleamain::pulloff( uint64_t seeler_uid, const name& seller_eosid, uint32_t pid )
+    void bitsfleamain::pulloff( uint64_t seller_uid, const name& seller_eosid, uint32_t pid )
     {
         require_auth( seller_eosid );
 
@@ -56,7 +57,7 @@ namespace rareteam {
         product_index pro_table( _self, _self.value );
         auto& product = pro_table.get( pid, "Invalid product id" );
         check( product.status == ProductStatus::NORMAL, "The product is not normal status" );
-        check( product.uid == seeler_uid, "This product does not belong to you" );
+        check( product.uid == seller_uid, "This product does not belong to you" );
 
         pro_table.modify( product, same_payer, [&](auto& p){
             p.status = ProductStatus::DELISTED;
@@ -66,6 +67,7 @@ namespace rareteam {
     void bitsfleamain::review( uint64_t reviewer_uid, const name& reviewer_eosid, uint32_t pid, bool is_delisted, string& memo )
     {
         require_auth( reviewer_eosid );
+        check( IsLockUser( reviewer_uid ) == false, "Account is locked" );
 
         reviewer_index re_table( _self, _self.value );
         auto re_itr = re_table.find( reviewer_uid );
@@ -146,6 +148,7 @@ namespace rareteam {
         require_auth( buyer_eosid );
         check( is_account( buyer_eosid ), "Invalid account buyer_eosid" );
         auto& user = _user_table.get( buyer_uid, "Invalid account buyer_uid" );
+        check( IsLockUser( user ) == false, "Account is locked" );
 
         product_index pro_table( _self, _self.value );
         auto& product = pro_table.get( pid, "Invalid product pid" );
@@ -269,16 +272,19 @@ namespace rareteam {
         if( buyer.referrer > 0 ){
             auto comm = asset( int64_t(double(income.amount) * _global.ref_commission_rate), income.symbol );
             if( comm.amount > 0 ) {
-                income -= comm;
+                //UserStatus::LOCK
                 auto& referrer = _user_table.get( buyer.referrer, "Invalid order referrer uid" );
-                transaction trx;
-                action a2 = action ( permission_level{_self, "active"_n}, contract_name, "transfer"_n,
-                    std::make_tuple( _self, referrer.eosid, comm, "Referral commission" )
-                );
-                trx.actions.emplace_back( a1 );
-                trx.actions.emplace_back( a2 );
-                trx.delay_sec = 5;
-                trx.send( (uint128_t(("settle"_n).value) << 64) | uint64_t(current_time_point().sec_since_epoch()) , _self, false);
+                if( IsLockUser( referrer ) == false ) {
+                    income -= comm;
+                    transaction trx;
+                    action a2 = action ( permission_level{_self, "active"_n}, contract_name, "transfer"_n,
+                        std::make_tuple( _self, referrer.eosid, comm, "Referral commission" )
+                    );
+                    trx.actions.emplace_back( a1 );
+                    trx.actions.emplace_back( a2 );
+                    trx.delay_sec = 5;
+                    trx.send( (uint128_t(("settle"_n).value) << 64) | uint64_t(current_time_point().sec_since_epoch()) , _self, false);
+                }
             } else {
                 a1.send();
             }

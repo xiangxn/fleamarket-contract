@@ -15,9 +15,11 @@ namespace rareteam {
         check( is_account(eosid), "Invalid account eosid" );
         check( nickname.length() <= 20, "Nickname is too long" );
         check( is_zero(phone_hash) == false, "invalid phone hash" );
+        bool is_ref = false;
         if( referrer > 0 ) {
-            auto ref_itr = _user_table.find( referrer );
-            check( ref_itr != _user_table.end(), "invalid referrer id" );
+            auto& ref = _user_table.get( referrer, "invalid referrer id" );
+            is_ref = ref.credit_value >= _global.credit_ref_limit;
+            is_ref = IsLockUser( ref ) == false;
         }
 
         auto phone_idx = _user_table.get_index<"phone"_n>();
@@ -36,12 +38,12 @@ namespace rareteam {
             u.phone_encrypt = phone_encrypt;
             u.credit_value = _global.credit_base_score;
             u.last_active_time = time_point_sec(current_time_point().sec_since_epoch());
-            if( referrer > 0 ) {
+            if( referrer > 0 && is_ref ) {
                 u.referrer = referrer;
             }
         });
 
-        if( referrer > 0 ) {
+        if( referrer > 0 && is_ref ) {
             referrer_index ref_table( _self, _self.value );
             ref_table.emplace( _self, [&]( auto& r ){
                 r.id = ref_table.available_primary_key();
@@ -63,6 +65,7 @@ namespace rareteam {
     bool bitsfleamain::CheckReviewer( uint64_t reviewer_uid, bool is_new )
     {
         auto& user = _user_table.get( reviewer_uid, "Invalid account id" );
+        check( IsLockUser( user ) == false, "Account is locked" );
         if( user.credit_value >= _global.credit_reviewer_limit ) {
             if( is_new )
                 return true;
@@ -105,6 +108,7 @@ namespace rareteam {
     void bitsfleamain::votereviewer( uint64_t voter_uid, const name& voter_eosid, uint64_t reviewer_uid, bool is_support )
     {
         require_auth( voter_eosid );
+        check( IsLockUser( voter_uid ) == false, "Account is locked" );
         auto& user = _user_table.get( reviewer_uid, "Invalid reviewer uid" );
         reviewer_index rev_table( _self, _self.value );
         auto& reviewer = rev_table.get( reviewer_uid, "The reviewer uid is not a reviewer" );
@@ -385,6 +389,16 @@ namespace rareteam {
     {
         require_auth( _self );
         payorder( order_id, quantity );
+    }
+
+    bool bitsfleamain::IsLockUser( uint64_t user_uid )
+    {
+        auto& user = _user_table.get( user_uid, "Invalid user id" );
+        return IsLockUser( user );
+    }
+    bool bitsfleamain::IsLockUser( const User& user )
+    {
+        return user.status == UserStatus::LOCK;
     }
     
 
