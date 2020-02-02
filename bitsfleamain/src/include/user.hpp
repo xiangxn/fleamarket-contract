@@ -39,7 +39,7 @@ namespace rareteam
         uint32_t posts_total = 0;
         uint32_t sell_total = 0;
         uint32_t buy_total = 0;
-        uint32_t favorite_total = 0;
+        //uint32_t favorite_total = 0;
         uint32_t referral_total = 0;
 
         asset point = asset( 0, FMP );

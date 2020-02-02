@@ -92,15 +92,18 @@ namespace rareteam {
                 p.reviewer = reviewer_uid;
             });
             // point logic
-            if( is_delisted ){
+            if( !is_delisted ){
                 // reward publisher
+                auto& publisher = _user_table.get( pro_itr->uid, "Invalid uid for review");
                 if( _global.gift_publish_product.amount > 0 && _global.transaction_pool.amount >= _global.gift_publish_product.amount ) {
-                    auto& publisher = _user_table.get( pro_itr->uid, "Invalid uid for review");
                     action(permission_level{_self, "active"_n}, "bitsfleamain"_n, "issue"_n,
                         std::make_tuple( publisher.eosid, _global.gift_publish_product, string("Reward publish product") )
                     ).send();
                     _global.transaction_pool -= _global.gift_publish_product;
                 }
+                _user_table.modify( publisher, same_payer, [&](auto& u){
+                    u.posts_total += 1;
+                });
             }
             // reviewer salary
             if( _global.salary_pool.amount >= _global.review_salary_product.amount ) {
@@ -223,9 +226,9 @@ namespace rareteam {
         });
 
         // shipment delivery timeout
-        if( current_time > order.ship_time_out ) {
-            SubCredit( buyer_uid, 5 );
-        }
+        // if( current_time > order.ship_time_out ) {
+        //     SubCredit( buyer_uid, 5 );
+        // }
     }
 
     void bitsfleamain::shipment( uint64_t seller_uid, const name& seller_eosid, uint128_t order_id, const string& number)
@@ -247,35 +250,66 @@ namespace rareteam {
         });
 
         // shipment delivery timeout
-        if( current_time > order.ship_time_out ) {
-            SubCredit( seller_uid, 5 );
+        // if( current_time > order.ship_time_out ) {
+        //     SubCredit( seller_uid, 5 );
+        // }
+    }
+
+    void bitsfleamain::Settle( const Order& order, const User& seller, const User& buyer, const name& contract_name )
+    {
+        //eosio.token
+        auto total = order.price + order.postage;
+        auto income = asset( int64_t(double(total.amount) * _global.fee_ratio), total.symbol );
+        auto amount = total - income;
+        
+        string memo = string("complete order ") + uint128ToString( order.id );
+        action a1 = action( permission_level{_self, "active"_n}, contract_name, "transfer"_n,
+            std::make_tuple( _self, seller.eosid, amount, memo )
+        );
+        if( buyer.referrer > 0 ){
+            auto comm = asset( int64_t(double(income.amount) * _global.ref_commission_rate), income.symbol );
+            if( comm.amount > 0 ) {
+                income -= comm;
+                auto& referrer = _user_table.get( buyer.referrer, "Invalid order referrer uid" );
+                transaction trx;
+                action a2 = action ( permission_level{_self, "active"_n}, contract_name, "transfer"_n,
+                    std::make_tuple( _self, referrer.eosid, comm, "Referral commission" )
+                );
+                trx.actions.emplace_back( a1 );
+                trx.actions.emplace_back( a2 );
+                trx.delay_sec = 5;
+                trx.send( (uint128_t(("settle"_n).value) << 64) | uint64_t(current_time_point().sec_since_epoch()) , _self, false);
+            } else {
+                a1.send();
+            }
+        } else {
+            a1.send();
         }
 
+        vector<asset>::iterator itr = find_if( _global.income.begin(), _global.income.end(), [&](asset& a){
+            return a.symbol == SYS;
+        });
+        if( itr != _global.income.end() ) {
+            asset sys = (*itr) + income;
+            _global.income.erase( itr );
+            _global.income.push_back( sys );
+        } else {
+            _global.income.push_back( income );
+        }
     }
 
     void bitsfleamain::endorder( const Order& order )
     {
+        auto& seller = _user_table.get( order.seller_uid, "Invalid order seller_uid" );
+        auto& buyer = _user_table.get( order.buyer_uid, "Invalid order buyer_uid" );
+        _user_table.modify( seller, same_payer, [&](auto& u){
+            u.sell_total += 1;
+        });
+        _user_table.modify( buyer, same_payer, [&](auto& u){
+            u.buy_total += 1;
+        });
         if( order.price.symbol == SYS ) { //EOS
-            auto& user = _user_table.get( order.seller_uid, "Invalid order seller_uid" );
-            auto total = order.price + order.postage;
-            auto income = asset( int64_t(double(total.amount) * _global.fee_ratio), total.symbol );
-            auto amount = total - income;
-            
-            string memo = string("complete order ") + uint128ToString( order.id );
-            action( permission_level{_self, "active"_n}, "eosio.token"_n, "transfer"_n,
-                std::make_tuple( _self, user.eosid, amount, memo )
-            ).send();
-
-            vector<asset>::iterator itr = find_if( _global.income.begin(), _global.income.end(), [&](asset& a){
-                return a.symbol == SYS;
-            });
-            if( itr != _global.income.end() ) {
-                asset sys = (*itr) + income;
-                _global.income.erase( itr );
-                _global.income.push_back( sys );
-            } else {
-                _global.income.push_back( income );
-            }
+            Settle( order, seller, buyer, "eosio.token"_n );
         }
     }
 
@@ -286,7 +320,7 @@ namespace rareteam {
 
         if( order.price.symbol == SYS ) { //EOS
             auto total = order.price + order.postage;
-            auto income = asset( uint64_t(double(order.price.amount) * _global.fee_ratio), order.price.symbol );
+            //auto income = asset( uint64_t(double(order.price.amount) * _global.fee_ratio), order.price.symbol );
             string memo = string("returns order ") + uint128ToString( order.id );
             transaction trx;
             action a1 = action( permission_level{_self, "active"_n}, "eosio.token"_n, "transfer"_n,
@@ -298,7 +332,7 @@ namespace rareteam {
             trx.actions.emplace_back( a1 );
             trx.actions.emplace_back( a2 );
             trx.delay_sec = 5;
-            trx.send( (uint128_t(_self.value) << 64) | uint64_t(current_time_point().sec_since_epoch()) , _self, true);
+            trx.send( (uint128_t(("refund"_n).value) << 64) | uint64_t(current_time_point().sec_since_epoch()) , _self, false);
         }
     }
 
@@ -341,7 +375,7 @@ namespace rareteam {
             trx.actions.emplace_back( a1 );
             trx.actions.emplace_back( a2 );
             trx.delay_sec = 5;
-            trx.send( (uint128_t(_self.value) << 64) | uint64_t(current_time_point().sec_since_epoch()) , _self, true);
+            trx.send( (uint128_t(("conreceipt"_n).value) << 64) | uint64_t(current_time_point().sec_since_epoch()) , _self, false);
         }
     }
 
@@ -369,6 +403,39 @@ namespace rareteam {
         if( current_time > order.receipt_time_out ) {
             SubCredit( seller_uid, 5 );
         }
+    }
+
+    void bitsfleamain::deferreceipt( uint64_t user_uid, const name& user_eosid, uint128_t order_id )
+    {
+        require_auth( user_eosid );
+
+        order_index order_table( _self, _self.value );
+        auto& order = order_table.get( order_id, "Invalid order id" );
+        check( order.buyer_uid == user_uid, "This order does not belong to you" );
+        check( order.delayed_count < 3, "Has been postponed three times" );
+
+        order_table.modify( order, same_payer, [&](auto& o){
+            o.receipt_time_out = time_point_sec( current_time_point().sec_since_epoch() + _global.receipt_time_out );
+            o.delayed_count += 1;
+        });
+    }
+
+    void bitsfleamain::deferreturn( uint64_t user_uid, const name& user_eosid, uint128_t order_id )
+    {
+        require_auth( user_eosid );
+
+        order_index order_table( _self, _self.value );
+        proreturn_index proreturn_table( _self, _self.value );
+        auto& order = order_table.get( order_id, "Invalid order id" );
+        auto& proreturn = proreturn_table.get( order_id, "Invalid order id for returns table" );
+        check( order.seller_uid == user_uid, "This order does not belong to you" );
+        check( proreturn.delayed_count < 3, "Has been postponed three times" );
+
+        proreturn_table.modify( proreturn, same_payer, [&](auto& pr){
+            pr.receipt_time_out = time_point_sec( current_time_point().sec_since_epoch() + _global.receipt_time_out );
+            pr.delayed_count += 1;
+        });
+
     }
 
     void bitsfleamain::returns( uint64_t buyer_uid, const name& buyer_eosid, uint128_t order_id, const string& reasons )

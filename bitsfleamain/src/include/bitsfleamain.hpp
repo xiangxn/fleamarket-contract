@@ -51,6 +51,7 @@ namespace rareteam {
         void AddCredit( const User& user, uint32_t value );
         void AddCredit( uint64_t user_uid, uint32_t value );
         void RewardReferrer( const name& referrer );
+        void Settle( const Order& order, const User& seller, const User& buyer, const name& contract_name );
 
     public:
         bitsfleamain( name receiver, name code, datastream<const char*> ds );
@@ -94,6 +95,8 @@ namespace rareteam {
         ACTION inarbit( uint64_t reviewer_uid, const name& reviewer_eosid, uint32_t arbit_id );
         ACTION updatearbit( const Arbitration& arbit );
         ACTION outpayorder( uint128_t order_id, const asset& quantity );
+        ACTION deferreceipt( uint64_t user_uid, const name& user_eosid, uint128_t order_id );
+        ACTION deferreturn( uint64_t user_uid, const name& user_eosid, uint128_t order_id );
         [[eosio::on_notify("eosio.token::transfer")]]
         void OnEOSTransfer( const name& from, const name& to, const asset& quantity, const string& memo );
         /********platform End*****/
