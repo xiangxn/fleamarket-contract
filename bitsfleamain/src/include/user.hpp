@@ -51,9 +51,24 @@ namespace rareteam
 
     };
 
+    struct [[eosio::table, eosio::contract("bitsfleamain")]] OtherAddr
+    {
+        uint32_t id;
+        uint64_t uid;
+        symbol coin_type;
+        string addr = "";
+
+        uint64_t primary_key() const { return uint64_t(id); }
+        uint64_t by_uid() const { return uid; }
+    };
+
     typedef eosio::multi_index<"users"_n, User,
         indexed_by< "eosid"_n, const_mem_fun<User, uint64_t,  &User::by_eosid> >,
         indexed_by< "phone"_n, const_mem_fun<User, checksum256,  &User::by_phone> >
     > user_index;
+
+    typedef eosio::multi_index<"otheraddr"_n, OtherAddr,
+        indexed_by< "byuid"_n, const_mem_fun<OtherAddr, uint64_t, &OtherAddr::by_uid> >
+    > otheraddr_index;
 
 } // namespace egame

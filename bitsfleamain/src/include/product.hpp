@@ -42,6 +42,11 @@ namespace rareteam
         RS_ARBITRATION = 400
     };
 
+    enum OtherSettleStatus : uint32_t {
+        OSS_NORMAL = 0,
+        OSS_PAID = 100
+    };
+
     struct [[eosio::table, eosio::contract("bitsfleamain")]] Categories
     {
         uint64_t id = 0;
@@ -157,6 +162,19 @@ namespace rareteam
         uint64_t by_pid() const { return uint64_t(pid); }
     };
 
+    struct [[eosio::table, eosio::contract("bitsfleamain")]] OtherSettle
+    {
+        uint32_t id;
+        uint64_t uid;
+        uint128_t order_id;
+        asset amount;
+        uint32_t status = OtherSettleStatus::OSS_NORMAL;
+        string addr = "";
+
+        uint64_t primary_key() const { return uint64_t(id); }
+        uint64_t by_uid() const { return uid; }
+    };
+
     typedef eosio::multi_index<"categories"_n, Categories > Category_index;
     typedef eosio::multi_index<"products"_n, Product,
         indexed_by< "status"_n, const_mem_fun<Product, uint64_t, &Product::by_status> >,
@@ -177,6 +195,10 @@ namespace rareteam
         indexed_by< "returnpid"_n, const_mem_fun<ProReturn, uint64_t,  &ProReturn::by_pid> >,
         indexed_by< "returnrid"_n, const_mem_fun<ProReturn, uint64_t,  &ProReturn::by_rid> >
     > proreturn_index;
+
+    typedef eosio::multi_index<"othersettle"_n, OtherSettle,
+        indexed_by< "byuid"_n, const_mem_fun<OtherSettle, uint64_t,  &OtherSettle::by_uid> >
+    > othersettle_index;
 
 
     uint128_t get_orderid( const string& order_id_str )
