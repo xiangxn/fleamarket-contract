@@ -51,7 +51,7 @@ namespace rareteam {
         void AddCredit( const User& user, uint32_t value );
         void AddCredit( uint64_t user_uid, uint32_t value );
         void RewardReferrer( const name& referrer );
-        void Settle( const Order& order, const User& seller, const User& buyer, const name& contract_name );
+        void Settle( const Order& order, const User& seller, const User& buyer);
         bool IsLockUser( uint64_t user_uid );
         bool IsLockUser( const User& user );
         bool CheckSymbol( const symbol& symbol );
@@ -102,6 +102,7 @@ namespace rareteam {
         ACTION deferreturn( uint64_t user_uid, const name& user_eosid, uint128_t order_id );
         ACTION startsync();
         ACTION endsync();
+        ACTION settleorder( uint128_t order_id );
         [[eosio::on_notify("eosio.token::transfer")]]
         void OnEOSTransfer( const name& from, const name& to, const asset& quantity, const string& memo );
         /********platform End*****/

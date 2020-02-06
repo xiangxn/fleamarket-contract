@@ -28,9 +28,10 @@ namespace rareteam
         OS_CANCELLED = 200,
         OS_PENDING_SHIPMENT = 300,
         OS_PENDING_RECEIPT = 400,
-        OS_COMPLETED = 500,
-        OS_ARBITRATION = 600,
-        OS_RETURN = 700
+        OS_PENDING_SETTLE = 500,
+        OS_COMPLETED = 600,
+        OS_ARBITRATION = 700,
+        OS_RETURN = 800
     };
 
     enum ReturnStatus : uint32_t {

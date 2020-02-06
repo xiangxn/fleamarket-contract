@@ -260,26 +260,24 @@ namespace rareteam {
         // }
     }
 
-    void bitsfleamain::Settle( const Order& order, const User& seller, const User& buyer, const name& contract_name )
+    void bitsfleamain::Settle( const Order& order, const User& seller, const User& buyer )
     {
-        //eosio.token
         auto total = order.price + order.postage;
         auto income = asset( int64_t(double(total.amount) * _global.fee_ratio), total.symbol );
         auto amount = total - income;
         
-        string memo = string("complete order ") + uint128ToString( order.id );
-        action a1 = action( permission_level{_self, "active"_n}, contract_name, "transfer"_n,
-            std::make_tuple( _self, seller.eosid, amount, memo )
-        );
-        if( buyer.referrer > 0 ){
-            auto comm = asset( int64_t(double(income.amount) * _global.ref_commission_rate), income.symbol );
-            if( comm.amount > 0 ) {
-                //UserStatus::LOCK
+        auto comm = asset( int64_t(double(income.amount) * _global.ref_commission_rate), income.symbol );
+        if( order.price.symbol == SYS ) {
+            string memo = string("complete order ") + uint128ToString( order.id );
+            action a1 = action( permission_level{_self, ACTIVE_PERMISSION}, NAME_EOSIO_TOKEN, ACTION_NAME_TRANSFER,
+                std::make_tuple( _self, seller.eosid, amount, memo )
+            );
+            if( buyer.referrer > 0 && comm.amount > 0 ){
                 auto& referrer = _user_table.get( buyer.referrer, "Invalid order referrer uid" );
                 if( IsLockUser( referrer ) == false ) {
                     income -= comm;
                     transaction trx;
-                    action a2 = action ( permission_level{_self, "active"_n}, contract_name, "transfer"_n,
+                    action a2 = action ( permission_level{_self, ACTIVE_PERMISSION}, NAME_EOSIO_TOKEN, ACTION_NAME_TRANSFER,
                         std::make_tuple( _self, referrer.eosid, comm, "Referral commission" )
                     );
                     trx.actions.emplace_back( a1 );
@@ -291,10 +289,26 @@ namespace rareteam {
                 a1.send();
             }
         } else {
-            a1.send();
+            //other blockchain income
+            if( buyer.referrer > 0 && comm.amount > 0 ){
+                auto& ref = _user_table.get( buyer.referrer, "Invalid order referrer uid" );
+                if( IsLockUser( ref ) == false ) {
+                    income -= comm;
+                    _user_table.modify( ref, same_payer, [&](auto& u){
+                        auto ref_income_itr = find_if( u.other_income.begin(), u.other_income.end(), [&](asset& a){ return a.symbol == total.symbol; });
+                        if( ref_income_itr != u.other_income.end() ) {
+                            asset ref_in = (*ref_income_itr) + comm;
+                            u.other_income.erase( ref_income_itr );
+                            u.other_income.push_back( ref_in );
+                        } else {
+                            u.other_income.push_back( comm );
+                        }
+                    });
+                }
+            }
         }
 
-        vector<asset>::iterator itr = find_if( _global.income.begin(), _global.income.end(), [&](asset& a){
+        auto itr = find_if( _global.income.begin(), _global.income.end(), [&](asset& a){
             return a.symbol == total.symbol;
         });
         if( itr != _global.income.end() ) {
@@ -316,9 +330,21 @@ namespace rareteam {
         _user_table.modify( buyer, same_payer, [&](auto& u){
             u.buy_total += 1;
         });
-        if( order.price.symbol == SYS ) {
-            Settle( order, seller, buyer, "eosio.token"_n );
-        }
+        Settle( order, seller, buyer );
+    }
+
+    void bitsfleamain::settleorder( uint128_t order_id )
+    {
+        require_auth( _self );
+
+        order_index order_table( _self, _self.value );
+        auto& order = order_table.get( order_id, "Invalid order id" );
+        check( order.price.symbol != SYS, "Only non-mainchain coins can update orders" );
+
+        order_table.modify( order, same_payer, [&](auto& o){
+            o.end_time = time_point_sec(current_time_point().sec_since_epoch());
+            o.status = OrderStatus::OS_COMPLETED; 
+        });
     }
 
     void bitsfleamain::refund( const Order& order )
@@ -355,14 +381,18 @@ namespace rareteam {
         time_point_sec current_time = time_point_sec(current_time_point().sec_since_epoch());
         order_table.modify( order, same_payer, [&](auto& o){
             o.receipt_time = current_time;
-            o.status = OrderStatus::OS_COMPLETED;
-            o.end_time = current_time;
+            if( order.price.symbol == SYS ) { 
+                o.status = OrderStatus::OS_COMPLETED;
+                o.end_time = current_time;
+            } else { 
+                o.status = OrderStatus::OS_PENDING_SETTLE; 
+            }
         });
         product_index product_table( _self, _self.value );
         auto pro_itr = product_table.find( order.pid );
         if( pro_itr != product_table.end() ) {
             product_table.modify( pro_itr, same_payer, [&](auto& p){
-                p.status = ProductStatus::COMPLETED;
+                p.status = ProductStatus::COMPLETED; 
             });
         }
         endorder( order );

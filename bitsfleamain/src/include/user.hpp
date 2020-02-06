@@ -43,6 +43,7 @@ namespace rareteam
         uint32_t referral_total = 0;
 
         asset point = asset( 0, FMP );
+        vector<asset> other_income;
 
         uint64_t primary_key() const { return uid; }
         uint64_t by_eosid() const { return eosid.value; }
