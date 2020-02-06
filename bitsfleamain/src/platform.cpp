@@ -44,13 +44,6 @@ namespace rareteam {
         });
 
         if( referrer > 0 && is_ref ) {
-            referrer_index ref_table( _self, _self.value );
-            ref_table.emplace( _self, [&]( auto& r ){
-                r.id = ref_table.available_primary_key();
-                r.referrer_id = referrer;
-                r.uid = u_itr->uid;
-                r.create_time = time_point_sec(current_time_point().sec_since_epoch());
-            });
             auto ru_itr = _user_table.find( referrer );
             _user_table.modify( ru_itr, same_payer, [&]( auto& ru ) {
                 ru.referral_total += 1;

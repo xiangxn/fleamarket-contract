@@ -13,7 +13,6 @@
 #include "token/token_balance.hpp"
 
 #include "user.hpp"
-#include "referrer.hpp"
 #include "product.hpp"
 #include "review.hpp"
 
