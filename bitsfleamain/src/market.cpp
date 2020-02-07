@@ -119,7 +119,7 @@ namespace rareteam {
         }
     }
 
-    void bitsfleamain::bidauction( uint64_t buyer_uid, const name& buyer_eosid, uint32_t pid, const asset& price )
+    void bitsfleamain::BidAuction( uint64_t buyer_uid, const name& buyer_eosid, uint32_t pid, const asset& price )
     {
         require_auth( buyer_eosid );
         check( is_account( buyer_eosid ), "Invalid account buyer_eosid" );
@@ -173,7 +173,7 @@ namespace rareteam {
         });
     }
 
-    void bitsfleamain::payorder( uint128_t order_id, const asset& quantity )
+    void bitsfleamain::PayOrder( uint128_t order_id, const asset& quantity )
     {
         order_index order_table( _self, _self.value );
         auto& order = order_table.get( order_id, "Invalid order id" );
@@ -206,7 +206,53 @@ namespace rareteam {
         auto info = split( memo, ":" );
         uint128_t order_id = get_orderid( info[1] );
 
-        payorder( order_id, quantity );
+        PayOrder( order_id, quantity );
+    }
+
+    void bitsfleamain::OnMyTransfer( const name& from, const name& to, const asset& quantity, const string& memo )
+    {
+        if( to != _self ) return;
+        require_auth( from );
+        check( quantity.amount > 0, "Invalid quantity" );
+        if( CheckSymbol( quantity.symbol ) == false ) return;
+        bool is_payorder = memo.find( "payorder:" ) == 0;
+        bool is_withdraw = memo.find( "withdraw:" ) == 0;
+        if( !is_payorder && !is_withdraw ) return;
+
+        auto info = split( memo, ":" );
+        if( is_payorder ) {
+            uint128_t order_id = get_orderid( info[1] );
+            PayOrder( order_id, quantity );
+        } else if( is_withdraw ) {
+            string addr = "";
+            auto user_idx = _user_table.get_index<"eosid"_n>();
+            auto user_itr = user_idx.find( from.value );
+            check( user_itr != user_idx.end(), "This account is not a platform user" );
+
+            otheraddr_index oa_table( _self, _self.value );
+            auto oa_idx = oa_table.get_index<"byuid"_n>();
+            auto oa_itr = oa_idx.find( user_itr->uid );
+            while( oa_itr != oa_idx.end() ) {
+                if( oa_itr->coin_type == quantity.symbol ) {
+                    addr = oa_itr->addr;
+                    break;
+                }
+                oa_itr++;
+            }
+            check( addr.length() > 0, "Withdrawal address not yet bound" );
+
+            othersettle_index os_table( _self, _self.value );
+            os_table.emplace( _self, [&](auto& os){
+                os.id = os_table.available_primary_key();
+                os.uid = user_itr->uid;
+                os.order_id = 0;
+                os.amount = quantity;
+                os.status = OtherSettleStatus::OSS_NORMAL;
+                os.addr = addr;
+                os.memo = "withdraw coin";
+                os.start_time = time_point_sec(current_time_point().sec_since_epoch());
+            });
+        }
     }
 
     void bitsfleamain::reshipment( uint64_t buyer_uid, const name& buyer_eosid, uint128_t order_id, const string& number )
@@ -260,51 +306,78 @@ namespace rareteam {
         // }
     }
 
+    void bitsfleamain::PayCoin( const string& stroid, const Order& order, const User& seller, const User& buyer, const asset& seller_income, const asset& referrer_income, const name& contract)
+    {
+        string memo = string("complete order ") + stroid;
+        action a1 = action( permission_level{_self, ACTIVE_PERMISSION}, contract, ACTION_NAME_TRANSFER,
+            std::make_tuple( _self, seller.eosid, seller_income, memo )
+        );
+        if( buyer.referrer > 0 && referrer_income.amount > 0 ){
+            auto& referrer = _user_table.get( buyer.referrer, "Invalid order referrer uid" );
+            if( IsLockUser( referrer ) == false ) {
+                transaction trx;
+                action a2 = action ( permission_level{_self, ACTIVE_PERMISSION}, contract, ACTION_NAME_TRANSFER,
+                    std::make_tuple( _self, referrer.eosid, referrer_income, "Referral commission " + stroid )
+                );
+                trx.actions.emplace_back( a1 );
+                trx.actions.emplace_back( a2 );
+                trx.delay_sec = 5;
+                trx.send( (uint128_t(("settle"_n).value) << 64) | uint64_t(current_time_point().sec_since_epoch()) , _self, false);
+            }
+        } else {
+            a1.send();
+        }
+    }
+
     void bitsfleamain::Settle( const Order& order, const User& seller, const User& buyer )
     {
+        string stroid = uint128ToString( order.id );
         auto total = order.price + order.postage;
         auto income = asset( int64_t(double(total.amount) * _global.fee_ratio), total.symbol );
         auto amount = total - income;
-        
         auto comm = asset( int64_t(double(income.amount) * _global.ref_commission_rate), income.symbol );
         if( order.price.symbol == SYS ) {
-            string memo = string("complete order ") + uint128ToString( order.id );
-            action a1 = action( permission_level{_self, ACTIVE_PERMISSION}, NAME_EOSIO_TOKEN, ACTION_NAME_TRANSFER,
-                std::make_tuple( _self, seller.eosid, amount, memo )
-            );
+            PayCoin( stroid, order, seller, buyer, amount, comm, NAME_EOSIO_TOKEN );
             if( buyer.referrer > 0 && comm.amount > 0 ){
-                auto& referrer = _user_table.get( buyer.referrer, "Invalid order referrer uid" );
-                if( IsLockUser( referrer ) == false ) {
-                    income -= comm;
-                    transaction trx;
-                    action a2 = action ( permission_level{_self, ACTIVE_PERMISSION}, NAME_EOSIO_TOKEN, ACTION_NAME_TRANSFER,
-                        std::make_tuple( _self, referrer.eosid, comm, "Referral commission" )
-                    );
-                    trx.actions.emplace_back( a1 );
-                    trx.actions.emplace_back( a2 );
-                    trx.delay_sec = 5;
-                    trx.send( (uint128_t(("settle"_n).value) << 64) | uint64_t(current_time_point().sec_since_epoch()) , _self, false);
-                }
-            } else {
-                a1.send();
+                income -= comm;
             }
         } else {
-            //other blockchain income
-            if( buyer.referrer > 0 && comm.amount > 0 ){
-                auto& ref = _user_table.get( buyer.referrer, "Invalid order referrer uid" );
-                if( IsLockUser( ref ) == false ) {
-                    income -= comm;
-                    _user_table.modify( ref, same_payer, [&](auto& u){
-                        auto ref_income_itr = find_if( u.other_income.begin(), u.other_income.end(), [&](asset& a){ return a.symbol == total.symbol; });
-                        if( ref_income_itr != u.other_income.end() ) {
-                            asset ref_in = (*ref_income_itr) + comm;
-                            u.other_income.erase( ref_income_itr );
-                            u.other_income.push_back( ref_in );
-                        } else {
-                            u.other_income.push_back( comm );
-                        }
-                    });
+            //other blockchain
+            otheraddr_index oa_table( _self, _self.value );
+            auto uid_idx = oa_table.get_index<"byuid"_n>();
+            bool is_bind = false;
+            string addr = "";
+            auto oa_itr = uid_idx.find( order.seller_uid );
+            while ( oa_itr != uid_idx.end() && oa_itr->uid == order.seller_uid )
+            {
+                if( order.price.symbol == oa_itr->coin_type && oa_itr->addr.length() != 0 ) {
+                    is_bind = true;
+                    addr = oa_itr->addr;
+                    break;
                 }
+                oa_itr++;
+            }
+            if( is_bind ) { // create settle log
+                othersettle_index os_table( _self, _self.value );
+                os_table.emplace( _self, [&](auto& os){
+                    os.id = os_table.available_primary_key();
+                    os.uid = order.seller_uid;
+                    os.order_id = order.id;
+                    os.amount = amount;
+                    os.status = OtherSettleStatus::OSS_NORMAL;
+                    os.addr = addr;
+                    os.memo = "complete order " + stroid;
+                    os.start_time = time_point_sec(current_time_point().sec_since_epoch());
+                });
+                if( buyer.referrer > 0 && comm.amount > 0 ){
+                    auto& referrer = _user_table.get( buyer.referrer, "Invalid order referrer uid" );
+                    income -= comm;
+                    action( permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, ACTION_NAME_TRANSFER,
+                        std::make_tuple( _self, referrer.eosid, comm, "Referral commission" + stroid )
+                    );
+                }
+            } else { // bitsfleamain transfer
+                PayCoin( stroid, order, seller, buyer, amount, comm, FLEA_PLATFORM );
             }
         }
 
@@ -320,7 +393,7 @@ namespace rareteam {
         }
     }
 
-    void bitsfleamain::endorder( const Order& order )
+    void bitsfleamain::EndOrder( const Order& order )
     {
         auto& seller = _user_table.get( order.seller_uid, "Invalid order seller_uid" );
         auto& buyer = _user_table.get( order.buyer_uid, "Invalid order buyer_uid" );
@@ -333,40 +406,53 @@ namespace rareteam {
         Settle( order, seller, buyer );
     }
 
-    void bitsfleamain::settleorder( uint128_t order_id )
+    void bitsfleamain::closesettle( uint64_t os_id )
     {
         require_auth( _self );
 
-        order_index order_table( _self, _self.value );
-        auto& order = order_table.get( order_id, "Invalid order id" );
-        check( order.price.symbol != SYS, "Only non-mainchain coins can update orders" );
+        othersettle_index os_table( _self, _self.value );
+        auto& os = os_table.get( os_id, "Invalid other settle id" );
 
-        order_table.modify( order, same_payer, [&](auto& o){
+        os_table.modify( os, same_payer, [&](auto& o){
             o.end_time = time_point_sec(current_time_point().sec_since_epoch());
-            o.status = OrderStatus::OS_COMPLETED; 
+            o.status = OtherSettleStatus::OSS_PAID;
         });
+        uint32_t count = get_size( os_table );
+        if( count > 500 ) {
+            auto itr = os_table.begin();
+            if( itr != os_table.end() && itr->status == OtherSettleStatus::OSS_PAID )
+                os_table.erase( itr );
+        }
     }
 
-    void bitsfleamain::refund( const Order& order )
+    void bitsfleamain::Refund( const Order& order )
     {
         auto& buyer = _user_table.get( order.buyer_uid, "Invalid order seller_uid" );
         auto& seller = _user_table.get( order.seller_uid, "Invalid order seller_uid" );
 
+        string memo = string("returns order ") + uint128ToString( order.id );
+        transaction trx;
         if( order.price.symbol == SYS ) { //EOS
-            auto total = order.price + order.postage;
-            string memo = string("returns order ") + uint128ToString( order.id );
-            transaction trx;
-            action a1 = action( permission_level{_self, "active"_n}, "eosio.token"_n, "transfer"_n,
+            action a1 = action( permission_level{_self, ACTIVE_PERMISSION}, NAME_EOSIO_TOKEN, ACTION_NAME_TRANSFER,
                 std::make_tuple( _self, buyer.eosid, order.price, memo )
             );
-            action a2 =action( permission_level{_self, "active"_n}, "eosio.token"_n, "transfer"_n,
+            action a2 =action( permission_level{_self, ACTIVE_PERMISSION}, NAME_EOSIO_TOKEN, ACTION_NAME_TRANSFER,
                 std::make_tuple( _self, seller.eosid, order.postage, memo )
             );
             trx.actions.emplace_back( a1 );
             trx.actions.emplace_back( a2 );
-            trx.delay_sec = 5;
-            trx.send( (uint128_t(("refund"_n).value) << 64) | uint64_t(current_time_point().sec_since_epoch()) , _self, false);
+        } else {
+            action a3 = action( permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, ACTION_NAME_TRANSFER,
+                std::make_tuple( _self, buyer.eosid, order.price, memo )
+            );
+            action a4 = action( permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, ACTION_NAME_TRANSFER,
+                std::make_tuple( _self, seller.eosid, order.postage, memo )
+            );
+            trx.actions.emplace_back( a3 );
+            trx.actions.emplace_back( a4 );
         }
+        trx.delay_sec = 5;
+        trx.send( (uint128_t(("refund"_n).value) << 64) | uint64_t(current_time_point().sec_since_epoch()) , _self, false);
     }
 
     void bitsfleamain::conreceipt( uint64_t buyer_uid, const name& buyer_eosid, uint128_t order_id )
@@ -381,12 +467,8 @@ namespace rareteam {
         time_point_sec current_time = time_point_sec(current_time_point().sec_since_epoch());
         order_table.modify( order, same_payer, [&](auto& o){
             o.receipt_time = current_time;
-            if( order.price.symbol == SYS ) { 
-                o.status = OrderStatus::OS_COMPLETED;
-                o.end_time = current_time;
-            } else { 
-                o.status = OrderStatus::OS_PENDING_SETTLE; 
-            }
+            o.status = OrderStatus::OS_COMPLETED;
+            o.end_time = current_time;
         });
         product_index product_table( _self, _self.value );
         auto pro_itr = product_table.find( order.pid );
@@ -395,7 +477,7 @@ namespace rareteam {
                 p.status = ProductStatus::COMPLETED; 
             });
         }
-        endorder( order );
+        EndOrder( order );
 
         // credit
         AddCredit( order.seller_uid, 5 );
@@ -442,7 +524,7 @@ namespace rareteam {
             re.end_time = current_time;
         });
         //Refund
-        refund( order );
+        Refund( order );
         // receipt delivery timeout
         if( current_time > order.receipt_time_out ) {
             SubCredit( seller_uid, 5 );

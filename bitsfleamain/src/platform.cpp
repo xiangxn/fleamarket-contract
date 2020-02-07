@@ -266,7 +266,7 @@ namespace rareteam {
                                 o.status = OrderStatus::OS_CANCELLED;
                                 o.end_time = current_time;
                             });
-                            refund( order );
+                            Refund( order );
                         } else { //initiated by the buyer
                             order_table.modify( order, same_payer, [&](auto& o){
                                 o.status = OrderStatus::OS_RETURN;
@@ -294,7 +294,7 @@ namespace rareteam {
                                 o.status = OrderStatus::OS_COMPLETED;
                                 o.end_time = current_time;
                             });
-                            endorder( order );
+                            EndOrder( order );
                         }
                         SubCredit( order.buyer_uid, 100 );
                     }
@@ -378,12 +378,6 @@ namespace rareteam {
         }
     }
 
-    void bitsfleamain::outpayorder( uint128_t order_id, const asset& quantity )
-    {
-        require_auth( _self );
-        payorder( order_id, quantity );
-    }
-
     bool bitsfleamain::IsLockUser( uint64_t user_uid )
     {
         auto& user = _user_table.get( user_uid, "Invalid user id" );
@@ -417,6 +411,18 @@ namespace rareteam {
             return s == symbol;
         });
         return itr != _global.support_coin.end();
+    }
+
+    void bitsfleamain::Withdraw( const name& user_eosid, const asset& quantity )
+    {
+        // require_auth( user_eosid );
+
+        // check( quantity.is_valid(), "invalid quantity" );
+        // check( CheckSymbol( quantity.symbol ), "Invalid symbol" );
+
+        // auto balance = GetBalance( FLEA_PLATFORM, user_eosid, quantity.symbol );
+        // check( balance.amount >= quantity.amount, "invalid quantity" );
+        
     }
     
 }

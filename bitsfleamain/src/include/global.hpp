@@ -19,7 +19,7 @@ namespace rareteam {
         /**
          * System fee ratio
          */ 
-        double fee_ratio = 0.01;
+        double fee_ratio = 0.05;
 
         /************************Points related************************/
         /**

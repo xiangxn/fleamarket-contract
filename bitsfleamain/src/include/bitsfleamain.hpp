@@ -40,10 +40,10 @@ namespace rareteam {
         void add_balance( name owner, asset value, name ram_payer );
         /*****token end*****/
 
-        void bidauction( uint64_t buyer_uid, const name& buyer_eosid, uint32_t pid, const asset& price );
-        void payorder( uint128_t order_id, const asset& quantity );
-        void endorder( const Order& order );
-        void refund( const Order& order );
+        void BidAuction( uint64_t buyer_uid, const name& buyer_eosid, uint32_t pid, const asset& price );
+        void PayOrder( uint128_t order_id, const asset& quantity );
+        void EndOrder( const Order& order );
+        void Refund( const Order& order );
         bool CheckReviewer( uint64_t reviewer_uid, bool is_new = false );
         void SubCredit( const User& user, uint32_t value, bool cancel_reviewer = false );
         void SubCredit( uint64_t user_uid, uint32_t value, bool cancel_reviewer = false );
@@ -54,6 +54,8 @@ namespace rareteam {
         bool IsLockUser( uint64_t user_uid );
         bool IsLockUser( const User& user );
         bool CheckSymbol( const symbol& symbol );
+        void PayCoin( const string& stroid, const Order& order, const User& seller, const User& buyer, const asset& seller_income, const asset& referrer_income, const name& contract);
+        void Withdraw( const name& user_eosid, const asset& quantity );
 
     public:
         bitsfleamain( name receiver, name code, datastream<const char*> ds );
@@ -96,15 +98,21 @@ namespace rareteam {
         ACTION applyarbit( uint64_t plaintiff_uid, const name& plaintiff_eosid, const Arbitration& arbitration );
         ACTION inarbit( uint64_t reviewer_uid, const name& reviewer_eosid, uint32_t arbit_id );
         ACTION updatearbit( const Arbitration& arbit );
-        ACTION outpayorder( uint128_t order_id, const asset& quantity );
         ACTION deferreceipt( uint64_t user_uid, const name& user_eosid, uint128_t order_id );
         ACTION deferreturn( uint64_t user_uid, const name& user_eosid, uint128_t order_id );
         ACTION startsync();
         ACTION endsync();
-        ACTION settleorder( uint128_t order_id );
+        ACTION closesettle( uint64_t os_id );
+        
+        
+        /********platform End*****/
+
+        // notify
         [[eosio::on_notify("eosio.token::transfer")]]
         void OnEOSTransfer( const name& from, const name& to, const asset& quantity, const string& memo );
-        /********platform End*****/
+        [[eosio::on_notify("bitsfleamain::transfer")]]
+        void OnMyTransfer( const name& from, const name& to, const asset& quantity, const string& memo );
+
 
     public:
         // static const user& GetUser( const name& tokenContractAccount, const name& account )

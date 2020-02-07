@@ -164,14 +164,17 @@ namespace rareteam
 
     struct [[eosio::table, eosio::contract("bitsfleamain")]] OtherSettle
     {
-        uint32_t id;
+        uint64_t id;
         uint64_t uid;
         uint128_t order_id;
         asset amount;
         uint32_t status = OtherSettleStatus::OSS_NORMAL;
         string addr = "";
+        string memo = "";
+        time_point_sec start_time;
+        time_point_sec end_time;
 
-        uint64_t primary_key() const { return uint64_t(id); }
+        uint64_t primary_key() const { return id; }
         uint64_t by_uid() const { return uid; }
     };
 
