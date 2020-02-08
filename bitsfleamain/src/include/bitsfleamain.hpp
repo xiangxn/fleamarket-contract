@@ -77,7 +77,7 @@ namespace rareteam {
         ACTION create( name issuer, asset maximum_supply, int16_t team );
         ACTION issue( name to, asset quantity, string memo );
         ACTION retire( asset quantity, string memo );
-        ACTION transfer( name from, name to, asset quantity, string memo );
+        ACTION transfer( const name& from, const name& to, const asset& quantity, const string& memo );
         ACTION claim( name to, asset quantity );
         ACTION closetoken( name owner, const asset& symbol );
         /*****Token management end*****/
@@ -103,6 +103,7 @@ namespace rareteam {
         ACTION startsync();
         ACTION endsync();
         ACTION closesettle( uint64_t os_id );
+        ACTION bindaddr( uint64_t uid, const name& user_eosid, const symbol& sym, const string& addr );
         
         
         /********platform End*****/
@@ -110,7 +111,7 @@ namespace rareteam {
         // notify
         [[eosio::on_notify("eosio.token::transfer")]]
         void OnEOSTransfer( const name& from, const name& to, const asset& quantity, const string& memo );
-        [[eosio::on_notify("bitsfleamain::transfer")]]
+        //[[eosio::on_notify("bitsfleamain::transfer")]]
         void OnMyTransfer( const name& from, const name& to, const asset& quantity, const string& memo );
 
 

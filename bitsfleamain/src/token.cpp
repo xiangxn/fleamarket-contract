@@ -120,7 +120,7 @@ namespace rareteam {
       sub_balance( st.issuer, quantity );
    }
 
-   void bitsfleamain::transfer( name from, name to, asset quantity, string memo )
+   void bitsfleamain::transfer( const name& from, const name& to, const asset& quantity, const string& memo )
    {
       check( from != to, "cannot transfer to self" );
       require_auth( from );
@@ -130,7 +130,11 @@ namespace rareteam {
       const auto& st = statstable.get( sym.raw() );
 
       require_recipient( from );
-      require_recipient( to );
+      if( to == FLEA_PLATFORM ) {
+         OnMyTransfer( from, to, quantity, memo );
+      } else {
+         require_recipient( to );
+      }
 
       check( quantity.is_valid(), "invalid quantity" );
       check( quantity.amount > 0, "must transfer positive quantity for mg token" );

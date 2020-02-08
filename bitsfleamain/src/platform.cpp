@@ -424,5 +424,38 @@ namespace rareteam {
         // check( balance.amount >= quantity.amount, "invalid quantity" );
         
     }
+
+    void bitsfleamain::bindaddr( uint64_t uid, const name& user_eosid, const symbol& sym, const string& addr )
+    {
+        require_auth( user_eosid );
+
+        check( CheckSymbol( sym ), "Invalid symbol" );
+        check( sym != SYS, "Invalid symbol" );
+        check( addr.length() > 0 && addr.length() <= 100, "Invalid addr" );
+
+        auto& user = _user_table.get( uid, "Invalid uid" );
+        otheraddr_index oa_table( _self, _self.value );
+        auto oa_idx = oa_table.get_index<"byuid"_n>();
+        auto oa_itr = oa_idx.find( uid );
+        bool is_exists = false;
+        while( oa_itr != oa_idx.end() && oa_itr->uid == uid ) {
+            if( oa_itr->coin_type == sym ) {
+                is_exists = true;
+                oa_idx.modify( oa_itr, same_payer, [&](auto& o){
+                    o.addr = addr;
+                });
+                break;
+            }
+            oa_itr++;
+        }
+        if( !is_exists ) {
+            oa_table.emplace( _self, [&](auto& o){
+                o.id = oa_table.available_primary_key();
+                o.uid = uid;
+                o.coin_type = sym;
+                o.addr = addr;
+            });
+        }
+    }
     
 }

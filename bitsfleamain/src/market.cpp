@@ -212,7 +212,6 @@ namespace rareteam {
     void bitsfleamain::OnMyTransfer( const name& from, const name& to, const asset& quantity, const string& memo )
     {
         if( to != _self ) return;
-        require_auth( from );
         check( quantity.amount > 0, "Invalid quantity" );
         if( CheckSymbol( quantity.symbol ) == false ) return;
         bool is_payorder = memo.find( "payorder:" ) == 0;
@@ -371,13 +370,15 @@ namespace rareteam {
                 });
                 if( buyer.referrer > 0 && comm.amount > 0 ){
                     auto& referrer = _user_table.get( buyer.referrer, "Invalid order referrer uid" );
-                    income -= comm;
                     action( permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, ACTION_NAME_TRANSFER,
                         std::make_tuple( _self, referrer.eosid, comm, "Referral commission" + stroid )
                     );
                 }
             } else { // bitsfleamain transfer
                 PayCoin( stroid, order, seller, buyer, amount, comm, FLEA_PLATFORM );
+            }
+            if( buyer.referrer > 0 && comm.amount > 0 ){
+                income -= comm;
             }
         }
 

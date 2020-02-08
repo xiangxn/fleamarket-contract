@@ -32,19 +32,42 @@ namespace rareteam {
         _global.transaction_pool = asset( 3500000000000, FMP );
         _global.salary_pool = asset( 2000000000000, FMP );
 
+        transaction trx;
+         //create FMP
         _global.support_coin.push_back( FMP );
+        action(permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, "create"_n,
+            std::make_tuple( _self, asset( 10000000000000, FMP ), 30 )
+        ).send();
+        //create SYS
         _global.support_coin.push_back( SYS );
         symbol eos = symbol(symbol_code("EOS"), 4);
         if( SYS != eos ) {
+            //EOS
             _global.support_coin.push_back( eos );
+            action a1 = action(permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, "create"_n,
+                std::make_tuple( _self, asset( 10000000000000, eos ), 0 )
+            );
+            trx.actions.emplace_back( a1 );
         }
-        _global.support_coin.push_back( symbol(symbol_code("BTS"), 4) );
-        //create FMP
-        action(permission_level{_self, "active"_n}, "bitsfleamain"_n, "create"_n,
-            std::make_tuple( _self, asset( 10000000000000, FMP ), 30 )
-        ).send();
+        // BTS
+        symbol BTS = symbol(symbol_code("BTS"), 4);
+        _global.support_coin.push_back( BTS );
+        action a2 = action(permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, "create"_n,
+            std::make_tuple( _self, asset( 36000000000000, BTS ), 0 )
+        );
+        trx.actions.emplace_back( a2 );
+
+        // NULS
+        symbol NULS = symbol(symbol_code("NULS"),8);
+        _global.support_coin.push_back( NULS );
+        action a3 = action(permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, "create"_n,
+            std::make_tuple( _self, asset(10000000000000000, NULS ), 0 )
+        );
+        trx.actions.emplace_back( a3 );
 
 
+        trx.delay_sec = 2;
+        trx.send( (uint128_t(("init"_n).value) << 64) | uint64_t(current_time_point().sec_since_epoch()) , _self, false);
     }
 
     void bitsfleamain::reset()
