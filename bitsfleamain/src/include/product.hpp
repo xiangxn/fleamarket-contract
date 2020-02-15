@@ -206,9 +206,14 @@ namespace rareteam
 
     uint128_t get_orderid( const string& order_id_str )
     {
-        check( order_id_str.length() == 34, "Invalid order id");
         uint128_t order_id = 0;
-        from_hex( order_id_str.substr(2), reinterpret_cast<char*>(&order_id), sizeof(order_id) );
+        if( order_id_str.substr(0,2) == "0x" ) {
+            check( order_id_str.length() == 34, "Invalid order id");
+            from_hex( order_id_str.substr(2), reinterpret_cast<char*>(&order_id), sizeof(order_id) );
+            return order_id;
+        } else {
+            order_id = uint128FromString( order_id_str );
+        }
         return order_id;
     };
 

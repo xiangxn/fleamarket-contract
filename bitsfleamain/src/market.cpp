@@ -176,7 +176,7 @@ namespace rareteam {
     void bitsfleamain::PayOrder( uint128_t order_id, const asset& quantity )
     {
         order_index order_table( _self, _self.value );
-        auto& order = order_table.get( order_id, "Invalid order id" );
+        auto& order = order_table.get( order_id, "PayOrder:Invalid order id" );
         check( order.price.symbol == quantity.symbol, "Invalid order symbol" );
         check( quantity.amount == (order.postage + order.price).amount, "Invalid order amount" );
 
@@ -242,7 +242,8 @@ namespace rareteam {
 
             othersettle_index os_table( _self, _self.value );
             os_table.emplace( _self, [&](auto& os){
-                os.id = os_table.available_primary_key();
+                auto oid = os_table.available_primary_key();
+                os.id = oid == 0 ? 1 : oid;
                 os.uid = user_itr->uid;
                 os.order_id = 0;
                 os.amount = quantity;
@@ -359,7 +360,8 @@ namespace rareteam {
             if( is_bind ) { // create settle log
                 othersettle_index os_table( _self, _self.value );
                 os_table.emplace( _self, [&](auto& os){
-                    os.id = os_table.available_primary_key();
+                    auto oid = os_table.available_primary_key();
+                    os.id = oid == 0 ? 1 : oid;
                     os.uid = order.seller_uid;
                     os.order_id = order.id;
                     os.amount = amount;

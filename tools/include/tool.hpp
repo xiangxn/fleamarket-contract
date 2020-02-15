@@ -2,6 +2,7 @@
 
 #include <string>
 #include <math.h>
+#include <errno.h>
 #include <eosio/eosio.hpp>
 #include <eosio/crypto.hpp>
 #include "base58.hpp"
@@ -121,6 +122,69 @@ namespace rareteam {
       } while ( helper );
       std::reverse( result.begin(), result.end() );
       return result;
+   }
+
+   uint128_t uint128FromString(const string& sz)
+   {
+      uint128_t val = 0;
+      if(!sz.empty()) {
+        int radix = 10;
+        bool minus = false;
+        std::string::const_iterator i = sz.begin();
+        if(*i == '-') {
+          ++i;
+          minus = true;
+        }
+        if(i != sz.end()) {
+          if(*i == '0') {
+            radix = 8;
+            ++i;
+            if(i != sz.end()) {
+              if(*i == 'x') {
+                radix = 16;
+                ++i;
+              }
+            }
+          }
+
+          while(i != sz.end()) {
+            unsigned int n = 0;
+            const char ch = *i;
+
+            if(ch >= 'A' && ch <= 'Z') {
+              if(((ch - 'A') + 10) < radix) {
+                n = (ch - 'A') + 10;
+              } else {
+                break;
+              }
+            } else if(ch >= 'a' && ch <= 'z') {
+              if(((ch - 'a') + 10) < radix) {
+                n = (ch - 'a') + 10;
+              } else {
+                break;
+              }
+            } else if(ch >= '0' && ch <= '9') {
+              if((ch - '0') < radix) {
+                n = (ch - '0');
+              } else {
+                break;
+              }
+            } else {
+              break;
+            }
+
+            val *= radix;
+            val += n;
+            ++i;
+          }
+        }
+
+        // if this was a negative number, do that two's compliment madness :-P
+        if(minus) {
+          val = -val;
+        }
+      }
+      return val;
    }
 
    template<typename T>

@@ -6,7 +6,7 @@ RED='\033[0;31m'
 NC='\033[0m'
 
 CORES=`getconf _NPROCESSORS_ONLN`
-SYS_NAME="EOS"
+SYS_NAME="BOS"
 NOTEST="notest"
 
 function help()

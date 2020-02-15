@@ -13,7 +13,7 @@ namespace rareteam {
    #define N_ON_NOTIFY(_NAME_) [[eosio::on_notify(#_NAME_)]]
 
    #define FMP symbol(symbol_code("FMP"), 4)
-   #define SYS symbol(symbol_code("EOS"), 4)
+   #define SYS symbol(symbol_code("BOS"), 4)
 
    #define FLEA_PLATFORM ("bitsfleamain"_n)
    #define NAME_EOSIO_TOKEN name("eosio.token")
