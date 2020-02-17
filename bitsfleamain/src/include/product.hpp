@@ -171,6 +171,7 @@ namespace rareteam
         uint32_t status = OtherSettleStatus::OSS_NORMAL;
         string addr = "";
         string memo = "";
+        string trx_id = "";
         time_point_sec start_time;
         time_point_sec end_time;
 

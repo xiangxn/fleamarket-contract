@@ -102,7 +102,7 @@ namespace rareteam {
         ACTION deferreturn( uint64_t user_uid, const name& user_eosid, uint128_t order_id );
         ACTION startsync();
         ACTION endsync();
-        ACTION closesettle( uint64_t os_id );
+        ACTION closesettle( uint64_t os_id, const string& trx_id );
         ACTION bindaddr( uint64_t uid, const name& user_eosid, const symbol& sym, const string& addr );
         
         

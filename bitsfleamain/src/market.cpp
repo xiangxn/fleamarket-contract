@@ -223,6 +223,7 @@ namespace rareteam {
             uint128_t order_id = get_orderid( info[1] );
             PayOrder( order_id, quantity );
         } else if( is_withdraw ) {
+            check( quantity.symbol != SYS && quantity.symbol != FMP, "Invalid quantity symbol" );
             string addr = "";
             auto user_idx = _user_table.get_index<"eosid"_n>();
             auto user_itr = user_idx.find( from.value );
@@ -409,16 +410,18 @@ namespace rareteam {
         Settle( order, seller, buyer );
     }
 
-    void bitsfleamain::closesettle( uint64_t os_id )
+    void bitsfleamain::closesettle( uint64_t os_id, const string& trx_id )
     {
         require_auth( _self );
 
+        check( trx_id.length() <= 100, "trx_id is too long" );
         othersettle_index os_table( _self, _self.value );
         auto& os = os_table.get( os_id, "Invalid other settle id" );
 
         os_table.modify( os, same_payer, [&](auto& o){
             o.end_time = time_point_sec(current_time_point().sec_since_epoch());
             o.status = OtherSettleStatus::OSS_PAID;
+            o.trx_id = trx_id;
         });
         uint32_t count = get_size( os_table );
         if( count > 500 ) {

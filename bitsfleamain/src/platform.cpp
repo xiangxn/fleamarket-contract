@@ -430,7 +430,7 @@ namespace rareteam {
         require_auth( user_eosid );
 
         check( CheckSymbol( sym ), "Invalid symbol" );
-        check( sym != SYS, "Invalid symbol" );
+        check( sym != SYS && sym != FMP, "Invalid symbol" );
         check( addr.length() > 0 && addr.length() <= 100, "Invalid addr" );
 
         auto& user = _user_table.get( uid, "Invalid uid" );
