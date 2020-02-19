@@ -266,6 +266,12 @@ namespace rareteam {
                                 o.status = OrderStatus::OS_CANCELLED;
                                 o.end_time = current_time;
                             });
+                            //update product status
+                            product_index pro_table( _self, _self.value );
+                            auto& product = pro_table.get( order.pid, "Invalid product pid" );
+                            pro_table.modify( product, same_payer, [&](auto& p){
+                                p.status = ProductStatus::NORMAL;
+                            });
                             Refund( order );
                         } else { //initiated by the buyer
                             order_table.modify( order, same_payer, [&](auto& o){

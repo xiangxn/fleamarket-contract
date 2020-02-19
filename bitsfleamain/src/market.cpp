@@ -171,6 +171,10 @@ namespace rareteam {
             o.create_time = time_point_sec(current_time_point().sec_since_epoch());
             o.pay_time_out = time_point_sec(current_time_point().sec_since_epoch() + _global.pay_time_out);
         });
+        //update product status
+        pro_table.modify( product, same_payer, [&](auto& p){
+            p.status = ProductStatus::LOCKED;
+        });
     }
 
     void bitsfleamain::PayOrder( uint128_t order_id, const asset& quantity )
@@ -179,6 +183,7 @@ namespace rareteam {
         auto& order = order_table.get( order_id, "PayOrder:Invalid order id" );
         check( order.price.symbol == quantity.symbol, "Invalid order symbol" );
         check( quantity.amount == (order.postage + order.price).amount, "Invalid order amount" );
+        check( order.status == OrderStatus::OS_PENDING_PAYMENT, "Invalid order status");
 
         time_point_sec pay_time = time_point_sec(current_time_point().sec_since_epoch());
         check( pay_time < order.pay_time_out, "Order has expired");
@@ -189,6 +194,12 @@ namespace rareteam {
                 o.ship_time_out = time_point_sec(current_time_point().sec_since_epoch() + _global.ship_time_out);
             });
         } else {
+            //update product status
+            product_index pro_table( _self, _self.value );
+            auto& product = pro_table.get( order.pid, "Invalid product pid" );
+            pro_table.modify( product, same_payer, [&](auto& p){
+                p.status = ProductStatus::NORMAL;
+            });
             order_table.erase( order );
             check( false, "Order has expired");
         }
@@ -219,6 +230,10 @@ namespace rareteam {
         if( !is_payorder && !is_withdraw ) return;
 
         auto info = split( memo, ":" );
+        auto payer = from;
+        if( info.size() > 2 ){
+            payer = name(info[2]);
+        }
         if( is_payorder ) {
             uint128_t order_id = get_orderid( info[1] );
             PayOrder( order_id, quantity );
@@ -226,7 +241,7 @@ namespace rareteam {
             check( quantity.symbol != SYS && quantity.symbol != FMP, "Invalid quantity symbol" );
             string addr = "";
             auto user_idx = _user_table.get_index<"eosid"_n>();
-            auto user_itr = user_idx.find( from.value );
+            auto user_itr = user_idx.find( payer.value );
             check( user_itr != user_idx.end(), "This account is not a platform user" );
 
             otheraddr_index oa_table( _self, _self.value );
