@@ -390,7 +390,7 @@ namespace rareteam {
                     auto& referrer = _user_table.get( buyer.referrer, "Invalid order referrer uid" );
                     action( permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, ACTION_NAME_TRANSFER,
                         std::make_tuple( _self, referrer.eosid, comm, "Referral commission" + stroid )
-                    );
+                    ).send();
                 }
             } else { // bitsfleamain transfer
                 PayCoin( stroid, order, seller, buyer, amount, comm, FLEA_PLATFORM );
@@ -438,6 +438,9 @@ namespace rareteam {
             o.status = OtherSettleStatus::OSS_PAID;
             o.trx_id = trx_id;
         });
+        action( permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, ACTION_NAME_TRANSFER,
+            std::make_tuple( _self, "fleagateways"_n, os.amount, os.memo )
+        ).send();
         uint32_t count = get_size( os_table );
         if( count > 500 ) {
             auto itr = os_table.begin();
