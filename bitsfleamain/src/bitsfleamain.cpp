@@ -50,7 +50,7 @@ namespace rareteam {
             trx.actions.emplace_back( a1 );
         }
         // BTS
-        symbol BTS = symbol(symbol_code("BTS"), 4);
+        symbol BTS = symbol(symbol_code("BTS"), 5);
         _global.support_coin.push_back( BTS );
         action a2 = action(permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, "create"_n,
             std::make_tuple( _self, asset( 36000000000000, BTS ), 0 )
