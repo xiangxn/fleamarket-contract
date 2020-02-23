@@ -1,0 +1,49 @@
+cleos wallet unlock -n bostest  --password PW5KajM5kmn6YSckdg3hWregB1bGQ3VMKeUpSyHDMXuukZZnTiyFj
+
+"name": "bitsfleamain",
+"owner": {
+	"privateKey": "5JNdajnQUGS3ehTsksQp3MJLz9cEJ7vDLCBcft9dr5j8Vcb6uhb",
+	"publicKey": "EOS76g5Xb1qHiv6iqzLCix2wsgSYzAAAnbCXMhU85n4SZPibqD8bV"},
+"active": {
+	"privateKey": "5JU2y3M9pJgxDDntRvdG1GxkyeuHLMopdt7NHYKrRTnTZhbKZ2k",
+	"publicKey": "EOS6VqjyRiJZWUDFErcnX7CkhDkkBKjaZCsLfGJXPJEEe5DNbW2KW"}
+
+name":"reviewer1111",
+"owner":{
+	"privateKey":"5JaT58QgyzHWLqtHtRDP8EEHqNtUW9k6CW6oPemZT3iCcDPoR8K",
+	"publicKey":"EOS72kQp62sWdMfqxwVjoaMDm1TxA1n8ntQiGVMoFpWjtbPrSEneR"},
+"active"{
+	"privateKey":"5HpzxmbQxztevu9tzewF1rkRsMU6gq21o3pqkKyLvgQ7Rays15G",
+	"publicKey":"EOS57HB9VnECMbsjG2Lmtp2u2618dGjE9dt3LqyiVh6iagXes2ofJ"}
+
+"name":"reviewer1112",
+"owner"{
+	"privateKey":"5KXP9AbUeGJFoxqvcCqfAtdQnfQ9nJDUwqKjf9KHsk6t91Unza2",
+	"publicKey":"EOS7L6449A5BFXAL4tnkSSsxvhhh21ShezDj9dU8YfgWm4Pc6k99q"},
+"active"{
+	"privateKey":"5JkJpVmoiS1VqrcfPjREenVXpaznKUV3fyFKfbemfXz5MzD4hNX",
+	"publicKey":"EOS7Wjhv8NLitHesBexvx4bEuMeBDaGbzVC4DwVUXzWY87SxSBdmC"}
+
+"name":"reviewer1113",
+"owner"{
+	"privateKey":"5HuGXEsRfQBFL5cyur1b2foXpFp41WetyTuW7XoctCieKvTWoUB",
+	"publicKey":"EOS5fSKdkeXQ4FJUnzrb9Qjn52aGQxu5MGctxjpExMAJNhcG2XLiK"},
+"active"{
+	"privateKey":"5KkLPGYXUsAhBAwPaZhbSxh8nGPCGARzjxdMeZeCfGoTYhPzsat",
+	"publicKey":"EOS8Q4ArogcMNNe5CALtyPTaE3uLe51QtxXhMFsApVqzkhiR3LFwW"
+
+"name":"bitsflea1111",
+"owner"{
+	"privateKey":"5Hpr92iRJBHXj8ZsZxWv2gnMbo6dDrR2jbXDiB3Yy2taDS4Tfdo",
+	"publicKey":"EOS8bf2JWA3YMmibKK1MynUbCQ9MgtF7QFaf3WJPn1ws3YPuyaVbZ"},
+"active"{
+	"privateKey":"5KThEypCTPy5m7AzU4TU6msQgHSdxykLYZgd4huJP7Zpa27bJ2m",
+	"publicKey":"EOS8Wdb6bdFonzwwmDGWHa6PfFHYM2nPQokfGf9LCgzn4tVBHykza"}
+
+"name":"bitsflea1112",
+"owner"{
+	"privateKey":"5JSX5ZJxJVyArQgnoHNrcfrtiPr9bQbv7p9pYcSuNMyE3CkCaB7",
+	"publicKey":"EOS5C9FUSqCa1Kp7EKpgVDBFb2jm2EQUWv98zNVQ4CvZTTZfRQhey"},
+"active"{
+	"privateKey":"5JGwF9ogsY7gmXEHpzqnj8dbazmD9JW7mxomFetqRhxqx98U2hV",
+	"publicKey":"EOS5uAfeXPxNnJDuCtyPr3LM6sAm1P9Bx2RGCbgiro9exreWvCyqD"}
