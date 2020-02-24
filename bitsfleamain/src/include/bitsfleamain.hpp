@@ -170,11 +170,18 @@ namespace rareteam {
         
         
         /********platform End*****/
-
+        /**
+         * 接收下单
+         * 下单memo格式如: payorder:36893488153296537970
+         */ 
         // notify
         [[eosio::on_notify("eosio.token::transfer")]]
         void OnEOSTransfer( const name& from, const name& to, const asset& quantity, const string& memo );
-        //[[eosio::on_notify("bitsfleamain::transfer")]]
+        /**
+         * 接收下单或提现
+         * 下单memo格式如: payorder:36893488153296537970:player1
+         * 提现memo格式如: withdraw:
+         */ 
         void OnMyTransfer( const name& from, const name& to, const asset& quantity, const string& memo );
 
 
