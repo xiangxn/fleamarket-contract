@@ -230,6 +230,7 @@ namespace rareteam {
 
     void bitsfleamain::updatearbit( const Arbitration& arbit )
     {
+        require_auth( _self );
         check( arbit.id >= 0, "Invalid arbit id" );
         arbitration_index arbit_table( _self, _self.value );
         auto& c_arbit = arbit_table.get( uint64_t(arbit.id), "Invalid arbit id" );
