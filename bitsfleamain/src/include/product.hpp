@@ -49,11 +49,11 @@ namespace rareteam
 
     struct [[eosio::table, eosio::contract("bitsfleamain")]] Categories
     {
-        uint64_t id = 0;
-        name key;
+        uint16_t id = 0;
         string view;
+        uint16_t parent = 0;
 
-        uint64_t primary_key() const { return id; }
+        uint64_t primary_key() const { return uint64_t(id); }
     };
 
     struct [[eosio::table, eosio::contract("bitsfleamain")]] Product

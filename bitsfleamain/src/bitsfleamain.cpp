@@ -32,6 +32,17 @@ namespace rareteam {
         _global.transaction_pool = asset( 3500000000000, FMP );
         _global.salary_pool = asset( 2000000000000, FMP );
 
+        //init Category
+        string v[] = {"数码","玩具","美妆","居家","服装","图书","其他"};
+        Category_index category_table( _self, _self.value);
+        for( auto& item : v) {
+            category_table.emplace( _self, [&](auto& c){
+                auto id = category_table.available_primary_key();
+                c.id = uint16_t(id == 0 ? id+1 : id);
+                c.view = item;
+            });
+        }
+
         transaction trx;
          //create FMP
         _global.support_coin.push_back( FMP );
@@ -73,6 +84,7 @@ namespace rareteam {
     void bitsfleamain::reset()
     {
         require_auth( _self );
+
     }
 
     void bitsfleamain::test(const string& para)

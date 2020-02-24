@@ -16,6 +16,10 @@ namespace rareteam {
         check( product.price.symbol == product.postage.symbol, "Inconsistent payment methods" );
         check( CheckSymbol( product.price.symbol ), "This currency is not currently supported" );
 
+        Category_index category_table( _self, _self.value);
+        auto cat_itr = category_table.find( product.category );
+        check( cat_itr != category_table.end(), "Invalid product category" );
+
         product_index pro_table( _self, _self.value );
         auto pro_itr = pro_table.emplace( _self, [&]( auto& p ) {
             p.pid = pro_table.available_primary_key();
