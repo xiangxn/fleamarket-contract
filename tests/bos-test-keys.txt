@@ -8,6 +8,14 @@ cleos wallet unlock -n bostest  --password PW5KajM5kmn6YSckdg3hWregB1bGQ3VMKeUpS
 	"privateKey": "5JU2y3M9pJgxDDntRvdG1GxkyeuHLMopdt7NHYKrRTnTZhbKZ2k",
 	"publicKey": "EOS6VqjyRiJZWUDFErcnX7CkhDkkBKjaZCsLfGJXPJEEe5DNbW2KW"}
 
+"name":"fleagateways",
+"owner":{
+	"privateKey":"5KeJCY6mtCjnJNBnjRfdBXU4hqBSqJ9VuPC9CJKpA4cMuYSQi99",
+	"publicKey":"EOS6xMD89KCnT92hYqjk1DBTwP5GtpwkjrgDGuHTi4CS4w1tFKT9j"},
+"active":{
+	"privateKey":"5KZ3FeymGbSMRZJMffKwB3fBmgAUBCTVxe2EdjwuSinC4Zz4XqR",
+	"publicKey":"EOS5ix3Mo2rbDwWSQyTAKtYSmEapuxxyHmk6gsGuWNUJBsGA5s7si"}
+
 name":"reviewer1111",
 "owner":{
 	"privateKey":"5JaT58QgyzHWLqtHtRDP8EEHqNtUW9k6CW6oPemZT3iCcDPoR8K",
