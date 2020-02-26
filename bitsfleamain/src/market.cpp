@@ -215,7 +215,7 @@ namespace rareteam {
         require_auth( from );
         if( quantity.symbol != SYS ) return;
         check( quantity.amount > 0, "Invalid quantity" );
-        bool is_payorder = memo.find( string("payorder:") ) == 0;
+        bool is_payorder = memo.find( string("p:") ) == 0;
         if( !is_payorder ) return;
 
         auto info = split( memo, ":" );
@@ -229,8 +229,8 @@ namespace rareteam {
         if( to != _self ) return;
         check( quantity.amount > 0, "Invalid quantity" );
         if( CheckSymbol( quantity.symbol ) == false ) return;
-        bool is_payorder = memo.find( "payorder:" ) == 0;
-        bool is_withdraw = memo.find( "withdraw:" ) == 0;
+        bool is_payorder = memo.find( "p:" ) == 0;
+        bool is_withdraw = memo.find( "w:" ) == 0;
         if( !is_payorder && !is_withdraw ) return;
 
         auto info = split( memo, ":" );

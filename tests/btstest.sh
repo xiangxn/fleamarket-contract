@@ -15,7 +15,7 @@ cleos push action bitsfleamain issue '[ "fleagateways", "1000.00000 BTS", "memo"
 cleos get table bitsfleamain bitsfleamain orders 
 
 # pay : order id 在上一行的输出中取
-# cleos transfer player1 bitsfleamain "2.10000 BTS" "payorder:36893488153296537970" -p player1 -c bitsfleamain
+# cleos transfer player1 bitsfleamain "2.10000 BTS" "p:36893488153296537970" -p player1 -c bitsfleamain
 # cleos get currency balance bitsfleamain player BTS
 # cleos get currency balance bitsfleamain player1 BTS
 # cleos get currency balance bitsfleamain bitsfleamain BTS
@@ -28,7 +28,7 @@ cleos get table bitsfleamain bitsfleamain orders
 # cleos push action bitsfleamain reshipment '[2,"player1","36893488153296537970","229988223"]' -p player1
 # cleos push action bitsfleamain reconreceipt '[0,"player","36893488153296537970"]' -p player
 
-# cleos transfer player bitsfleamain "0.10000 BTS" "withdraw:0x165a3e5e0100000" -p player -c bitsfleamain
+# cleos transfer player bitsfleamain "0.10000 BTS" "w:0x165a3e5e0100000" -p player -c bitsfleamain
 # cleos push action bitsfleamain closesettle '[0]' -p bitsfleamain
 # cleos get table bitsfleamain bitsfleamain othersettle
 
@@ -38,4 +38,4 @@ cleos get currency balance bitsfleamain reviewer BTS &&
 cleos get currency balance bitsfleamain fleagateways BTS &&
 cleos get currency balance bitsfleamain bitsfleamain BTS
 
-# cleos transfer player bitsfleamain "2.00000 BTS" "withdraw:0" -p player -c bitsfleamain
+# cleos transfer player bitsfleamain "2.00000 BTS" "w:0" -p player -c bitsfleamain

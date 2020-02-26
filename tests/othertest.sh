@@ -16,7 +16,7 @@ cleos push action bitsfleamain issue '[ "fleagateways", "1000.0000 EOS", "memo" 
 cleos get table bitsfleamain bitsfleamain orders 
 
 # pay : order id 在上一行的输出中取
-# cleos transfer player1 bitsfleamain "0.1000 EOS" "payorder:36893488157591172661" -p player1 -c bitsfleamain
+# cleos transfer player1 bitsfleamain "0.1000 EOS" "p:36893488157591172661" -p player1 -c bitsfleamain
 # cleos get currency balance bitsfleamain player EOS
 # cleos get currency balance bitsfleamain player1 EOS
 # cleos get currency balance bitsfleamain bitsfleamain EOS
@@ -29,7 +29,7 @@ cleos get table bitsfleamain bitsfleamain orders
 # cleos push action bitsfleamain reshipment '[2,"player1","36893488157591172661","229988223"]' -p player1
 # cleos push action bitsfleamain reconreceipt '[0,"player","36893488157591172661"]' -p player
 
-# cleos transfer player bitsfleamain "0.1000 EOS" "withdraw:0x165a3e5e0100000" -p player -c bitsfleamain
+# cleos transfer player bitsfleamain "0.1000 EOS" "w:0x165a3e5e0100000" -p player -c bitsfleamain
 # cleos push action bitsfleamain closesettle '[0]' -p bitsfleamain
 # cleos get table bitsfleamain bitsfleamain othersettle
 
@@ -40,4 +40,4 @@ cleos get currency balance bitsfleamain fleagateways EOS &&
 cleos get currency balance bitsfleamain bitsfleamain EOS
 
 # cleos push action bitsfleamain issue '[ "player", "100.00000000 NULS", "memo" ]' -p bitsfleamain
-# cleos transfer player bitsfleamain "2.0000 NULS" "withdraw:0" -p player -c bitsfleamain
+# cleos transfer player bitsfleamain "2.0000 NULS" "w:0" -p player -c bitsfleamain
