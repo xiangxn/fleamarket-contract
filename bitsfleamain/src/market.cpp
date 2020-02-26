@@ -243,6 +243,9 @@ namespace rareteam {
             PayOrder( order_id, quantity );
         } else if( is_withdraw ) {
             check( quantity.symbol != SYS && quantity.symbol != FMP, "Invalid quantity symbol" );
+            coin_index coin_table( _self, _self.value );
+            auto& coin = coin_table.get( quantity.symbol.code().raw() );
+            check( coin.is_out, "Withdrawal closed" );
             string addr = "";
             auto user_idx = _user_table.get_index<"eosid"_n>();
             auto user_itr = user_idx.find( payer.value );
