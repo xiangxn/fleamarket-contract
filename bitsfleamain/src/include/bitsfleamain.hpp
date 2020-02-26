@@ -15,6 +15,7 @@
 #include "user.hpp"
 #include "product.hpp"
 #include "review.hpp"
+#include "coins.hpp"
 
 using namespace eosio;
 

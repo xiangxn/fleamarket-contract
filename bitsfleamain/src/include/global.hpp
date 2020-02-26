@@ -100,7 +100,6 @@ namespace rareteam {
          */ 
         vector<asset> income;
         vector<asset> last_income;
-        vector<symbol> support_coin;
         /**
          * the project start time.
          */ 

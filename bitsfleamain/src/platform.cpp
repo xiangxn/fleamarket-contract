@@ -414,10 +414,9 @@ namespace rareteam {
 
     bool bitsfleamain::CheckSymbol( const symbol& symbol )
     {
-        auto itr = find_if( _global.support_coin.begin(), _global.support_coin.end(), [&](auto& s){
-            return s == symbol;
-        });
-        return itr != _global.support_coin.end();
+        coin_index coin_table( _self, _self.value );
+        auto itr = coin_table.find( symbol.code().raw() );
+        return itr != coin_table.end();
     }
 
     void bitsfleamain::Withdraw( const name& user_eosid, const asset& quantity )

@@ -44,17 +44,28 @@ namespace rareteam {
         }
 
         transaction trx;
+        coin_index coin_table( _self, _self.value );
          //create FMP
-        _global.support_coin.push_back( FMP );
+        coin_table.emplace( _self, [&](auto& c){
+            c.sym = FMP;
+            c.fee = asset(0, FMP);
+        });
         action(permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, "create"_n,
             std::make_tuple( _self, asset( 10000000000000, FMP ), 30 )
         ).send();
         //create SYS
-        _global.support_coin.push_back( SYS );
+        coin_table.emplace( _self, [&](auto& c){
+            c.sym = SYS;
+            c.fee = asset(0, SYS);
+        });
         symbol eos = symbol(symbol_code("EOS"), 4);
         if( SYS != eos ) {
             //EOS
-            _global.support_coin.push_back( eos );
+            coin_table.emplace( _self, [&](auto& c){
+                c.sym = eos;
+                c.fee = asset(1000, eos);
+                c.is_out = true;
+            });
             action a1 = action(permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, "create"_n,
                 std::make_tuple( _self, asset( 10000000000000, eos ), 0 )
             );
@@ -62,7 +73,11 @@ namespace rareteam {
         }
         // BTS
         symbol BTS = symbol(symbol_code("BTS"), 5);
-        _global.support_coin.push_back( BTS );
+        coin_table.emplace( _self, [&](auto& c){
+            c.sym = BTS;
+            c.fee = asset(100000, BTS);
+            c.is_out = true;
+        });
         action a2 = action(permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, "create"_n,
             std::make_tuple( _self, asset( 100000000000000, BTS ), 0 )
         );
@@ -70,11 +85,39 @@ namespace rareteam {
 
         // NULS
         symbol NULS = symbol(symbol_code("NULS"),8);
-        _global.support_coin.push_back( NULS );
+        coin_table.emplace( _self, [&](auto& c){
+            c.sym = NULS;
+            c.fee = asset(50000000, NULS);
+            c.is_out = true;
+        });
         action a3 = action(permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, "create"_n,
             std::make_tuple( _self, asset(10000000000000000, NULS ), 0 )
         );
         trx.actions.emplace_back( a3 );
+
+        // ETH
+        symbol ETH = symbol(symbol_code("ETH"), 8);
+        coin_table.emplace( _self, [&](auto& c){
+            c.sym = ETH;
+            c.fee = asset(1000000, ETH);
+            c.is_out = true;
+        });
+        action a4 = action(permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, "create"_n,
+            std::make_tuple( _self, asset(10000000000000000, ETH ), 0 )
+        );
+        trx.actions.emplace_back( a4 );
+
+        //USDT
+        symbol USDT = symbol(symbol_code("USDT"), 8);
+        coin_table.emplace( _self, [&](auto& c){
+            c.sym = USDT;
+            c.fee = asset(130000000, USDT);
+            c.is_out = true;
+        });
+        action a5 = action(permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, "create"_n,
+            std::make_tuple( _self, asset(10000000000000000, USDT ), 0 )
+        );
+        trx.actions.emplace_back( a5 );
 
 
         trx.delay_sec = 2;
