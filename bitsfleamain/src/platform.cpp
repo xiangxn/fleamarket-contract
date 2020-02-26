@@ -463,5 +463,31 @@ namespace rareteam {
             });
         }
     }
+
+    void bitsfleamain::updatecoin( const symbol& sym, const asset& fee, bool is_out, const asset& max )
+    {
+        require_auth( _self );
+        check( sym.is_valid(), "Invalid sym" );
+        check( sym == fee.symbol, "Invalid sym" );
+        coin_index coin_table( _self, _self.value );
+        auto itr = coin_table.find( sym.code().raw() );
+        if( itr == coin_table.end() ) { //add
+            check( max.amount > 0, "max amount must be greater than 0");
+            check( sym == max.symbol, "Invalid sym" );
+            coin_table.emplace( _self, [&](auto& c){
+                c.sym = sym;
+                c.fee = fee;
+                c.is_out = is_out;
+            });
+            action(permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, "create"_n,
+                std::make_tuple( _self, max, 0 )
+            ).send();
+        } else { //update
+            coin_table.modify( itr, same_payer, [&](auto& c){
+                c.fee = fee;
+                c.is_out = is_out;
+            });
+        }
+    }
     
 }

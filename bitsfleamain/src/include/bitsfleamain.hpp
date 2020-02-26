@@ -168,6 +168,10 @@ namespace rareteam {
          * 绑定外链账号或者地址
          */ 
         ACTION bindaddr( uint64_t uid, const name& user_eosid, const symbol& sym, const string& addr );
+        /**
+         * 添加、更新支持币种
+         */ 
+        ACTION updatecoin( const symbol& sym, const asset& fee, bool is_out, const asset& max );
         
         
         /********platform End*****/
