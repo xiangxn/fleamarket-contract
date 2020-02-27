@@ -246,6 +246,7 @@ namespace rareteam {
             coin_index coin_table( _self, _self.value );
             auto& coin = coin_table.get( quantity.symbol.code().raw() );
             check( coin.is_out, "Withdrawal closed" );
+            check( quantity.amount > coin.fee.amount, "The withdraw amount is too small" );
             string addr = "";
             auto user_idx = _user_table.get_index<"eosid"_n>();
             auto user_itr = user_idx.find( payer.value );
@@ -261,7 +262,7 @@ namespace rareteam {
                 }
                 oa_itr++;
             }
-            check( addr.length() > 0, "Withdrawal address not yet bound" );
+            check( addr.length() > 0, "Withdraw address not yet bound" );
 
             othersettle_index os_table( _self, _self.value );
             os_table.emplace( _self, [&](auto& os){
@@ -269,7 +270,7 @@ namespace rareteam {
                 os.id = oid == 0 ? 1 : oid;
                 os.uid = user_itr->uid;
                 os.order_id = 0;
-                os.amount = quantity;
+                os.amount = quantity - coin.fee; //Withdrawal fees have been deducted
                 os.status = OtherSettleStatus::OSS_NORMAL;
                 os.addr = addr;
                 os.memo = "withdraw coin";
