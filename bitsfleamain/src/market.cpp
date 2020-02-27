@@ -276,9 +276,8 @@ namespace rareteam {
                 os.memo = "withdraw coin";
                 os.start_time = time_point_sec(current_time_point().sec_since_epoch());
             });
-            action( permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, ACTION_NAME_TRANSFER,
-                std::make_tuple( _self, _global.gateway, coin.fee, "withdraw fee" )
-            ).send();
+            sub_balance( _self, coin.fee );
+            add_balance( _global.gateway, coin.fee, _self );
         }
     }
 
@@ -450,7 +449,7 @@ namespace rareteam {
             o.trx_id = trx_id;
         });
         action( permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, ACTION_NAME_TRANSFER,
-            std::make_tuple( _self, "fleagateways"_n, os.amount, os.memo )
+            std::make_tuple( _self, _global.gateway, os.amount, os.memo )
         ).send();
         uint32_t count = get_size( os_table );
         if( count > 500 ) {

@@ -38,6 +38,8 @@ cleos push action eosio.token issue '[ "reviewer", "10000.0000 BOS", "memo" ]' -
 
 cleos get table bitsfleamain bitsfleamain global &&
 
+cleos get table bitsfleamain bitsfleamain coins &&
+
 # cleos get currency stats bitsfleamain FMP &&
 cleos get table bitsfleamain FMP stat &&
 

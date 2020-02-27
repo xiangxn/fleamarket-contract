@@ -480,9 +480,7 @@ namespace rareteam {
                 c.fee = fee;
                 c.is_out = is_out;
             });
-            action(permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, "create"_n,
-                std::make_tuple( _self, max, 0 )
-            ).send();
+            create( _self, max, 0 );
         } else { //update
             coin_table.modify( itr, same_payer, [&](auto& c){
                 c.fee = fee;
