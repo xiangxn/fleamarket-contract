@@ -20,6 +20,10 @@ namespace rareteam {
          * System fee ratio
          */ 
         double fee_ratio = 0.05;
+        /**
+         * Gateway account bound to the contract
+         */ 
+        name gateway = "fleagateways"_n;
 
         /************************Points related************************/
         /**

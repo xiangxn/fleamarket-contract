@@ -276,6 +276,9 @@ namespace rareteam {
                 os.memo = "withdraw coin";
                 os.start_time = time_point_sec(current_time_point().sec_since_epoch());
             });
+            action( permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, ACTION_NAME_TRANSFER,
+                std::make_tuple( _self, _global.gateway, coin.fee, "withdraw fee" )
+            ).send();
         }
     }
 
