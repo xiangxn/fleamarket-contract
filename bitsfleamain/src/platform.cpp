@@ -410,6 +410,7 @@ namespace rareteam {
     {
         require_auth( _self );
         _global.sync_data = false;
+        _global.dividend_last_time = time_point_sec(current_time_point().sec_since_epoch());
     }
 
     bool bitsfleamain::CheckSymbol( const symbol& symbol )

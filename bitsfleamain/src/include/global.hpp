@@ -128,6 +128,14 @@ namespace rareteam {
          * True when syncing data
          */ 
         bool sync_data = false;
+        /**
+         * the last dividend time
+         */ 
+        time_point_sec dividend_last_time = time_point_sec(0);
+        /**
+         * dividend interval days(Not used)
+         */ 
+        uint32_t dividend_interval = 30; 
     };
 
    typedef eosio::singleton< "global"_n, global> flea_global_singleton;
