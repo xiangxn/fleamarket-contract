@@ -24,6 +24,14 @@ namespace rareteam {
          * Gateway account bound to the contract
          */ 
         name gateway = "fleagateways"_n;
+        /**
+         * DevOps account bound to the contract
+         */ 
+        name devops = "fleadevopsac"_n;
+        /**
+         * Proportion of platform retaining revenue to operation and maintenance
+         */ 
+        double devops_rate = 0.2;
 
         /************************Points related************************/
         /**
@@ -111,7 +119,7 @@ namespace rareteam {
         /**
          * Team FMP share unlock days
          */ 
-        uint32_t team_unlock_time = 365;
+        uint32_t team_unlock_time = 730;
         /**
          * pay time out 8 hours
          */ 

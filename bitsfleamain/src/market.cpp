@@ -164,7 +164,8 @@ namespace rareteam {
         //fixed price
         order_index order_table( _self, _self.value );
         order_table.emplace( _self, [&](auto& o){
-            o.id = ((uint128_t(buyer_uid) << 64) | (uint128_t(pid) << 32)) | current_time_point().sec_since_epoch();
+            auto ct = current_time_point().sec_since_epoch();
+            o.id = ((uint128_t(buyer_uid) << 64) | (uint128_t(pid) << 32)) | ct;
             //o.id = pro_table.available_primary_key();
             o.pid = pid;
             o.seller_uid = product.uid;
@@ -172,8 +173,8 @@ namespace rareteam {
             o.price = product.price;
             o.postage = product.postage;
             o.status = OrderStatus::OS_PENDING_PAYMENT;
-            o.create_time = time_point_sec(current_time_point().sec_since_epoch());
-            o.pay_time_out = time_point_sec(current_time_point().sec_since_epoch() + _global.pay_time_out);
+            o.create_time = time_point_sec(ct);
+            o.pay_time_out = time_point_sec(ct + _global.pay_time_out);
         });
         //update product status
         pro_table.modify( product, same_payer, [&](auto& p){
@@ -332,27 +333,29 @@ namespace rareteam {
         // }
     }
 
-    void bitsfleamain::PayCoin( const string& stroid, const Order& order, const User& seller, const User& buyer, const asset& seller_income, const asset& referrer_income, const name& contract)
+    void bitsfleamain::PayCoin( const string& stroid, const Order& order, const User& seller, const User& buyer, const asset& seller_income, const asset& devops_income, const asset& referrer_income, const name& contract)
     {
+        transaction trx;
         string memo = string("complete order ") + stroid;
         action a1 = action( permission_level{_self, ACTIVE_PERMISSION}, contract, ACTION_NAME_TRANSFER,
             std::make_tuple( _self, seller.eosid, seller_income, memo )
         );
+        trx.actions.emplace_back( a1 );
+        if( devops_income.amount > 0 ) {
+            action a2 = action( permission_level{_self, ACTIVE_PERMISSION}, contract, ACTION_NAME_TRANSFER,
+                std::make_tuple( _self, _global.devops, devops_income, memo )
+            );
+            trx.actions.emplace_back( a2 );
+        }
         if( buyer.referrer > 0 && referrer_income.amount > 0 ){
             auto& referrer = _user_table.get( buyer.referrer, "Invalid order referrer uid" );
-            if( IsLockUser( referrer ) == false ) {
-                transaction trx;
-                action a2 = action ( permission_level{_self, ACTIVE_PERMISSION}, contract, ACTION_NAME_TRANSFER,
-                    std::make_tuple( _self, referrer.eosid, referrer_income, "Referral commission " + stroid )
-                );
-                trx.actions.emplace_back( a1 );
-                trx.actions.emplace_back( a2 );
-                trx.delay_sec = 5;
-                trx.send( (uint128_t(("settle"_n).value) << 64) | uint64_t(current_time_point().sec_since_epoch()) , _self, false);
-            }
-        } else {
-            a1.send();
+            action a3 = action ( permission_level{_self, ACTIVE_PERMISSION}, contract, ACTION_NAME_TRANSFER,
+                std::make_tuple( _self, referrer.eosid, referrer_income, "Referral commission " + stroid )
+            );
+            trx.actions.emplace_back( a3 );
         }
+        trx.delay_sec = 5;
+        trx.send( (uint128_t(("settle"_n).value) << 64) | uint64_t(current_time_point().sec_since_epoch()) , _self, false);
     }
 
     void bitsfleamain::Settle( const Order& order, const User& seller, const User& buyer )
@@ -360,13 +363,18 @@ namespace rareteam {
         string stroid = uint128ToString( order.id );
         auto total = order.price + order.postage;
         auto income = asset( int64_t(double(total.amount) * _global.fee_ratio), total.symbol );
+        auto devops_income = asset( int64_t(double(income.amount) * _global.devops_rate), total.symbol );
         auto amount = total - income;
+        if( devops_income.amount > 0 )
+            income -= devops_income;
         auto comm = asset( int64_t(double(income.amount) * _global.ref_commission_rate), income.symbol );
+        if( buyer.referrer > 0 && comm.amount > 0 && IsLockUser( buyer.referrer ) == false ){
+            income -= comm;
+        } else {
+            comm = asset( 0, income.symbol );
+        }
         if( order.price.symbol == SYS ) {
-            PayCoin( stroid, order, seller, buyer, amount, comm, NAME_EOSIO_TOKEN );
-            if( buyer.referrer > 0 && comm.amount > 0 ){
-                income -= comm;
-            }
+            PayCoin( stroid, order, seller, buyer, amount, devops_income, comm, NAME_EOSIO_TOKEN );
         } else {
             //other blockchain
             otheraddr_index oa_table( _self, _self.value );
@@ -384,6 +392,7 @@ namespace rareteam {
                 oa_itr++;
             }
             if( is_bind ) { // create settle log
+                string memo = "complete order " + stroid;
                 othersettle_index os_table( _self, _self.value );
                 os_table.emplace( _self, [&](auto& os){
                     auto oid = os_table.available_primary_key();
@@ -393,20 +402,29 @@ namespace rareteam {
                     os.amount = amount;
                     os.status = OtherSettleStatus::OSS_NORMAL;
                     os.addr = addr;
-                    os.memo = "complete order " + stroid;
+                    os.memo = memo;
                     os.start_time = time_point_sec(current_time_point().sec_since_epoch());
                 });
+                transaction trx;
+                if( devops_income.amount > 0 ) {
+                    action a1 = action( permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, ACTION_NAME_TRANSFER,
+                        std::make_tuple( _self, _global.devops, devops_income, memo )
+                    );
+                    trx.actions.emplace_back( a1 );
+                }
                 if( buyer.referrer > 0 && comm.amount > 0 ){
                     auto& referrer = _user_table.get( buyer.referrer, "Invalid order referrer uid" );
-                    action( permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, ACTION_NAME_TRANSFER,
+                    action a2 = action( permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, ACTION_NAME_TRANSFER,
                         std::make_tuple( _self, referrer.eosid, comm, "Referral commission" + stroid )
-                    ).send();
+                    );
+                    trx.actions.emplace_back( a2 );
+                }
+                if( trx.actions.size() > 0 ) {
+                    trx.delay_sec = 5;
+                    trx.send( (uint128_t(("settle"_n).value) << 64) | uint64_t(current_time_point().sec_since_epoch()) , _self, false);
                 }
             } else { // bitsfleamain transfer
-                PayCoin( stroid, order, seller, buyer, amount, comm, FLEA_PLATFORM );
-            }
-            if( buyer.referrer > 0 && comm.amount > 0 ){
-                income -= comm;
+                PayCoin( stroid, order, seller, buyer, amount, devops_income, comm, FLEA_PLATFORM );
             }
         }
 

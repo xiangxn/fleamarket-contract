@@ -55,7 +55,7 @@ namespace rareteam {
         bool IsLockUser( uint64_t user_uid );
         bool IsLockUser( const User& user );
         bool CheckSymbol( const symbol& symbol );
-        void PayCoin( const string& stroid, const Order& order, const User& seller, const User& buyer, const asset& seller_income, const asset& referrer_income, const name& contract);
+        void PayCoin( const string& stroid, const Order& order, const User& seller, const User& buyer, const asset& seller_income, const asset& devops_income, const asset& referrer_income, const name& contract);
         void Withdraw( const name& user_eosid, const asset& quantity );
 
     public:

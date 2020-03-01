@@ -33,6 +33,7 @@ namespace rareteam {
    {
       require_auth( _self );
 
+      check( is_account( to ), "to account does not exist");
       auto sym = quantity.symbol;
       check( sym.is_valid(), "invalid symbol name" );
       check( quantity.is_valid(), "invalid quantity" );
@@ -51,7 +52,7 @@ namespace rareteam {
       asset one = st.team / int64_t(_global.team_unlock_time);
       uint32_t days = uint32_t((current_time_point().sec_since_epoch() - _global.project_start_time.sec_since_epoch()) / 86400);
       asset claim_ava = (one * days) - st.team_claim;
-      check( quantity.amount <= claim_ava.amount, "quantity exceeds available team");
+      check( claim_ava.amount > 0 && quantity.amount <= claim_ava.amount, "quantity exceeds available team");
 
       statstable.modify( st, same_payer, [&]( auto& s ) {
          s.supply += quantity;
