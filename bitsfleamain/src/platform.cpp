@@ -400,13 +400,26 @@ namespace rareteam {
         if( _global.sync_data )
             return;
         require_auth( _self );
+        uint32_t s = current_time_point().sec_since_epoch() - _global.dividend_last_time.sec_since_epoch();
+        check( s >= _global.dividend_interval, "Unallocated time" );
         _global.sync_data = true;
         vector<asset> tmp;
         _global.last_income.swap( tmp );
-        for_each( _global.income.begin(), _global.income.end(), [&](auto& a){
-            _global.last_income.push_back( asset( a.amount, a.symbol) );
-        });
-        _global.income.swap( tmp );
+        // get FMP supply
+        tokenStats ts_table( _self, FMP.code().raw() );
+        auto& fmp = ts_table.get( FMP.code().raw() );
+        if( fmp.supply.amount > 0 ) {
+            int64_t one = 0;
+            int64_t all = 0;
+            for_each( _global.income.begin(), _global.income.end(), [&](auto& a){
+                one = a.amount / fmp.supply.amount;
+                if( one > 0 ) {
+                    all = one * fmp.supply.amount;
+                    a.amount -= all;
+                    _global.last_income.push_back( asset( all, a.symbol ) );
+                }
+            });
+        }
     }
     void bitsfleamain::endsync()
     {

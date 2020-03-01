@@ -145,9 +145,9 @@ namespace rareteam {
          */ 
         time_point_sec dividend_last_time = time_point_sec(0);
         /**
-         * dividend interval days(Not used)
+         * dividend interval 30 days(Not used)
          */ 
-        uint32_t dividend_interval = 30; 
+        uint32_t dividend_interval = 30 * 24 * 60 * 60; 
     };
 
    typedef eosio::singleton< "global"_n, global> flea_global_singleton;

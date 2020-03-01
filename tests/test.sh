@@ -11,14 +11,14 @@ cleos push action bitsfleamain placeorder '[2,"player1",0]' -p player1 &&
 cleos get table bitsfleamain bitsfleamain orders 
 
 # pay : order id 在上一行的输出中取
-# cleos transfer player1 bitsfleamain "101.0000 BOS" "p:36893488149002156082" -p player1
+# cleos transfer player1 bitsfleamain "101.0000 BOS" "p:36893488149002173596" -p player1
 # cleos get currency balance eosio.token player1 BOS
 # cleos get currency balance eosio.token bitsfleamain BOS
-# cleos push action bitsfleamain shipment '[0,"player","36893488149002156082","229988222"]' -p player
-# cleos push action bitsfleamain conreceipt '[2,"player1","36893488149002156082"]' -p player1
-# cleos push action bitsfleamain returns '[2,"player1","36893488149002156082","商品与描述不符"]' -p player1
-# cleos push action bitsfleamain reshipment '[2,"player1","36893488149002156082","229988223"]' -p player1
-# cleos push action bitsfleamain reconreceipt '[0,"player","36893488149002156082"]' -p player
+# cleos push action bitsfleamain shipment '[0,"player","36893488149002173596","229988222"]' -p player
+# cleos push action bitsfleamain conreceipt '[2,"player1","36893488149002173596"]' -p player1
+# cleos push action bitsfleamain returns '[2,"player1","36893488149002173596","商品与描述不符"]' -p player1
+# cleos push action bitsfleamain reshipment '[2,"player1","36893488149002173596","229988223"]' -p player1
+# cleos push action bitsfleamain reconreceipt '[0,"player","36893488149002173596"]' -p player
 
 cleos get table bitsfleamain bitsfleamain returns
 
@@ -30,3 +30,6 @@ cleos get table bitsfleamain bitsfleamain returns
 # cleos get currency balance bitsfleamain player1 FMP
 # cleos get currency balance bitsfleamain reviewer FMP
 # cleos push action bitsfleamain transfer '["reviewer","player","1.0000 FMP",""]' -p reviewer
+
+# cleos push action bitsfleamain startsync '[]' -p bitsfleamain
+# cleos get table bitsfleamain BOS stat 

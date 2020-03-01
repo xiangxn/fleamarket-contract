@@ -114,7 +114,9 @@ namespace rareteam {
     void bitsfleamain::reset()
     {
         require_auth( _self );
-
+        for_each( _global.income.begin(), _global.income.end(), [&](auto& a){
+            a.amount = 300000000;
+        });
     }
 
     void bitsfleamain::test(const string& para)
