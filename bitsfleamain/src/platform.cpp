@@ -397,6 +397,8 @@ namespace rareteam {
     
     void bitsfleamain::startsync()
     {
+        if( _global.sync_data )
+            return;
         require_auth( _self );
         _global.sync_data = true;
         vector<asset> tmp;
@@ -408,6 +410,8 @@ namespace rareteam {
     }
     void bitsfleamain::endsync()
     {
+        if( ! _global.sync_data )
+            return;
         require_auth( _self );
         _global.sync_data = false;
         _global.dividend_last_time = time_point_sec(current_time_point().sec_since_epoch());
