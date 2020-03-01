@@ -409,6 +409,7 @@ namespace rareteam {
         tokenStats ts_table( _self, FMP.code().raw() );
         auto& fmp = ts_table.get( FMP.code().raw() );
         if( fmp.supply.amount > 0 ) {
+            _global.dividend_last_supply = fmp.supply;
             int64_t one = 0;
             int64_t all = 0;
             for_each( _global.income.begin(), _global.income.end(), [&](auto& a){

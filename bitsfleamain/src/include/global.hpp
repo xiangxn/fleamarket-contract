@@ -147,7 +147,11 @@ namespace rareteam {
         /**
          * dividend interval 30 days(Not used)
          */ 
-        uint32_t dividend_interval = 30 * 24 * 60 * 60; 
+        uint32_t dividend_interval = 30 * 24 * 60 * 60;
+        /**
+         * When allocating supply
+         */ 
+        asset dividend_last_supply = asset(0,FMP);
     };
 
    typedef eosio::singleton< "global"_n, global> flea_global_singleton;
