@@ -19,7 +19,7 @@ namespace rareteam {
         /**
          * System fee ratio
          */ 
-        double fee_ratio = 0.05;
+        double fee_ratio = 0.05f;
         /**
          * Gateway account bound to the contract
          */ 
@@ -31,13 +31,13 @@ namespace rareteam {
         /**
          * Proportion of platform retaining revenue to operation and maintenance
          */ 
-        double devops_rate = 0.2;
+        double devops_rate = 0.2f;
 
         /************************Points related************************/
         /**
          * the referral commission rate
          */ 
-        double ref_commission_rate = 0.05;
+        double ref_commission_rate = 0.05f;
         /**
          * Points gift once by the system at the time of referral
          */ 
@@ -53,7 +53,7 @@ namespace rareteam {
         /**
          * transaction gift rate
          */ 
-        double transaction_gift_rate = 0.05;
+        double transaction_gift_rate = 0.05f;
         /**
          * salary gift pool
          */ 

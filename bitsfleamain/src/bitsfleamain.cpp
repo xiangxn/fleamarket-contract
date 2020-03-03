@@ -114,9 +114,58 @@ namespace rareteam {
     void bitsfleamain::reset()
     {
         require_auth( _self );
-        for_each( _global.income.begin(), _global.income.end(), [&](auto& a){
-            a.amount = 300000000;
-        });
+
+        clear_table(_user_table);
+
+        coin_index coin_table( _self, _self.value );
+        clear_table(coin_table);
+
+        Category_index cate_table( _self, _self.value );
+        clear_table(cate_table);
+
+        product_index product_table( _self, _self.value );
+        clear_table(product_table);
+
+        proaudit_index proaudit_table( _self, _self.value );
+        clear_table(proaudit_table);
+
+        reviewer_index reviewer_table( _self, _self.value );
+        clear_table(reviewer_table);
+
+        balances rb_table( _self, name("reviewer1111").value);
+        clear_table(rb_table);
+
+        balances bb_table( _self, name("bitsflea1111").value);
+        clear_table(bb_table);
+        
+        symbol eos = symbol(symbol_code("EOS"), 4);
+        tokenStats eos_table( _self, eos.code().raw() );
+        clear_table(eos_table);
+
+        tokenStats fmp_table( _self, FMP.code().raw() );
+        clear_table(fmp_table);
+
+        symbol BTS = symbol(symbol_code("BTS"), 5);
+        tokenStats bts_table( _self, BTS.code().raw() );
+        clear_table(bts_table);
+
+        symbol NULS = symbol(symbol_code("NULS"),8);
+        tokenStats nuls_table( _self, NULS.code().raw() );
+        clear_table(nuls_table);
+
+        symbol ETH = symbol(symbol_code("ETH"), 8);
+        tokenStats eth_table( _self, ETH.code().raw() );
+        clear_table(eth_table);
+
+        symbol USDT = symbol(symbol_code("USDT"), 8);
+        tokenStats usdt_table( _self, USDT.code().raw() );
+        clear_table(usdt_table);
+
+        symbol CNY = symbol(symbol_code("CNY"), 4);
+        tokenStats cny_table( _self, CNY.code().raw() );
+        clear_table(cny_table);
+
+        _global_table.remove();
     }
 
     void bitsfleamain::test(const string& para)
