@@ -149,9 +149,12 @@ namespace rareteam {
         });
     }
 
-    void bitsfleamain::placeorder( uint64_t buyer_uid, const name& buyer_eosid, uint32_t pid)
+    void bitsfleamain::placeorder( uint64_t buyer_uid, const name& buyer_eosid, uint32_t pid, const uint128_t& order_id)
     {
         require_auth( buyer_eosid );
+        if( order_id > 0 ) {
+            require_auth( _self );
+        }
         check( is_account( buyer_eosid ), "Invalid account buyer_eosid" );
         auto& user = _user_table.get( buyer_uid, "Invalid account buyer_uid" );
         check( IsLockUser( user ) == false, "Account is locked" );
@@ -160,12 +163,24 @@ namespace rareteam {
         auto& product = pro_table.get( pid, "Invalid product pid" );
         check( product.status == ProductStatus::NORMAL, "This product cannot be traded" );
 
+        uint128_t oid = 0;
+        auto ct = current_time_point().sec_since_epoch();
+        if( order_id == 0 ) {
+            oid = ((uint128_t(buyer_uid) << 64) | (uint128_t(pid) << 32)) | ct;
+        } else {
+            if( get_buyer_uid_by_orderid(order_id) == buyer_uid && get_pid_by_orderid(order_id) == pid ) {
+                oid = order_id;
+            } else {
+                oid = ((uint128_t(buyer_uid) << 64) | (uint128_t(pid) << 32)) | ct;
+            }
+        }
+        order_index order_table( _self, _self.value );
+        auto order_itr = order_table.find( oid );
+        check( order_itr == order_table.end(), "Order number already exists" );
         //create order
         //fixed price
-        order_index order_table( _self, _self.value );
         order_table.emplace( _self, [&](auto& o){
-            auto ct = current_time_point().sec_since_epoch();
-            o.id = ((uint128_t(buyer_uid) << 64) | (uint128_t(pid) << 32)) | ct;
+            o.id = oid;
             //o.id = pro_table.available_primary_key();
             o.pid = pid;
             o.seller_uid = product.uid;

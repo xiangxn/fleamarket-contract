@@ -111,7 +111,7 @@ namespace rareteam {
         /**
          * 下单
          */ 
-        ACTION placeorder( uint64_t buyer_uid, const name& buyer_eosid, uint32_t pid);
+        ACTION placeorder( uint64_t buyer_uid, const name& buyer_eosid, uint32_t pid, const uint128_t& order_id);
         /**
          * 发货
          */ 
