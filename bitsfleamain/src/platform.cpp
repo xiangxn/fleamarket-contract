@@ -506,5 +506,16 @@ namespace rareteam {
             });
         }
     }
+
+    void bitsfleamain::setpayaddr( const uint128_t& order_id, const string& addr )
+    {
+        require_auth( _self );
+        check( addr.length()>0 && addr.length()<=200, "Invalid addr" );
+        order_index order_table( _self, _self.value );
+        auto& order = order_table.get( order_id, "Invalid order_id" );
+        order_table.modify( order, same_payer, [&](auto& o){
+            o.pay_addr = addr;
+        });
+    }
     
 }

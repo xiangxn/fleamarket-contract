@@ -172,6 +172,10 @@ namespace rareteam {
          * 添加、更新支持币种
          */ 
         ACTION updatecoin( const symbol& sym, const asset& fee, bool is_out, const asset& max );
+        /**
+         * 设置订单的支付地址，只有订单支付币种不支持memo时才用
+         */ 
+        ACTION setpayaddr( const uint128_t& order_id, const string& addr );
         
         
         /********platform End*****/

@@ -118,6 +118,7 @@ namespace rareteam
         asset postage;
         uint32_t status = OrderStatus::OS_PENDING_PAYMENT;
         string shipment_number = "";
+        string pay_addr = "";
         time_point_sec create_time;
         time_point_sec pay_time;
         time_point_sec pay_time_out;
