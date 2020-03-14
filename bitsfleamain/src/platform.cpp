@@ -435,7 +435,11 @@ namespace rareteam {
     {
         coin_index coin_table( _self, _self.value );
         auto itr = coin_table.find( symbol.code().raw() );
-        return itr != coin_table.end();
+        bool flg = itr != coin_table.end();
+        if( flg ) {
+            flg = symbol.precision() == itr->sym.precision();
+        }
+        return flg;
     }
 
     void bitsfleamain::Withdraw( const name& user_eosid, const asset& quantity )

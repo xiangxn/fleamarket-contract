@@ -13,7 +13,7 @@ cleos push action bitsfleamain publish '[0,{"pid":0,"uid":0,"title":"title test 
 
 cleos push action bitsfleamain review '[1,"reviewer",1,false,"good product"]' -p reviewer &&
 
-cleos push action bitsfleamain placeorder '[2,"player1",1]' -p player1 &&
+cleos push action bitsfleamain placeorder '[2,"player1",1,"0"]' -p player1 &&
 
 cleos get currency balance bitsfleamain player ETH &&
 
