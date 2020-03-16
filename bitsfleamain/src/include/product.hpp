@@ -77,6 +77,14 @@ namespace rareteam
          * 0 Pick up and 1 mail
          */ 
         uint8_t transaction_method = 0;
+        /**
+         * Stock quantity
+         */ 
+        uint32_t stock_count = 0;
+        /**
+         * Whether retail
+         */ 
+        bool is_retail = false;
 
         asset postage;
         string position;

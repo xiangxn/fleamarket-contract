@@ -11,7 +11,7 @@ cleos push action bitsfleamain issue '[ "fleagateways", "100.00000000 NULS", "me
 
 #cleos transfer player bitsfleamain "1.00000000 NULS" "w:" -p player -c bitsfleamain &&
 
-cleos push action bitsfleamain publish '[0,{"pid":0,"uid":0,"title":"title test NULS","description":"description 测试NULS","photos":"photos 测试","category":1,"status":0,"is_new":false,"is_returns":true,"reviewer":0,"sale_method":0,"price":"2.09000000 NULS","transaction_method":1,"postage":"0.01000000 NULS","position":"位置","release_time":"2020-01-20T00:00:00"},{"id":0,"pid":0,"security":"1.00000000 NULS","markup":"1.0000 NULS","current_price":"1.00000000 NULS","auction_times":0,"last_price_user":0,"start_time":"2020-01-20T00:00:00","end_time":"2020-01-22T00:00:00"}]' -p bitsfleamain &&
+cleos push action bitsfleamain publish '[0,{"pid":0,"uid":0,"title":"title test NULS","description":"description 测试NULS","photos":"photos 测试","category":1,"status":0,"is_new":false,"is_returns":true,"reviewer":0,"sale_method":0,"price":"2.09000000 NULS","transaction_method":1,"stock_count":1,"is_retail":false,"postage":"0.01000000 NULS","position":"位置","release_time":"2020-01-20T00:00:00"},{"id":0,"pid":0,"security":"1.00000000 NULS","markup":"1.0000 NULS","current_price":"1.00000000 NULS","auction_times":0,"last_price_user":0,"start_time":"2020-01-20T00:00:00","end_time":"2020-01-22T00:00:00"}]' -p bitsfleamain &&
 
 cleos push action bitsfleamain review '[1,"reviewer",1,false,"good product"]' -p reviewer &&
 

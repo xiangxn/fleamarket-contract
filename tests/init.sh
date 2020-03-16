@@ -47,4 +47,4 @@ cleos get table bitsfleamain FMP stat &&
 
 cleos get table bitsfleamain bitsfleamain users # &&
 
-# {"uid":0,"product":{"pid":0,"title":"title test","description":"description 测试","photos":"photos 测试","category":0,"status":0,"is_new":false,"is_returns":false,"sale_method":0,"price":"100.0000 BOS","transaction_method":1,"postage":"1.0000 BOS","position":"位置"},"pa":null}
+# {"uid":0,"product":{"pid":0,"title":"title test","description":"description 测试","photos":"photos 测试","category":0,"status":0,"is_new":false,"is_returns":false,"sale_method":0,"price":"100.0000 BOS","transaction_method":1,"stock_count":1,"is_retail":false,"postage":"1.0000 BOS","position":"位置"},"pa":null}
