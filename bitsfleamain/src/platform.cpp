@@ -401,7 +401,7 @@ namespace rareteam {
             return;
         require_auth( _self );
         uint32_t s = current_time_point().sec_since_epoch() - _global.dividend_last_time.sec_since_epoch();
-        check( s >= _global.dividend_interval, "Unallocated time" );
+        check( s >= _global.dividend_interval, "Dividend time is not up" );
         _global.sync_data = true;
         vector<asset> tmp;
         _global.last_income.swap( tmp );
