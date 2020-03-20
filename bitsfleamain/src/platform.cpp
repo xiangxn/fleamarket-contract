@@ -127,8 +127,8 @@ namespace rareteam {
             }else{
                 r.voted_count -= 1;
                 r.voter_against.push_back( voter_uid );
-                if( r.voted_count <= 0 ) {
-                    r.voted_count = 0;
+                if( r.voted_count == 0 ) {
+                    //r.voted_count = 0;
                     _user_table.modify( user, same_payer, [&](auto& u){
                         u.is_reviewer = false;
                     });

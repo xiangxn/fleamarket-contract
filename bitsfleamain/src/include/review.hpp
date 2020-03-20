@@ -33,7 +33,7 @@ namespace rareteam
         uint64_t id = 0;
         uint64_t uid = 0;
         name eosid;
-        uint32_t voted_count = 0;
+        int32_t voted_count = 0;
         time_point_sec create_time;
         time_point_sec last_active_time;
         vector<uint64_t> voter_approve;
