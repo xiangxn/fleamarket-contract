@@ -85,95 +85,95 @@ namespace rareteam {
 
         /********platform*********/
         /**
-         * 注册新用户到平台
+         * 注册新用户到平台(需要平台签名)
          */ 
         ACTION reguser( const name& eosid, const string& nickname, const checksum256& phone_hash, const string& phone_encrypt, uint64_t referrer );
         /**
-         * 申请成为评审员
+         * 申请成为评审员(需要用户签名)
          */ 
         ACTION appreviewer( uint64_t uid, const name& eosid );
         /**
-         * 用户为评审员投票(一人可以投多个评审员)
+         * 用户为评审员投票(一人可以投多个评审员)(需要用户签名)
          */ 
         ACTION votereviewer( uint64_t voter_uid, const name& voter_eosid, uint64_t reviewer_uid, bool is_support );
         /**
-         * 发布商品
+         * 发布商品(需要平台签名)
          */ 
         ACTION publish( uint64_t uid, const Product& product, const ProductAuction& pa );
         /**
-         * 评审员审核商品
+         * 评审员审核商品(需要用户签名)
          */ 
         ACTION review( uint64_t reviewer_uid, const name& reviewer_eosid, uint32_t pid, bool is_delisted, string& memo );
         /**
-         * 卖家下架商品
+         * 卖家下架商品(需要用户签名)
          */ 
         ACTION pulloff( uint64_t seller_uid, const name& seller_eosid, uint32_t pid );
         /**
-         * 下单
+         * 下单(需要用户、平台签名)
          */ 
         ACTION placeorder( uint64_t buyer_uid, const name& buyer_eosid, uint32_t pid, const uint128_t& order_id);
         /**
-         * 发货
+         * 发货(需要用户签名)
          */ 
         ACTION shipment( uint64_t seller_uid, const name& seller_eosid, uint128_t order_id, const string& number );
         /**
-         * 退货时的发货
+         * 退货时的发货(需要用户签名)
          */ 
         ACTION reshipment( uint64_t buyer_uid, const name& buyer_eosid, uint128_t order_id, const string& number );
         /**
-         * 确认收货
+         * 确认收货(需要用户签名)
          */ 
         ACTION conreceipt( uint64_t buyer_uid, const name& buyer_eosid, uint128_t order_id );
         /**
-         * 退货时的确认收货
+         * 退货时的确认收货(需要用户签名)
          */ 
         ACTION reconreceipt( uint64_t seller_uid, const name& seller_eosid, uint128_t order_id );
         /**
-         * 买家发起退货
+         * 买家发起退货(需要用户签名)
          */ 
         ACTION returns( uint64_t buyer_uid, const name& buyer_eosid, uint128_t order_id, const string& reasons );
         /**
-         * 申请仲裁
+         * 申请仲裁(需要用户签名)
          */ 
         ACTION applyarbit( uint64_t plaintiff_uid, const name& plaintiff_eosid, const Arbitration& arbitration );
         /**
-         * 评审员参与仲裁
+         * 评审员参与仲裁(需要用户签名)
          */ 
         ACTION inarbit( uint64_t reviewer_uid, const name& reviewer_eosid, uint32_t arbit_id );
         /**
-         * 更新仲裁结果
+         * 更新仲裁结果(需要用户签名)
          */ 
         ACTION updatearbit( const Arbitration& arbit );
         /**
-         * 延迟收货
+         * 延迟收货(需要用户签名)
          */ 
         ACTION deferreceipt( uint64_t user_uid, const name& user_eosid, uint128_t order_id );
         /**
-         * 退货时的延迟收货
+         * 退货时的延迟收货(需要用户签名)
          */ 
         ACTION deferreturn( uint64_t user_uid, const name& user_eosid, uint128_t order_id );
         /**
-         * 开始链外同步用户数据
+         * 开始链外同步用户数据(需要平台签名)
          */ 
         ACTION startsync();
         /**
-         * 结束链外同步数据
+         * 结束链外同步数据(需要平台签名)
          */ 
         ACTION endsync();
         /**
-         * 完成提现
+         * 完成提现(需要平台签名)
          */ 
         ACTION closesettle( uint64_t os_id, const string& trx_id );
         /**
-         * 绑定外链账号或者地址
+         * 绑定外链账号或者地址(需要用户签名)
          */ 
         ACTION bindaddr( uint64_t uid, const name& user_eosid, const symbol& sym, const string& addr );
         /**
-         * 添加、更新支持币种
+         * 添加、更新支持币种(需要平台签名)
          */ 
         ACTION updatecoin( const symbol& sym, const asset& fee, bool is_out, const asset& max );
         /**
-         * 设置订单的支付地址，只有订单支付币种不支持memo时才用
+         * 设置订单的支付地址，只有订单支付币种不支持memo时才用(需要平台签名)
          */ 
         ACTION setpayaddr( const uint128_t& order_id, const string& addr );
         

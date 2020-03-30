@@ -55,3 +55,11 @@ name":"reviewer1111",
 "active"{
 	"privateKey":"5JGwF9ogsY7gmXEHpzqnj8dbazmD9JW7mxomFetqRhxqx98U2hV",
 	"publicKey":"EOS5uAfeXPxNnJDuCtyPr3LM6sAm1P9Bx2RGCbgiro9exreWvCyqD"}
+
+"name":"fleafaucet11",
+"owner"{
+	"privateKey":"5JbNW1fQ4PsQgrmYNYFDWGgE3vsyv1tPshRpdw3tHrjYWbb79s9",
+	"publicKey":"EOS5p5d2xA9tLVLc8knw1afQfpfBXuHcFZGBVDUVVCy677LBm3K9k"},
+"active"{
+	"privateKey":"5JEqeNHksYz3Q47rKjPfMvP1D64X2JA61Qp9kMdLmaT7vKGiXZL",
+	"publicKey":"EOS6RbTLtFQ49MKa8epucQT7FvTjcCHgLc58FzY9mcPVcN94omxtT"}}
