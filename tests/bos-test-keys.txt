@@ -63,3 +63,11 @@ name":"reviewer1111",
 "active"{
 	"privateKey":"5JEqeNHksYz3Q47rKjPfMvP1D64X2JA61Qp9kMdLmaT7vKGiXZL",
 	"publicKey":"EOS6RbTLtFQ49MKa8epucQT7FvTjcCHgLc58FzY9mcPVcN94omxtT"}}
+
+"name":"fleadevopsac",
+	"owner":{
+		"privateKey":"5JZyXMH1E1QKksrxqwdA45SQtS2aEh2gwfGiHYwHwCc6WLDtNCm",
+		"publicKey":"EOS8PKxnqjuf9hpK17BDUEc33QD5d894KF9SZjiLSc7bqKVXGGhfy"},
+	"active":{
+		"privateKey":"5JTjhoW4cbBDcHkfDVE6C3DwHqgU4yccqTAxrV7xc7JMDwa1xja",
+		"publicKey":"EOS5BiYrPwXwFmrjLQ3ZUa3BX9crdomJNfYdu6uC863XAXrHNyWbo"}}
