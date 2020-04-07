@@ -175,6 +175,7 @@ namespace rareteam {
             ueosid_idx.modify( u_itr, same_payer, [&](auto& u){
                u.point = from.balance;
             });
+            AddTableLog("users"_n, OpType::OT_UPDATE, u_itr->uid);
          }
       }
    }
@@ -199,6 +200,7 @@ namespace rareteam {
             ueosid_idx.modify( u_itr, same_payer, [&](auto& u){
                u.point = to->balance;
             });
+            AddTableLog("users"_n, OpType::OT_UPDATE, u_itr->uid);
          }
       }
    }

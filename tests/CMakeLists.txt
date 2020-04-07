@@ -7,7 +7,7 @@ set(EOSIO_VERSION_SOFT_MAX "1.4")
 include(../CheckVersion.txt)
 
 if(EOSIO_ROOT STREQUAL "" OR NOT EOSIO_ROOT)
-   set(EOSIO_ROOT "/usr/local/eosio")
+   set(EOSIO_ROOT "/Users/necklace/eosio/2.0")
 endif()
 
 if(EOSIO_CONTRACT_DIR STREQUAL "" OR NOT EOSIO_CONTRACT_DIR)

@@ -271,6 +271,9 @@ BOOST_FIXTURE_TEST_CASE( recharge, platform_tester ) try {
    string tstr = uint128ToString(t);
    BOOST_REQUIRE_EQUAL(tstr,"1579703051");
 
+   auto m = N(reviewer1111)
+   BOOST_REQUIRE_EQUAL(m.value, 0)
+
    
 
    

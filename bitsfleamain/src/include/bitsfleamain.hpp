@@ -16,6 +16,7 @@
 #include "product.hpp"
 #include "review.hpp"
 #include "coins.hpp"
+#include "tablelog.hpp"
 
 using namespace eosio;
 
@@ -30,6 +31,7 @@ namespace rareteam {
         flea_global_singleton   _global_table;
         global                  _global;
         user_index              _user_table;
+        tablelog_index          _tablelog_table;
 
         global get_default_global() {
             global g;
@@ -57,6 +59,11 @@ namespace rareteam {
         bool CheckSymbol( const symbol& symbol );
         void PayCoin( const string& stroid, const Order& order, const User& seller, const User& buyer, const asset& seller_income, const asset& devops_income, const asset& referrer_income, const name& contract);
         void Withdraw( const name& user_eosid, const asset& quantity );
+
+        void AddTableLog(const name& table, OpType type, uint32_t primary);
+        void AddTableLog(const name& table, OpType type, uint64_t primary);
+        void AddTableLog(const name& table, OpType type, uint128_t primary);
+        void DeleteTableLog(uint64_t id);
 
     public:
         bitsfleamain( name receiver, name code, datastream<const char*> ds );
@@ -176,6 +183,8 @@ namespace rareteam {
          * 设置订单的支付地址，只有订单支付币种不支持memo时才用(需要平台签名)
          */ 
         ACTION setpayaddr( const uint128_t& order_id, const string& addr );
+
+        ACTION deletelog( uint64_t id);
         
         
         /********platform End*****/

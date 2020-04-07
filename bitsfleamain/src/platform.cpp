@@ -42,12 +42,14 @@ namespace rareteam {
                 u.referrer = referrer;
             }
         });
+        AddTableLog("users"_n, OpType::OT_INSERT, u_itr->uid);
 
         if( referrer > 0 && is_ref ) {
             auto ru_itr = _user_table.find( referrer );
             _user_table.modify( ru_itr, same_payer, [&]( auto& ru ) {
                 ru.referral_total += 1;
             });
+            AddTableLog("users"_n, OpType::OT_UPDATE, ru_itr->uid);
             AddCredit( referrer, 1 );
             //Reward Referrer Points
             RewardReferrer( ru_itr->eosid );
@@ -68,9 +70,11 @@ namespace rareteam {
             _user_table.modify( user, same_payer, [&](auto& u){
                 u.is_reviewer = false;
             });
+            AddTableLog("users"_n, OpType::OT_UPDATE, user.uid);
             reviewer_index reviewer_table( _self, _self.value );
             auto itr = reviewer_table.find( reviewer_uid );
             if( itr != reviewer_table.end() ) {
+                AddTableLog("reviewers"_n, OpType::OT_DELETE, itr->id);
                 reviewer_table.erase( itr );
             }
             return false;
@@ -95,6 +99,7 @@ namespace rareteam {
             r.voted_count = 0;
             r.create_time = time_point_sec(current_time_point().sec_since_epoch());
             r.last_active_time = time_point_sec(current_time_point().sec_since_epoch());
+            AddTableLog("reviewers"_n, OpType::OT_INSERT, r.id);
         });
     }
 
@@ -121,6 +126,7 @@ namespace rareteam {
                      _user_table.modify( user, same_payer, [&](auto& u){
                         u.is_reviewer = true;
                     });
+                    AddTableLog("users"_n, OpType::OT_UPDATE, user.uid);
                 }
                 r.voted_count += 1;
                 r.voter_approve.push_back( voter_uid );
@@ -132,8 +138,10 @@ namespace rareteam {
                     _user_table.modify( user, same_payer, [&](auto& u){
                         u.is_reviewer = false;
                     });
+                    AddTableLog("users"_n, OpType::OT_UPDATE, user.uid);
                 }
             }
+            AddTableLog("reviewers"_n, OpType::OT_UPDATE, reviewer.id);
         });
         // point logic
         if( _global.gift_vote.amount > 0 && _global.transaction_pool.amount >= _global.gift_vote.amount ) {
@@ -158,6 +166,7 @@ namespace rareteam {
             pro_table.modify( pro_itr, same_payer, [&](auto& p){
                 p.status = ProductStatus::LOCKED;
             });
+            AddTableLog("products"_n, OpType::OT_UPDATE, pro_itr->pid );
         }
         
         if( arbitration.type == ArbitType::AT_ORDER ) {
@@ -168,6 +177,7 @@ namespace rareteam {
                 check( order_itr->status == OrderStatus::OS_PENDING_RECEIPT, "apply for arbitration until payment has been made and order is not completed");
                 order_table.modify( order_itr, same_payer, [&](auto& o){
                     o.status = OrderStatus::OS_ARBITRATION;
+                    AddTableLog( "orders"_n, OpType::OT_UPDATE, o.id );
                 });
             }
             //Usually initiated by the seller
@@ -177,6 +187,7 @@ namespace rareteam {
                 check( res_itr->status == ReturnStatus::RS_PENDING_RECEIPT, "Initiation of arbitration without confirmation of receipt" );
                 res_table.modify( res_itr, same_payer, [&](auto& r){
                     r.status = ReturnStatus::RS_ARBITRATION;
+                    AddTableLog( "returns"_n, OpType::OT_UPDATE, r.id );
                 });
             }
         } else if( arbitration.type == ArbitType::AT_COMPLAINT ) { //complaint
@@ -201,6 +212,7 @@ namespace rareteam {
             a.create_time = time_point_sec(current_time_point().sec_since_epoch());
             a.defendant = arbitration.defendant;
             a.proof_content = arbitration.proof_content;
+            AddTableLog( "arbitrations"_n, OpType::OT_INSERT, a.id );
         });
     }
 
@@ -225,6 +237,7 @@ namespace rareteam {
                     a.status = ArbitStatus::AS_WAIT;
                 }
             });
+            AddTableLog( "arbitrations"_n, OpType::OT_UPDATE, arbit.id );
         }
     }
 
@@ -249,6 +262,7 @@ namespace rareteam {
                 a.arbitration_results = arbit.arbitration_results;
                 a.winner = arbit.winner;
             });
+            AddTableLog( "arbitrations"_n, OpType::OT_UPDATE, c_arbit.id );
             //order: Processing funds if there are orders
             if( c_arbit.type == ArbitType::AT_ORDER ) {
                 time_point_sec current_time = time_point_sec(current_time_point().sec_since_epoch());
@@ -262,10 +276,12 @@ namespace rareteam {
                         if( repro_itr != repro_table.end() ) { //initiated by the seller
                             repro_table.modify( repro_itr, same_payer, [&](auto& r){
                                 r.status = ReturnStatus::RS_COMPLETED;
+                                AddTableLog( "returns"_n, OpType::OT_UPDATE, r.id );
                             });
                             order_table.modify( order_itr, same_payer, [&](auto& o){
                                 o.status = OrderStatus::OS_CANCELLED;
                                 o.end_time = current_time;
+                                AddTableLog( "orders"_n, OpType::OT_UPDATE, o.id );
                             });
                             //update product status
                             product_index pro_table( _self, _self.value );
@@ -273,10 +289,12 @@ namespace rareteam {
                             pro_table.modify( product, same_payer, [&](auto& p){
                                 p.status = ProductStatus::NORMAL;
                             });
+                            AddTableLog("products"_n, OpType::OT_UPDATE, product.pid );
                             Refund( order );
                         } else { //initiated by the buyer
                             order_table.modify( order, same_payer, [&](auto& o){
                                 o.status = OrderStatus::OS_RETURN;
+                                AddTableLog( "orders"_n, OpType::OT_UPDATE, o.id );
                             });
                             repro_table.emplace( _self, [&](auto& r){
                                 r.id = repro_table.available_primary_key();
@@ -287,6 +305,7 @@ namespace rareteam {
                                 r.reasons = arbit.arbitration_results;
                                 r.create_time = current_time;
                                 r.ship_time_out = time_point_sec(current_time_point().sec_since_epoch() + _global.ship_time_out);
+                                AddTableLog( "returns"_n, OpType::OT_INSERT, r.id );
                             });
                         }
                         SubCredit( order.seller_uid, 100 );
@@ -295,11 +314,13 @@ namespace rareteam {
                             order_table.modify( order_itr, same_payer, [&](auto& o){ //Redeliver
                                 o.status = OrderStatus::OS_PENDING_SHIPMENT;
                                 o.ship_time_out = time_point_sec(current_time_point().sec_since_epoch() + _global.ship_time_out);
+                                AddTableLog( "orders"_n, OpType::OT_UPDATE, o.id );
                             });
                         } else { //initiated by the buyer
                             order_table.modify( order_itr, same_payer, [&](auto& o){
                                 o.status = OrderStatus::OS_COMPLETED;
                                 o.end_time = current_time;
+                                AddTableLog( "orders"_n, OpType::OT_UPDATE, o.id );
                             });
                             EndOrder( order );
                         }
@@ -343,7 +364,11 @@ namespace rareteam {
                 //cancel reviewer
                 reviewer_index reviewer_table( _self, _self.value );
                 auto rev_itr = reviewer_table.find( u.uid );
-                if( rev_itr != reviewer_table.end() ) reviewer_table.erase( rev_itr );
+                if( rev_itr != reviewer_table.end() ) {
+                    AddTableLog("reviewers"_n, OpType::OT_DELETE, rev_itr->id);
+                    reviewer_table.erase( rev_itr );
+                }
+                
             } else {
                 u.credit_value -= value;
                 if( u.credit_value < _global.credit_reviewer_limit && user.is_reviewer ) {
@@ -355,6 +380,7 @@ namespace rareteam {
                 u.status = UserStatus::LOCK;
             }
         });
+        AddTableLog("users"_n, OpType::OT_UPDATE, user.uid);
     }
 
     void bitsfleamain::SubCredit( uint64_t user_uid, uint32_t value, bool cancel_reviewer )
@@ -368,6 +394,7 @@ namespace rareteam {
         _user_table.modify( user, same_payer, [&](auto& u){
             u.credit_value += value;
         });
+        AddTableLog("users"_n, OpType::OT_UPDATE, user.uid);
     }
     void bitsfleamain::AddCredit( uint64_t user_uid, uint32_t value )
     {
@@ -473,6 +500,7 @@ namespace rareteam {
                 oa_idx.modify( oa_itr, same_payer, [&](auto& o){
                     o.addr = addr;
                 });
+                AddTableLog("otheraddr"_n, OpType::OT_UPDATE, oa_itr->id);
                 break;
             }
             oa_itr++;
@@ -483,6 +511,7 @@ namespace rareteam {
                 o.uid = uid;
                 o.coin_type = sym;
                 o.addr = addr;
+                AddTableLog("otheraddr"_n, OpType::OT_INSERT, o.id);
             });
         }
     }
@@ -519,6 +548,7 @@ namespace rareteam {
         auto& order = order_table.get( order_id, "Invalid order_id" );
         order_table.modify( order, same_payer, [&](auto& o){
             o.pay_addr = addr;
+            AddTableLog( "orders"_n, OpType::OT_UPDATE, o.id );
         });
     }
     

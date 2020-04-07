@@ -13,7 +13,8 @@ namespace rareteam {
 
     bitsfleamain::bitsfleamain( name receiver, name code, datastream<const char*> ds ): eosio::contract( receiver, code, ds ),
     _global_table(_self, _self.value),
-    _user_table(_self, _self.value)
+    _user_table(_self, _self.value),
+    _tablelog_table(_self, _self.value)
     {
         if( _global_table.exists() ){
             _is_init = true;
@@ -170,9 +171,9 @@ namespace rareteam {
 
     void bitsfleamain::test(const string& para)
     {
-        string str = "05FBED483A974456708EF12FCF3D278276E982234D775ECEE0DFA5CB49B8B492";
-        auto hash = hex_to_sha256(str);
-        string result = sha256_to_hex(hash);
+        // string str = "05FBED483A974456708EF12FCF3D278276E982234D775ECEE0DFA5CB49B8B492";
+        // auto hash = hex_to_sha256(str);
+        // string result = sha256_to_hex(hash);
         //check(false,result);
         //set_zero( hash );
         //check(is_zero( hash ),"is_zero Error");
@@ -181,6 +182,9 @@ namespace rareteam {
         //auto num = get_uint64(hash);
         
         //check(false,result);
+
+        name n = "reviewer1112"_n;
+        print(n.value);
     }
 
     void bitsfleamain::OnError( const onerror& error )
@@ -188,8 +192,51 @@ namespace rareteam {
         
     }
 
-    
+    void bitsfleamain::AddTableLog(const name& table, OpType type, uint32_t primary)
+    {
+        _tablelog_table.emplace( _self, [&](auto& t){
+            t.id = _tablelog_table.available_primary_key();
+            t.table = table;
+            t.type = type;
+            t.primary = std::to_string(primary);
+        });
+    }
 
+    
+    void bitsfleamain::AddTableLog(const name& table, OpType type, uint64_t primary)
+    {
+        _tablelog_table.emplace( _self, [&](auto& t){
+            t.id = _tablelog_table.available_primary_key();
+            t.table = table;
+            t.type = type;
+            t.primary = std::to_string(primary);
+        });
+    }
+
+    void bitsfleamain::AddTableLog(const name& table, OpType type, uint128_t primary)
+    {
+        _tablelog_table.emplace( _self, [&](auto& t){
+            t.id = _tablelog_table.available_primary_key();
+            t.table = table;
+            t.type = type;
+            t.primary = uint128ToString(primary);
+        });
+    }
+
+    void bitsfleamain::DeleteTableLog(uint64_t id)
+    {
+        auto itr = _tablelog_table.begin();
+        while ( itr != _tablelog_table.end() && itr->id <= id )
+        {
+            itr = _tablelog_table.erase(itr);
+        }
+    }
+
+    void bitsfleamain::deletelog( uint64_t id)
+    {
+        require_auth( _self );
+        DeleteTableLog(id);
+    }
 
     
 
