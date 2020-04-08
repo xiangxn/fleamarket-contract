@@ -12,6 +12,7 @@ namespace rareteam {
     {
         require_auth( _self );
         auto& user = _user_table.get( uid, "Invalid account uid" );
+        require_auth( user.eosid );
         check( IsLockUser( user ) == false, "Account is locked" );
         check( product.price.symbol == product.postage.symbol, "Inconsistent payment methods" );
         check( CheckSymbol( product.price.symbol ), "This currency is not currently supported" );
