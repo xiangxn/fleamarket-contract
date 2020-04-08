@@ -62,7 +62,7 @@ namespace rareteam
         uint64_t uid = 0;
         string title;
         string description;
-        string photos;
+        vector<string> photos;
         uint64_t category;
         uint32_t status = ProductStatus::PUBLISH;
         bool is_new = false;

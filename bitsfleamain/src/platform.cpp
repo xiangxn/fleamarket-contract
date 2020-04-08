@@ -74,7 +74,7 @@ namespace rareteam {
             reviewer_index reviewer_table( _self, _self.value );
             auto itr = reviewer_table.find( reviewer_uid );
             if( itr != reviewer_table.end() ) {
-                AddTableLog("reviewers"_n, OpType::OT_DELETE, itr->id);
+                AddTableLog("reviewers"_n, OpType::OT_DELETE, itr->uid);
                 reviewer_table.erase( itr );
             }
             return false;
@@ -99,7 +99,7 @@ namespace rareteam {
             r.voted_count = 0;
             r.create_time = time_point_sec(current_time_point().sec_since_epoch());
             r.last_active_time = time_point_sec(current_time_point().sec_since_epoch());
-            AddTableLog("reviewers"_n, OpType::OT_INSERT, r.id);
+            AddTableLog("reviewers"_n, OpType::OT_INSERT, r.uid);
         });
     }
 
@@ -141,7 +141,7 @@ namespace rareteam {
                     AddTableLog("users"_n, OpType::OT_UPDATE, user.uid);
                 }
             }
-            AddTableLog("reviewers"_n, OpType::OT_UPDATE, reviewer.id);
+            AddTableLog("reviewers"_n, OpType::OT_UPDATE, reviewer.uid);
         });
         // point logic
         if( _global.gift_vote.amount > 0 && _global.transaction_pool.amount >= _global.gift_vote.amount ) {
@@ -187,7 +187,7 @@ namespace rareteam {
                 check( res_itr->status == ReturnStatus::RS_PENDING_RECEIPT, "Initiation of arbitration without confirmation of receipt" );
                 res_table.modify( res_itr, same_payer, [&](auto& r){
                     r.status = ReturnStatus::RS_ARBITRATION;
-                    AddTableLog( "returns"_n, OpType::OT_UPDATE, r.id );
+                    AddTableLog( "returns"_n, OpType::OT_UPDATE, r.order_id );
                 });
             }
         } else if( arbitration.type == ArbitType::AT_COMPLAINT ) { //complaint
@@ -276,7 +276,7 @@ namespace rareteam {
                         if( repro_itr != repro_table.end() ) { //initiated by the seller
                             repro_table.modify( repro_itr, same_payer, [&](auto& r){
                                 r.status = ReturnStatus::RS_COMPLETED;
-                                AddTableLog( "returns"_n, OpType::OT_UPDATE, r.id );
+                                AddTableLog( "returns"_n, OpType::OT_UPDATE, r.order_id );
                             });
                             order_table.modify( order_itr, same_payer, [&](auto& o){
                                 o.status = OrderStatus::OS_CANCELLED;
@@ -305,7 +305,7 @@ namespace rareteam {
                                 r.reasons = arbit.arbitration_results;
                                 r.create_time = current_time;
                                 r.ship_time_out = time_point_sec(current_time_point().sec_since_epoch() + _global.ship_time_out);
-                                AddTableLog( "returns"_n, OpType::OT_INSERT, r.id );
+                                AddTableLog( "returns"_n, OpType::OT_INSERT, r.order_id );
                             });
                         }
                         SubCredit( order.seller_uid, 100 );
@@ -365,7 +365,7 @@ namespace rareteam {
                 reviewer_index reviewer_table( _self, _self.value );
                 auto rev_itr = reviewer_table.find( u.uid );
                 if( rev_itr != reviewer_table.end() ) {
-                    AddTableLog("reviewers"_n, OpType::OT_DELETE, rev_itr->id);
+                    AddTableLog("reviewers"_n, OpType::OT_DELETE, rev_itr->uid);
                     reviewer_table.erase( rev_itr );
                 }
                 

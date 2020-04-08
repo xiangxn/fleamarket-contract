@@ -51,7 +51,7 @@ namespace rareteam {
                 pa_item.last_price_user = 0;
                 pa_item.start_time = pa.start_time;
                 pa_item.end_time = pa.end_time;
-                AddTableLog( "proauction"_n, OpType::OT_INSERT, pa_item.id );
+                AddTableLog( "proauction"_n, OpType::OT_INSERT, pa_item.pid );
             });
         }
     }
@@ -91,7 +91,7 @@ namespace rareteam {
                 a.is_delisted = is_delisted;
                 a.review_details = memo;
                 a.review_time = time_point_sec(current_time_point().sec_since_epoch());
-                AddTableLog( "proaudits"_n, OpType::OT_INSERT, a.id );
+                AddTableLog( "proaudits"_n, OpType::OT_INSERT, a.pid );
             });
 
             pro_table.modify( pro_itr, same_payer, [&]( auto& p ){
@@ -152,7 +152,7 @@ namespace rareteam {
             a.current_price = price;
             a.auction_times += 1;
             a.last_price_user = buyer_uid;
-            AddTableLog( "proauction"_n, OpType::OT_UPDATE, a.id );
+            AddTableLog( "proauction"_n, OpType::OT_UPDATE, a.pid );
         });
     }
 
@@ -328,7 +328,7 @@ namespace rareteam {
             re.ship_time = current_time;
             re.status = ReturnStatus::RS_PENDING_RECEIPT;
             re.receipt_time_out = time_point_sec( current_time_point().sec_since_epoch() + _global.receipt_time_out );
-            AddTableLog( "returns"_n, OpType::OT_UPDATE, re.id );
+            AddTableLog( "returns"_n, OpType::OT_UPDATE, re.order_id );
         });
 
         // shipment delivery timeout
@@ -607,7 +607,7 @@ namespace rareteam {
             re.receipt_time = current_time;
             re.status = ReturnStatus::RS_COMPLETED;
             re.end_time = current_time;
-            AddTableLog( "returns"_n, OpType::OT_UPDATE, re.id );
+            AddTableLog( "returns"_n, OpType::OT_UPDATE, re.order_id );
         });
         //Refund
         Refund( order );
@@ -647,7 +647,7 @@ namespace rareteam {
         proreturn_table.modify( proreturn, same_payer, [&](auto& pr){
             pr.receipt_time_out = time_point_sec( current_time_point().sec_since_epoch() + _global.receipt_time_out );
             pr.delayed_count += 1;
-            AddTableLog( "returns"_n, OpType::OT_UPDATE, pr.id );
+            AddTableLog( "returns"_n, OpType::OT_UPDATE, pr.order_id );
         });
 
     }
@@ -684,7 +684,7 @@ namespace rareteam {
             r.reasons = reasons;
             r.create_time = time_point_sec(current_time_point().sec_since_epoch());
             r.ship_time_out = time_point_sec(current_time_point().sec_since_epoch() + _global.ship_time_out);
-            AddTableLog( "returns"_n, OpType::OT_INSERT, r.id );
+            AddTableLog( "returns"_n, OpType::OT_INSERT, r.order_id );
         });
 
     }
