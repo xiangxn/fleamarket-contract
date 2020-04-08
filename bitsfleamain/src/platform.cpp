@@ -8,7 +8,7 @@ using namespace eosio;
 
 namespace rareteam {
 
-    void bitsfleamain::reguser( const name& eosid, const string& nickname, const checksum256& phone_hash, const string& phone_encrypt, uint64_t referrer )
+    void bitsfleamain::reguser( const name& eosid, const string& nickname, const checksum256& phone_hash, const string& phone_encrypt, uint64_t referrer, const public_key& auth_key )
     {
         require_auth( _self );
 
@@ -37,6 +37,7 @@ namespace rareteam {
             u.phone_hash = phone_hash;
             u.phone_encrypt = phone_encrypt;
             u.credit_value = _global.credit_base_score;
+            u.auth_key = auth_key;
             u.last_active_time = time_point_sec(current_time_point().sec_since_epoch());
             if( referrer > 0 && is_ref ) {
                 u.referrer = referrer;
