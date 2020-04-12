@@ -106,7 +106,7 @@ namespace rareteam {
         /**
          * 发布商品(需要平台签名)
          */ 
-        ACTION publish( uint64_t uid, const Product& product, const ProductAuction& pa );
+        ACTION publish( uint64_t uid, const Product& product, const optional<ProductAuction>& pa );
         /**
          * 评审员审核商品(需要用户签名)
          */ 

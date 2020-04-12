@@ -8,7 +8,7 @@ using namespace eosio;
 
 namespace rareteam {
 
-    void bitsfleamain::publish( uint64_t uid, const Product& product, const ProductAuction& pa )
+    void bitsfleamain::publish( uint64_t uid, const Product& product, const optional<ProductAuction>& pa )
     {
         require_auth( _self );
         auto& user = _user_table.get( uid, "Invalid account uid" );
@@ -40,18 +40,22 @@ namespace rareteam {
             p.release_time = time_point_sec(current_time_point().sec_since_epoch());
             AddTableLog("products"_n, OpType::OT_INSERT, p.pid );
         });
-        if( pa.id > 0 ) {
+        if( pro_itr->sale_method == 1 ) {
+            check( pa.has_value(), "Please provide auction information" );
+        }
+        if( pa.has_value() ) {
+            auto tpa = pa.value();
             auction_index pa_table( _self, _self.value );
             pa_table.emplace( _self, [&]( auto& pa_item ) {
                 pa_item.id = pa_table.available_primary_key();
                 pa_item.pid = pro_itr->pid;
-                pa_item.security = pa.security;
-                pa_item.markup = pa.markup;
+                pa_item.security = tpa.security;
+                pa_item.markup = tpa.markup;
                 pa_item.current_price = product.price;
                 pa_item.auction_times = 0;
                 pa_item.last_price_user = 0;
-                pa_item.start_time = pa.start_time;
-                pa_item.end_time = pa.end_time;
+                pa_item.start_time = tpa.start_time;
+                pa_item.end_time = tpa.end_time;
                 AddTableLog( "proauction"_n, OpType::OT_INSERT, pa_item.pid );
             });
         }
