@@ -2,6 +2,7 @@
 
 #include <eosio/eosio.hpp>
 #include <eosio/singleton.hpp>
+#include <eosio/crypto.hpp>
 #include <string>
 
 #include "types.hpp"
@@ -152,6 +153,8 @@ namespace rareteam {
          * When allocating supply
          */ 
         asset dividend_last_supply = asset(0,FMP);
+
+        public_key encrypt_key;
     };
 
    typedef eosio::singleton< "global"_n, global> flea_global_singleton;
