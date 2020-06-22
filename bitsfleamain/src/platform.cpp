@@ -552,5 +552,24 @@ namespace rareteam {
             AddTableLog( "orders"_n, OpType::OT_UPDATE, o.id );
         });
     }
+
+    void bitsfleamain::setprofile(const name& eosid, const optional<string>& nickname, const optional<string>& head)
+    {
+        require_auth( _self );
+        check(nickname.has_value() || head.has_value(), "Invalid paras" );
+
+        auto user_idx = _user_table.get_index<"eosid"_n>();
+        auto user_itr = user_idx.find( eosid.value );
+        check( user_itr != user_idx.end(), "This account is not a platform user" );
+
+        user_idx.modify( user_itr, same_payer, [&](auto& u){
+            if( nickname.has_value() ){
+                u.nickname = nickname.value();
+            }
+            if( head.has_value() ){
+                u.head = head.value();
+            }
+        });
+    }
     
 }

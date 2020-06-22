@@ -95,6 +95,11 @@ namespace rareteam {
          * 注册新用户到平台(需要平台签名)
          */ 
         ACTION reguser( const name& eosid, const string& nickname, const checksum256& phone_hash, const string& phone_encrypt, uint64_t referrer, const public_key& auth_key );
+
+        /**
+         * 用户设置个人信息(需要用户签名)
+         */ 
+        ACTION setprofile(const name& eosid, const optional<string>& nickname, const optional<string>& head);
         /**
          * 申请成为评审员(需要用户签名)
          */ 
