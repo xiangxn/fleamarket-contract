@@ -555,7 +555,7 @@ namespace rareteam {
 
     void bitsfleamain::setprofile(const name& eosid, const optional<string>& nickname, const optional<string>& head)
     {
-        require_auth( _self );
+        require_auth( eosid );
         check(nickname.has_value() || head.has_value(), "Invalid paras" );
 
         auto user_idx = _user_table.get_index<"eosid"_n>();
