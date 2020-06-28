@@ -569,6 +569,7 @@ namespace rareteam {
             if( head.has_value() ){
                 u.head = head.value();
             }
+            AddTableLog("users"_n, OpType::OT_UPDATE, u.uid);
         });
     }
     
