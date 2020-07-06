@@ -2,9 +2,9 @@ cleos wallet unlock -n localtest  --password PW5JAipZzmGEfah7rLgi6hwyw8Hrg6yxCLx
 
 cleos create account eosio eosio.token EOS8M1jvYGgV2XuPqS2nbZaW9tRZfUjT1N88BxJVeF4jVFDLfSAzQ EOS8M1jvYGgV2XuPqS2nbZaW9tRZfUjT1N88BxJVeF4jVFDLfSAzQ &&
 
-cleos create account eosio bitsfleamain EOS8M1jvYGgV2XuPqS2nbZaW9tRZfUjT1N88BxJVeF4jVFDLfSAzQ EOS8M1jvYGgV2XuPqS2nbZaW9tRZfUjT1N88BxJVeF4jVFDLfSAzQ &&
+cleos create account eosio bitsfleamain EOS76g5Xb1qHiv6iqzLCix2wsgSYzAAAnbCXMhU85n4SZPibqD8bV EOS6VqjyRiJZWUDFErcnX7CkhDkkBKjaZCsLfGJXPJEEe5DNbW2KW &&
 
-cleos create account eosio fleadevopsac EOS8M1jvYGgV2XuPqS2nbZaW9tRZfUjT1N88BxJVeF4jVFDLfSAzQ EOS8M1jvYGgV2XuPqS2nbZaW9tRZfUjT1N88BxJVeF4jVFDLfSAzQ &&
+cleos create account eosio fleadevopsac EOS8PKxnqjuf9hpK17BDUEc33QD5d894KF9SZjiLSc7bqKVXGGhfy EOS5BiYrPwXwFmrjLQ3ZUa3BX9crdomJNfYdu6uC863XAXrHNyWbo &&
 
 cleos create account eosio player EOS8M1jvYGgV2XuPqS2nbZaW9tRZfUjT1N88BxJVeF4jVFDLfSAzQ EOS8M1jvYGgV2XuPqS2nbZaW9tRZfUjT1N88BxJVeF4jVFDLfSAzQ &&
 
@@ -12,7 +12,9 @@ cleos create account eosio reviewer EOS8M1jvYGgV2XuPqS2nbZaW9tRZfUjT1N88BxJVeF4j
 
 cleos create account eosio player1 EOS8M1jvYGgV2XuPqS2nbZaW9tRZfUjT1N88BxJVeF4jVFDLfSAzQ EOS8M1jvYGgV2XuPqS2nbZaW9tRZfUjT1N88BxJVeF4jVFDLfSAzQ &&
 
-cleos create account eosio fleagateways EOS8M1jvYGgV2XuPqS2nbZaW9tRZfUjT1N88BxJVeF4jVFDLfSAzQ EOS8M1jvYGgV2XuPqS2nbZaW9tRZfUjT1N88BxJVeF4jVFDLfSAzQ &&
+cleos create account eosio fleagateways EOS6xMD89KCnT92hYqjk1DBTwP5GtpwkjrgDGuHTi4CS4w1tFKT9j EOS5ix3Mo2rbDwWSQyTAKtYSmEapuxxyHmk6gsGuWNUJBsGA5s7si &&
+
+cleos create account eosio fleafaucet11 EOS5p5d2xA9tLVLc8knw1afQfpfBXuHcFZGBVDUVVCy677LBm3K9k EOS6RbTLtFQ49MKa8epucQT7FvTjcCHgLc58FzY9mcPVcN94omxtT &&
 
 cleos create account eosio necklace EOS8M1jvYGgV2XuPqS2nbZaW9tRZfUjT1N88BxJVeF4jVFDLfSAzQ EOS8M1jvYGgV2XuPqS2nbZaW9tRZfUjT1N88BxJVeF4jVFDLfSAzQ &&
 
@@ -24,27 +26,4 @@ cleos set contract bitsfleamain ./build/bitsfleamain -p bitsfleamain &&
 
 cleos push action eosio.token create '[ "eosio", "1000000000.0000 BOS", 0, 0, 0]' -p eosio.token &&
 
-cleos set account permission bitsfleamain active '{"threshold": 1,"keys": [{"key": "EOS8M1jvYGgV2XuPqS2nbZaW9tRZfUjT1N88BxJVeF4jVFDLfSAzQ","weight": 1}],"accounts": [{"permission":{"actor":"bitsfleamain","permission":"eosio.code"},"weight":1}]}' owner -p bitsfleamain &&
-sleep 2s &&
-cleos push action bitsfleamain init '[]' -p bitsfleamain &&
-
-cleos push action bitsfleamain reguser '[player,"player","05FBED483A974456708EF12FCF3D278276E982234D775ECEE0DFA5CB49B8B492","05FBED483A974456708EF12FCF3D278276E982234D775ECEE0DFA5CB49B8B492",0, "EOS6VqjyRiJZWUDFErcnX7CkhDkkBKjaZCsLfGJXPJEEe5DNbW2KW"]' -p bitsfleamain &&
-
-cleos push action bitsfleamain reguser '[reviewer,"reviewer","05FBED483A974456708EF12FCF3D278276E982234D775ECEE0DFA5CB49B8B493","05FBED483A974456708EF12FCF3D278276E982234D775ECEE0DFA5CB49B8B493",0, "EOS6VqjyRiJZWUDFErcnX7CkhDkkBKjaZCsLfGJXPJEEe5DNbW2KW"]' -p bitsfleamain &&
-
-cleos push action bitsfleamain reguser '[player1,"player1","05FBED483A974456708EF12FCF3D278276E982234D775ECEE0DFA5CB49B8B494","05FBED483A974456708EF12FCF3D278276E982234D775ECEE0DFA5CB49B8B493",1, "EOS6VqjyRiJZWUDFErcnX7CkhDkkBKjaZCsLfGJXPJEEe5DNbW2KW"]' -p bitsfleamain &&
-
-cleos push action eosio.token issue '[ "player", "10000.0000 BOS", "memo" ]' -p eosio &&
-cleos push action eosio.token issue '[ "player1", "10000.0000 BOS", "memo" ]' -p eosio &&
-cleos push action eosio.token issue '[ "reviewer", "10000.0000 BOS", "memo" ]' -p eosio &&
-
-cleos get table bitsfleamain bitsfleamain global &&
-
-cleos get table bitsfleamain bitsfleamain coins &&
-
-# cleos get currency stats bitsfleamain FMP &&
-cleos get table bitsfleamain FMP stat &&
-
-cleos get table bitsfleamain bitsfleamain users # &&
-
-# {"uid":0,"product":{"pid":0,"title":"title test","description":"description 测试","photos":"photos 测试","category":0,"status":0,"is_new":false,"is_returns":false,"sale_method":0,"price":"100.0000 BOS","transaction_method":1,"stock_count":1,"is_retail":false,"postage":"1.0000 BOS","position":"位置"},"pa":null}
+cleos set account permission bitsfleamain active '{"threshold": 1,"keys": [{"key": "EOS6VqjyRiJZWUDFErcnX7CkhDkkBKjaZCsLfGJXPJEEe5DNbW2KW","weight": 1}],"accounts": [{"permission":{"actor":"bitsfleamain","permission":"eosio.code"},"weight":1}]}' owner -p bitsfleamain
