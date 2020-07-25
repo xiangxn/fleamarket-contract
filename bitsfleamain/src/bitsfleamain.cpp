@@ -197,6 +197,7 @@ namespace rareteam {
     {
         _tablelog_table.emplace( _self, [&](auto& t){
             t.id = _tablelog_table.available_primary_key();
+            t.id = t.id == 0 ? t.id + 1 : t.id;
             t.table = table;
             t.type = type;
             t.primary = std::to_string(primary);
@@ -208,6 +209,7 @@ namespace rareteam {
     {
         _tablelog_table.emplace( _self, [&](auto& t){
             t.id = _tablelog_table.available_primary_key();
+            t.id = t.id == 0 ? t.id + 1 : t.id;
             t.table = table;
             t.type = type;
             t.primary = std::to_string(primary);
@@ -218,6 +220,7 @@ namespace rareteam {
     {
         _tablelog_table.emplace( _self, [&](auto& t){
             t.id = _tablelog_table.available_primary_key();
+            t.id = t.id == 0 ? t.id + 1 : t.id;
             t.table = table;
             t.type = type;
             t.primary = uint128ToString(primary);
