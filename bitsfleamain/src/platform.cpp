@@ -145,12 +145,12 @@ namespace rareteam {
             AddTableLog("reviewers"_n, OpType::OT_UPDATE, reviewer.uid);
         });
         // point logic
-        // if( _global.gift_vote.amount > 0 && _global.transaction_pool.amount >= _global.gift_vote.amount ) {
-        //     action(permission_level{_self, "active"_n}, "bitsfleamain"_n, "issue"_n,
-        //         std::make_tuple( voter_eosid, _global.gift_vote, string("Reward voted") )
-        //     ).send();
-        //     _global.transaction_pool -= _global.gift_vote;
-        // }
+        if( _global.gift_vote.amount > 0 && _global.transaction_pool.amount >= _global.gift_vote.amount ) {
+            action(permission_level{_self, "active"_n}, "bitsfleamain"_n, "issue"_n,
+                std::make_tuple( voter_eosid, _global.gift_vote, string("Reward voted") )
+            ).send();
+            _global.transaction_pool -= _global.gift_vote;
+        }
 
     }
 
