@@ -108,6 +108,7 @@ namespace rareteam {
     {
         require_auth( voter_eosid );
         check( IsLockUser( voter_uid ) == false, "Account is locked" );
+        check( voter_uid != reviewer_uid, "Can't vote for myself" );
         auto& user = _user_table.get( reviewer_uid, "Invalid reviewer uid" );
         reviewer_index rev_table( _self, _self.value );
         auto& reviewer = rev_table.get( reviewer_uid, "The reviewer uid is not a reviewer" );
