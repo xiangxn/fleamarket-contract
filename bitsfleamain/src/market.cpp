@@ -78,10 +78,13 @@ namespace rareteam {
         AddTableLog("products"_n, OpType::OT_UPDATE, product.pid );
     }
 
-    void bitsfleamain::review( uint64_t reviewer_uid, const name& reviewer_eosid, uint32_t pid, bool is_delisted, string& memo )
+    void bitsfleamain::review( uint64_t reviewer_uid, const name& reviewer_eosid, uint32_t pid, bool is_delisted, optional<string>& memo )
     {
         require_auth( reviewer_eosid );
         check( IsLockUser( reviewer_uid ) == false, "Account is locked" );
+        if( memo.has_value() ) {
+            check( memo.value().length()>0 && memo.value().length()<=1000, "Invalid memo" );
+        }
 
         reviewer_index re_table( _self, _self.value );
         auto re_itr = re_table.find( reviewer_uid );
@@ -94,7 +97,7 @@ namespace rareteam {
                 a.pid = pid;
                 a.reviewer_uid = reviewer_uid;
                 a.is_delisted = is_delisted;
-                a.review_details = memo;
+                a.review_details = memo.has_value() ? memo.value() : string("");
                 a.review_time = time_point_sec(current_time_point().sec_since_epoch());
                 AddTableLog( "proaudits"_n, OpType::OT_INSERT, a.pid );
             });

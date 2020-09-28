@@ -115,7 +115,7 @@ namespace rareteam {
         /**
          * 评审员审核商品(需要用户签名)
          */ 
-        ACTION review( uint64_t reviewer_uid, const name& reviewer_eosid, uint32_t pid, bool is_delisted, string& memo );
+        ACTION review( uint64_t reviewer_uid, const name& reviewer_eosid, uint32_t pid, bool is_delisted, optional<string>& memo );
         /**
          * 卖家下架商品(需要用户签名)
          */ 
