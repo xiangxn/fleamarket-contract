@@ -85,12 +85,16 @@ namespace rareteam {
         if( memo.has_value() ) {
             check( memo.value().length()>0 && memo.value().length()<=1000, "Invalid memo" );
         }
+        if( is_delisted ) {
+            check( memo.has_value(), "must provide reasons for delisting" );
+        }
 
         reviewer_index re_table( _self, _self.value );
         auto re_itr = re_table.find( reviewer_uid );
         product_index pro_table( _self, _self.value );
         auto pro_itr = pro_table.find( pid );
         if( re_itr != re_table.end() && pro_itr != pro_table.end() && pro_itr->status == ProductStatus::PUBLISH ) {
+            check( reviewer_uid != pro_itr->uid, "can’t review the products posted by myself" );
             proaudit_index audit_table( _self, _self.value );
             audit_table.emplace( _self, [&]( auto& a ){
                 a.id = audit_table.available_primary_key();
