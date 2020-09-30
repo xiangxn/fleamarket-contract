@@ -35,7 +35,7 @@ namespace rareteam {
         _global.encrypt_key = str_to_pub("EOS5BiYrPwXwFmrjLQ3ZUa3BX9crdomJNfYdu6uC863XAXrHNyWbo");
 
         //init Category
-        string v[] = {"数码","玩具","美妆","居家","服装","图书","其他"};
+        string v[] = {"数码","玩具","美妆","居家","服装","图书","虚拟","其他"};
         Category_index category_table( _self, _self.value);
         for( auto& item : v) {
             category_table.emplace( _self, [&](auto& c){
@@ -68,13 +68,13 @@ namespace rareteam {
             create( _self, asset( 10000000000000, eos ), 0 );
         }
         // BTS
-        symbol BTS = symbol(symbol_code("BTS"), 5);
-        coin_table.emplace( _self, [&](auto& c){
-            c.sym = BTS;
-            c.fee = asset(100000, BTS);
-            c.is_out = true;
-        });
-        create( _self, asset( 100000000000000, BTS ), 0 );
+        // symbol BTS = symbol(symbol_code("BTS"), 5);
+        // coin_table.emplace( _self, [&](auto& c){
+        //     c.sym = BTS;
+        //     c.fee = asset(100000, BTS);
+        //     c.is_out = true;
+        // });
+        // create( _self, asset( 100000000000000, BTS ), 0 );
 
         // NULS
         symbol NULS = symbol(symbol_code("NULS"),8);
@@ -86,13 +86,13 @@ namespace rareteam {
         create( _self, asset(10000000000000000, NULS ), 0 );
 
         // ETH
-        symbol ETH = symbol(symbol_code("ETH"), 8);
-        coin_table.emplace( _self, [&](auto& c){
-            c.sym = ETH;
-            c.fee = asset(1000000, ETH);
-            c.is_out = true;
-        });
-        create( _self, asset(10000000000000000, ETH ), 0 );
+        // symbol ETH = symbol(symbol_code("ETH"), 8);
+        // coin_table.emplace( _self, [&](auto& c){
+        //     c.sym = ETH;
+        //     c.fee = asset(1000000, ETH);
+        //     c.is_out = true;
+        // });
+        // create( _self, asset(10000000000000000, ETH ), 0 );
 
         //USDT
         symbol USDT = symbol(symbol_code("USDT"), 8);
@@ -104,13 +104,13 @@ namespace rareteam {
         create( _self, asset(10000000000000000, USDT ), 0 );
 
         // CNY
-        symbol CNY = symbol(symbol_code("CNY"), 4);
-        coin_table.emplace( _self, [&](auto& c){
-            c.sym = CNY;
-            c.fee = asset(20000, CNY);
-            c.is_out = true;
-        });
-        create( _self, asset(10000000000000, CNY ), 0 );
+        // symbol CNY = symbol(symbol_code("CNY"), 4);
+        // coin_table.emplace( _self, [&](auto& c){
+        //     c.sym = CNY;
+        //     c.fee = asset(20000, CNY);
+        //     c.is_out = true;
+        // });
+        // create( _self, asset(10000000000000, CNY ), 0 );
     }
 
     void bitsfleamain::reset()
@@ -133,6 +133,9 @@ namespace rareteam {
 
         reviewer_index reviewer_table( _self, _self.value );
         clear_table(reviewer_table);
+
+        otheraddr_index addrs_table( _self, _self.value );
+        clear_table( addrs_table );
 
         balances rb_table( _self, name("reviewer1111").value);
         clear_table(rb_table);
@@ -193,6 +196,13 @@ namespace rareteam {
             });
             pro_itr++;
         }
+    }
+
+    void bitsfleamain::cleanscope( const name& n)
+    {
+        require_auth( _self );
+        balances b_table( _self, n.value);
+        clear_table(b_table);
     }
 
     void bitsfleamain::OnError( const onerror& error )
