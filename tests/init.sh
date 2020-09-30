@@ -18,6 +18,8 @@ cleos create account eosio fleafaucet11 EOS5p5d2xA9tLVLc8knw1afQfpfBXuHcFZGBVDUV
 
 cleos create account eosio necklace EOS8M1jvYGgV2XuPqS2nbZaW9tRZfUjT1N88BxJVeF4jVFDLfSAzQ EOS8M1jvYGgV2XuPqS2nbZaW9tRZfUjT1N88BxJVeF4jVFDLfSAzQ &&
 
+cleos create account eosio reviewer1111 EOS8M1jvYGgV2XuPqS2nbZaW9tRZfUjT1N88BxJVeF4jVFDLfSAzQ EOS8M1jvYGgV2XuPqS2nbZaW9tRZfUjT1N88BxJVeF4jVFDLfSAzQ &&
+
 cleos set contract eosio /Users/necklace/work/eos/eosio.contracts/build/contracts/eosio.bios  -p eosio &&
 
 cleos set contract eosio.token /Users/necklace/work/eos/eosio.contracts/build/contracts/eosio.token -p eosio.token &&

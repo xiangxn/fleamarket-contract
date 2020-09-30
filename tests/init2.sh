@@ -6,6 +6,10 @@ cleos push action bitsfleamain reguser '[reviewer,"reviewer","05FBED483A97445670
 
 cleos push action bitsfleamain reguser '[player1,"player1","05FBED483A974456708EF12FCF3D278276E982234D775ECEE0DFA5CB49B8B494","05FBED483A974456708EF12FCF3D278276E982234D775ECEE0DFA5CB49B8B493",1, "EOS6VqjyRiJZWUDFErcnX7CkhDkkBKjaZCsLfGJXPJEEe5DNbW2KW"]' -p bitsfleamain &&
 
+cleos push action bitsfleamain reguser '[reviewer1111,"reviewer1111","05FBED483A974456708EF12FCF3D278276E982234D775ECEE0DFA5CB49B8B495","05FBED483A974456708EF12FCF3D278276E982234D775ECEE0DFA5CB49B8B495",0,"EOS5BiYrPwXwFmrjLQ3ZUa3BX9crdomJNfYdu6uC863XAXrHNyWbo"]' -p bitsfleamain &&
+
+cleos push action bitsfleamain appreviewer '[3,"reviewer1111"]' -p reviewer1111 &&
+
 cleos push action eosio.token issue '[ "player", "10000.0000 BOS", "memo" ]' -p eosio &&
 cleos push action eosio.token issue '[ "player1", "10000.0000 BOS", "memo" ]' -p eosio &&
 cleos push action eosio.token issue '[ "reviewer", "10000.0000 BOS", "memo" ]' -p eosio &&
