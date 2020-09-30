@@ -112,8 +112,8 @@ namespace rareteam
         time_point_sec start_time;
         time_point_sec end_time;
 
-        uint64_t primary_key() const { return uint64_t(pid); }
-        uint64_t by_auction_id() const { return id; }
+        uint64_t primary_key() const { return id; }
+        uint64_t by_pid() const { return uint64_t(pid); }
     };
 
     struct [[eosio::table, eosio::contract("bitsfleamain")]] Order
@@ -167,8 +167,8 @@ namespace rareteam
          */ 
         uint32_t delayed_count = 0;
 
-        uint128_t primary_key() const { return order_id; }
-        uint64_t by_rid() const { return uint64_t(id); }
+        uint64_t primary_key() const { return uint64_t(id); }
+        uint128_t by_order_id() const { return order_id; }
         uint64_t by_pid() const { return uint64_t(pid); }
     };
 
@@ -196,7 +196,7 @@ namespace rareteam
     > product_index;
 
     typedef eosio::multi_index<"proauction"_n, ProductAuction,
-        indexed_by< "auctionid"_n, const_mem_fun<ProductAuction, uint64_t,  &ProductAuction::by_auction_id> >
+        indexed_by< "bypid"_n, const_mem_fun<ProductAuction, uint64_t,  &ProductAuction::by_pid> >
     > auction_index;
 
     typedef eosio::multi_index<"orders"_n, Order,
@@ -207,8 +207,8 @@ namespace rareteam
     > order_index;
 
     typedef eosio::multi_index<"returns"_n, ProReturn,
-        indexed_by< "returnpid"_n, const_mem_fun<ProReturn, uint64_t,  &ProReturn::by_pid> >,
-        indexed_by< "returnrid"_n, const_mem_fun<ProReturn, uint64_t,  &ProReturn::by_rid> >
+        indexed_by< "bypid"_n, const_mem_fun<ProReturn, uint64_t,  &ProReturn::by_pid> >,
+        indexed_by< "byorderid"_n, const_mem_fun<ProReturn, uint128_t,  &ProReturn::by_order_id> >
     > proreturn_index;
 
     typedef eosio::multi_index<"othersettle"_n, OtherSettle,

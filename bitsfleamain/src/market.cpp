@@ -90,10 +90,11 @@ namespace rareteam {
         }
 
         reviewer_index re_table( _self, _self.value );
-        auto re_itr = re_table.find( reviewer_uid );
+        auto re_uid_index = re_table.get_index<"byuid"_n>();
+        auto re_itr = re_uid_index.find( reviewer_uid );
         product_index pro_table( _self, _self.value );
         auto pro_itr = pro_table.find( pid );
-        if( re_itr != re_table.end() && pro_itr != pro_table.end() && pro_itr->status == ProductStatus::PUBLISH ) {
+        if( re_itr != re_uid_index.end() && pro_itr != pro_table.end() && pro_itr->status == ProductStatus::PUBLISH ) {
             check( reviewer_uid != pro_itr->uid, "can’t review the products posted by myself" );
             proaudit_index audit_table( _self, _self.value );
             audit_table.emplace( _self, [&]( auto& a ){
@@ -153,14 +154,15 @@ namespace rareteam {
         check( product.price.symbol == price.symbol, "Invalid asset symbol" );
 
         auction_index auction_table( _self, _self.value );
-        auto& auction = auction_table.get( pid, "Invalid auction product" );
+        auto pid_index = auction_table.get_index<"bypid"_n>();
+        auto& auction = pid_index.get( uint64_t(pid), "Invalid auction product" );
         auto now = time_point_sec(current_time_point().sec_since_epoch());
         check( auction.start_time <= now, "Auction has not yet begin" );
         check( auction.end_time > now, "The auction has ended" );
         auto new_price = auction.current_price + auction.markup;
         check( price.amount >= new_price.amount, "Bid is too low" );
 
-        auction_table.modify( auction, same_payer, [&](auto& a){
+        pid_index.modify( pid_index.iterator_to(auction), same_payer, [&](auto& a){
             a.current_price = price;
             a.auction_times += 1;
             a.last_price_user = buyer_uid;
@@ -328,14 +330,15 @@ namespace rareteam {
         check( number.length() <= 50, "number too long" );
 
         proreturn_index repro_table( _self, _self.value );
-        auto& repro = repro_table.get( order_id, "invalid order id" );
+        auto repro_order_index = repro_table.get_index<"byorderid"_n>();
+        auto& repro = repro_order_index.get( order_id, "invalid order id" );
         order_index order_table( _self, _self.value );
         auto& order = order_table.get( order_id, "Invalid order id" );
         check( buyer_uid == order.buyer_uid, "This order does not belong to you" );
         check( repro.status == ReturnStatus::RS_PENDING_SHIPMENT, "This order is not ready for shipment" );
 
         time_point_sec current_time = time_point_sec(current_time_point().sec_since_epoch());
-        repro_table.modify( repro, same_payer, [&](auto& re){
+        repro_order_index.modify( repro_order_index.iterator_to(repro), same_payer, [&](auto& re){
             re.shipment_number = number;
             re.ship_time = current_time;
             re.status = ReturnStatus::RS_PENDING_RECEIPT;
@@ -611,11 +614,12 @@ namespace rareteam {
         check( seller_uid == order.seller_uid, "This order does not belong to you" );
 
         proreturn_index repro_table( _self, _self.value );
-        auto& repro = repro_table.get( order_id, "invalid order id" );
+        auto repro_order_index = repro_table.get_index<"byorderid"_n>();
+        auto& repro = repro_order_index.get( order_id, "invalid order id" );
         check( repro.status == ReturnStatus::RS_PENDING_RECEIPT, "The order status is not RS_PENDING_RECEIPT" );
 
         time_point_sec current_time = time_point_sec(current_time_point().sec_since_epoch());
-        repro_table.modify( repro, same_payer, [&](auto& re){
+        repro_order_index.modify( repro_order_index.iterator_to(repro), same_payer, [&](auto& re){
             re.receipt_time = current_time;
             re.status = ReturnStatus::RS_COMPLETED;
             re.end_time = current_time;
@@ -652,11 +656,12 @@ namespace rareteam {
         order_index order_table( _self, _self.value );
         proreturn_index proreturn_table( _self, _self.value );
         auto& order = order_table.get( order_id, "Invalid order id" );
-        auto& proreturn = proreturn_table.get( order_id, "Invalid order id for returns table" );
+        auto proreturn_order_index = proreturn_table.get_index<"byorderid"_n>();
+        auto& proreturn = proreturn_order_index.get( order_id, "Invalid order id for returns table" );
         check( order.seller_uid == user_uid, "This order does not belong to you" );
         check( proreturn.delayed_count < _global.max_deferr_times, "Has been postponed three times" );
 
-        proreturn_table.modify( proreturn, same_payer, [&](auto& pr){
+        proreturn_order_index.modify( proreturn_order_index.iterator_to(proreturn), same_payer, [&](auto& pr){
             pr.receipt_time_out = time_point_sec( current_time_point().sec_since_epoch() + _global.receipt_time_out );
             pr.delayed_count += 1;
             AddTableLog( "returns"_n, OpType::OT_UPDATE, pr.order_id );

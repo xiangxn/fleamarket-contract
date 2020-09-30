@@ -73,10 +73,11 @@ namespace rareteam {
             });
             AddTableLog("users"_n, OpType::OT_UPDATE, user.uid);
             reviewer_index reviewer_table( _self, _self.value );
-            auto itr = reviewer_table.find( reviewer_uid );
-            if( itr != reviewer_table.end() ) {
+            auto reviewer_uid_index = reviewer_table.get_index<"byuid"_n>();
+            auto itr = reviewer_uid_index.find( reviewer_uid );
+            if( itr != reviewer_uid_index.end() ) {
                 AddTableLog("reviewers"_n, OpType::OT_DELETE, itr->uid);
-                reviewer_table.erase( itr );
+                reviewer_uid_index.erase( itr );
             }
             return false;
         }
@@ -90,10 +91,11 @@ namespace rareteam {
         check( CheckReviewer( uid, true ), "Insufficient credit value" );
 
         reviewer_index rev_table( _self, _self.value );
-        auto itr = rev_table.find( uid );
-        check( itr == rev_table.end(), "Already reviewer" );
+        auto rev_uid_index = rev_table.get_index<"byuid"_n>();
+        auto itr = rev_uid_index.find( uid );
+        check( itr == rev_uid_index.end(), "Already reviewer" );
 
-        auto rev_itr = rev_table.emplace( _self, [&]( auto& r ){
+        rev_table.emplace( _self, [&]( auto& r ){
             r.id = rev_table.available_primary_key();
             r.uid = uid;
             r.eosid = eosid;
@@ -111,7 +113,8 @@ namespace rareteam {
         check( voter_uid != reviewer_uid, "Can't vote for myself" );
         auto& user = _user_table.get( reviewer_uid, "Invalid reviewer uid" );
         reviewer_index rev_table( _self, _self.value );
-        auto& reviewer = rev_table.get( reviewer_uid, "The reviewer uid is not a reviewer" );
+        auto rev_uid_index = rev_table.get_index<"byuid"_n>();
+        auto& reviewer = rev_uid_index.get( reviewer_uid, "The reviewer uid is not a reviewer" );
         if( is_support ) {
             check( reviewer.voter_approve.size() < 100, "maximum of 100 peoples can vote" );
         } else {
@@ -122,7 +125,7 @@ namespace rareteam {
         auto it2 = find_if(reviewer.voter_against.begin(), reviewer.voter_against.end(), [&](auto& u){ return u == voter_uid; });
         check( it2 == reviewer.voter_against.end(), "You already voted" );
 
-        rev_table.modify( reviewer, same_payer, [&]( auto& r ){
+        rev_uid_index.modify( rev_uid_index.iterator_to(reviewer), same_payer, [&]( auto& r ){
             if( is_support ){
                 if( r.voted_count == 0 ){
                      _user_table.modify( user, same_payer, [&](auto& u){
@@ -184,10 +187,11 @@ namespace rareteam {
             }
             //Usually initiated by the seller
             proreturn_index res_table( _self, _self.value );
-            auto res_itr = res_table.find( arbitration.order_id );
-            if( res_itr != res_table.end() ) {
+            auto res_order_index = res_table.get_index<"byorderid"_n>();
+            auto res_itr = res_order_index.find( arbitration.order_id );
+            if( res_itr != res_order_index.end() ) {
                 check( res_itr->status == ReturnStatus::RS_PENDING_RECEIPT, "Initiation of arbitration without confirmation of receipt" );
-                res_table.modify( res_itr, same_payer, [&](auto& r){
+                res_order_index.modify( res_itr, same_payer, [&](auto& r){
                     r.status = ReturnStatus::RS_ARBITRATION;
                     AddTableLog( "returns"_n, OpType::OT_UPDATE, r.order_id );
                 });
@@ -273,10 +277,11 @@ namespace rareteam {
                 if( order_itr != order_table.end() ) {
                     auto& order = (*order_itr);
                     proreturn_index repro_table( _self, _self.value );
-                    auto repro_itr = repro_table.find( order.id );
+                    auto repro_order_index = repro_table.get_index<"byorderid"_n>();
+                    auto repro_itr = repro_order_index.find( order.id );
                     if( c_arbit.winner == order.buyer_uid ) { // buyer win
-                        if( repro_itr != repro_table.end() ) { //initiated by the seller
-                            repro_table.modify( repro_itr, same_payer, [&](auto& r){
+                        if( repro_itr != repro_order_index.end() ) { //initiated by the seller
+                            repro_order_index.modify( repro_itr, same_payer, [&](auto& r){
                                 r.status = ReturnStatus::RS_COMPLETED;
                                 AddTableLog( "returns"_n, OpType::OT_UPDATE, r.order_id );
                             });
@@ -312,7 +317,7 @@ namespace rareteam {
                         }
                         SubCredit( order.seller_uid, 100 );
                     } else if ( c_arbit.winner == order.seller_uid ) { //seller win
-                        if( repro_itr != repro_table.end() ) { //initiated by the seller
+                        if( repro_itr != repro_order_index.end() ) { //initiated by the seller
                             order_table.modify( order_itr, same_payer, [&](auto& o){ //Redeliver
                                 o.status = OrderStatus::OS_PENDING_SHIPMENT;
                                 o.ship_time_out = time_point_sec(current_time_point().sec_since_epoch() + _global.ship_time_out);
@@ -365,10 +370,11 @@ namespace rareteam {
                 }
                 //cancel reviewer
                 reviewer_index reviewer_table( _self, _self.value );
-                auto rev_itr = reviewer_table.find( u.uid );
-                if( rev_itr != reviewer_table.end() ) {
+                auto reviewer_uid_index = reviewer_table.get_index<"byuid"_n>();
+                auto rev_itr = reviewer_uid_index.find( u.uid );
+                if( rev_itr != reviewer_uid_index.end() ) {
                     AddTableLog("reviewers"_n, OpType::OT_DELETE, rev_itr->uid);
-                    reviewer_table.erase( rev_itr );
+                    reviewer_uid_index.erase( rev_itr );
                 }
                 
             } else {

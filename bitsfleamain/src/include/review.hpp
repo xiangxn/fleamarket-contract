@@ -39,8 +39,8 @@ namespace rareteam
         vector<uint64_t> voter_approve;
         vector<uint64_t> voter_against;
 
-        uint64_t primary_key() const { return uid; }
-        uint64_t by_rid() const { return id; }
+        uint64_t primary_key() const { return id; }
+        uint64_t by_uid() const { return uid; }
         uint64_t by_eosid() const { return eosid.value; }
     };
 
@@ -56,8 +56,8 @@ namespace rareteam
         string review_details;
         time_point_sec review_time;
 
-        uint64_t primary_key() const { return uint64_t(pid); }
-        uint64_t by_audit_id() const { return id; }
+        uint64_t primary_key() const { return id; }
+        uint64_t by_pid() const { return uint64_t(pid); }
         uint64_t by_reviewer_id() const { return reviewer_uid; }
     };
 
@@ -88,11 +88,11 @@ namespace rareteam
 
     typedef eosio::multi_index<"reviewers"_n, Reviewer,
         indexed_by< "byeosid"_n, const_mem_fun<Reviewer, uint64_t,  &Reviewer::by_eosid> >,
-        indexed_by< "reviewerid"_n, const_mem_fun<Reviewer, uint64_t,  &Reviewer::by_rid> >
+        indexed_by< "byuid"_n, const_mem_fun<Reviewer, uint64_t,  &Reviewer::by_uid> >
     > reviewer_index;
 
     typedef eosio::multi_index<"proaudits"_n, ProductAudit,
-        indexed_by< "auditid"_n, const_mem_fun<ProductAudit, uint64_t,  &ProductAudit::by_audit_id> >,
+        indexed_by< "bypid"_n, const_mem_fun<ProductAudit, uint64_t,  &ProductAudit::by_pid> >,
         indexed_by< "reviewerid"_n, const_mem_fun<ProductAudit, uint64_t,  &ProductAudit::by_reviewer_id> >
     > proaudit_index;
 

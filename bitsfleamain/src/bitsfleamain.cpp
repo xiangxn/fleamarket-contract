@@ -184,8 +184,15 @@ namespace rareteam {
         
         //check(false,result);
 
-        name n = "reviewer1112"_n;
-        print(n.value);
+        product_index pro_table( _self, _self.value );
+        auto pro_itr = pro_table.begin();
+        while(pro_itr!=pro_table.end()){
+            pro_table.modify(pro_itr, same_payer, [&](auto& p){
+                if(p.status!=ProductStatus::NORMAL)
+                    p.status=ProductStatus::PUBLISH;
+            });
+            pro_itr++;
+        }
     }
 
     void bitsfleamain::OnError( const onerror& error )
