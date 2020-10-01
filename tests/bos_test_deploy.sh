@@ -23,7 +23,7 @@ cleos -u $BOS_API_URL push action $CONTRACT_ACCOUNT init '[]' -p $CONTRACT_ACCOU
 # cleos -u $BOS_API_URL push action $CONTRACT_ACCOUNT appreviewer '[1,"reviewer1112"]' -p reviewer1112 $USE_OLD_RPC &&
 # cleos -u $BOS_API_URL push action $CONTRACT_ACCOUNT appreviewer '[2,"reviewer1113"]' -p reviewer1113 $USE_OLD_RPC &&
 # # vote reviewer
-# cleos -u $BOS_API_URL push action $CONTRACT_ACCOUNT votereviewer '[3,"bitsflea1111",0,true]' -p bitsflea1111 $USE_OLD_RPC &&
+# cleos -u $BOS_API_URL push action $CONTRACT_ACCOUNT votereviewer '[2,"reviewer1111",0,true]' -p reviewer1111 $USE_OLD_RPC &&
 # cleos -u $BOS_API_URL push action $CONTRACT_ACCOUNT votereviewer '[3,"bitsflea1111",1,true]' -p bitsflea1111 $USE_OLD_RPC &&
 # cleos -u $BOS_API_URL push action $CONTRACT_ACCOUNT votereviewer '[3,"bitsflea1111",2,true]' -p bitsflea1111 $USE_OLD_RPC &&
 cleos -u $BOS_API_URL get table $CONTRACT_ACCOUNT $CONTRACT_ACCOUNT global

@@ -150,7 +150,7 @@ namespace rareteam {
         });
         // point logic
         if( _global.gift_vote.amount > 0 && _global.transaction_pool.amount >= _global.gift_vote.amount ) {
-            action(permission_level{_self, "active"_n}, "bitsfleamain"_n, "issue"_n,
+            action(permission_level{_self, "active"_n}, _self, "issue"_n,
                 std::make_tuple( voter_eosid, _global.gift_vote, string("Reward voted") )
             ).send();
             _global.transaction_pool -= _global.gift_vote;
@@ -413,7 +413,7 @@ namespace rareteam {
     void bitsfleamain::RewardReferrer( const name& referrer )
     {
         if( _global.ref_sys_gift.amount > 0 && _global.ref_pool.amount >= _global.ref_sys_gift.amount ) {
-            action(permission_level{_self, "active"_n}, "bitsfleamain"_n, "issue"_n,
+            action(permission_level{_self, "active"_n}, _self, "issue"_n,
                 std::make_tuple( referrer, _global.ref_sys_gift, string("Reward referrer") )
             ).send();
             _global.ref_pool -= _global.ref_sys_gift;
@@ -484,7 +484,7 @@ namespace rareteam {
         // check( quantity.is_valid(), "invalid quantity" );
         // check( CheckSymbol( quantity.symbol ), "Invalid symbol" );
 
-        // auto balance = GetBalance( FLEA_PLATFORM, user_eosid, quantity.symbol );
+        // auto balance = GetBalance( _self, user_eosid, quantity.symbol );
         // check( balance.amount >= quantity.amount, "invalid quantity" );
         
     }

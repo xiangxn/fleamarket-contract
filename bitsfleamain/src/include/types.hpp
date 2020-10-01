@@ -15,7 +15,6 @@ namespace rareteam {
    #define FMP symbol(symbol_code("FMP"), 4)
    #define SYS symbol(symbol_code("BOS"), 4)
 
-   #define FLEA_PLATFORM ("bitsfleamain"_n)
    #define NAME_EOSIO_TOKEN name("eosio.token")
 
    #define ACTIVE_PERMISSION name("active")

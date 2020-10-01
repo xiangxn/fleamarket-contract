@@ -122,7 +122,7 @@ namespace rareteam {
                 // reward publisher
                 auto& publisher = _user_table.get( pro_itr->uid, "Invalid uid for review");
                 if( _global.gift_publish_product.amount > 0 && _global.transaction_pool.amount >= _global.gift_publish_product.amount ) {
-                    action(permission_level{_self, "active"_n}, "bitsfleamain"_n, "issue"_n,
+                    action(permission_level{_self, "active"_n}, _self, "issue"_n,
                         std::make_tuple( publisher.eosid, _global.gift_publish_product, string("Reward publish product") )
                     ).send();
                     _global.transaction_pool -= _global.gift_publish_product;
@@ -134,7 +134,7 @@ namespace rareteam {
             }
             // reviewer salary
             if( _global.salary_pool.amount >= _global.review_salary_product.amount ) {
-                action(permission_level{_self, "active"_n}, "bitsfleamain"_n, "issue"_n,
+                action(permission_level{_self, "active"_n}, _self, "issue"_n,
                     std::make_tuple( reviewer_eosid, _global.review_salary_product, string("publish product salary") )
                 ).send();
                 _global.salary_pool -= _global.review_salary_product;
@@ -451,14 +451,14 @@ namespace rareteam {
                 });
                 transaction trx;
                 if( devops_income.amount > 0 ) {
-                    action a1 = action( permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, ACTION_NAME_TRANSFER,
+                    action a1 = action( permission_level{_self, ACTIVE_PERMISSION}, _self, ACTION_NAME_TRANSFER,
                         std::make_tuple( _self, _global.devops, devops_income, memo )
                     );
                     trx.actions.emplace_back( a1 );
                 }
                 if( buyer.referrer > 0 && comm.amount > 0 ){
                     auto& referrer = _user_table.get( buyer.referrer, "Invalid order referrer uid" );
-                    action a2 = action( permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, ACTION_NAME_TRANSFER,
+                    action a2 = action( permission_level{_self, ACTIVE_PERMISSION}, _self, ACTION_NAME_TRANSFER,
                         std::make_tuple( _self, referrer.eosid, comm, "Referral commission" + stroid )
                     );
                     trx.actions.emplace_back( a2 );
@@ -468,7 +468,7 @@ namespace rareteam {
                     trx.send( (uint128_t(("settle"_n).value) << 64) | uint64_t(current_time_point().sec_since_epoch()) , _self, false);
                 }
             } else { // bitsfleamain transfer
-                PayCoin( stroid, order, seller, buyer, amount, devops_income, comm, FLEA_PLATFORM );
+                PayCoin( stroid, order, seller, buyer, amount, devops_income, comm, _self );
             }
         }
 
@@ -512,7 +512,7 @@ namespace rareteam {
             o.status = OtherSettleStatus::OSS_PAID;
             o.trx_id = trx_id;
         });
-        action( permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, ACTION_NAME_TRANSFER,
+        action( permission_level{_self, ACTIVE_PERMISSION}, _self, ACTION_NAME_TRANSFER,
             std::make_tuple( _self, _global.gateway, os.amount, os.memo )
         ).send();
         uint32_t count = get_size( os_table );
@@ -540,10 +540,10 @@ namespace rareteam {
             trx.actions.emplace_back( a1 );
             trx.actions.emplace_back( a2 );
         } else {
-            action a3 = action( permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, ACTION_NAME_TRANSFER,
+            action a3 = action( permission_level{_self, ACTIVE_PERMISSION}, _self, ACTION_NAME_TRANSFER,
                 std::make_tuple( _self, buyer.eosid, order.price, memo )
             );
-            action a4 = action( permission_level{_self, ACTIVE_PERMISSION}, FLEA_PLATFORM, ACTION_NAME_TRANSFER,
+            action a4 = action( permission_level{_self, ACTIVE_PERMISSION}, _self, ACTION_NAME_TRANSFER,
                 std::make_tuple( _self, seller.eosid, order.postage, memo )
             );
             trx.actions.emplace_back( a3 );
@@ -592,10 +592,10 @@ namespace rareteam {
             auto& seller = _user_table.get( order.seller_uid, "Invalid seller uid for conreceipt" );
             asset point = asset( val, FMP );
             transaction trx;
-            action a1 = action(permission_level{_self, "active"_n}, "bitsfleamain"_n, "issue"_n,
+            action a1 = action(permission_level{_self, "active"_n}, _self, "issue"_n,
                 std::make_tuple( buyer_eosid, point, string("transaction gift") )
             );
-            action a2 = action(permission_level{_self, "active"_n}, "bitsfleamain"_n, "issue"_n,
+            action a2 = action(permission_level{_self, "active"_n}, _self, "issue"_n,
                 std::make_tuple( seller.eosid, point, string("transaction gift") )
             );
             trx.actions.emplace_back( a1 );

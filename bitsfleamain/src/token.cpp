@@ -60,7 +60,7 @@ namespace rareteam {
       });
       add_balance( st.issuer, quantity, st.issuer );
       if( to != st.issuer ) {
-         action( permission_level{st.issuer, "active"_n}, "bitsfleamain"_n, "transfer"_n,
+         action( permission_level{st.issuer, "active"_n}, _self, "transfer"_n,
                 std::make_tuple( st.issuer, to, quantity, string("team claim") )
          ).send();
       }
@@ -91,7 +91,7 @@ namespace rareteam {
       add_balance( st.issuer, quantity, st.issuer );
 
       if( to != st.issuer ) {
-         action( permission_level{st.issuer, "active"_n}, "bitsfleamain"_n, "transfer"_n,
+         action( permission_level{st.issuer, "active"_n}, _self, "transfer"_n,
                 std::make_tuple( st.issuer, to, quantity, memo )
          ).send();
       }
@@ -131,7 +131,7 @@ namespace rareteam {
       const auto& st = statstable.get( sym.raw() );
 
       require_recipient( from );
-      if( to == FLEA_PLATFORM ) {
+      if( to == _self ) {
          OnMyTransfer( from, to, quantity, memo );
       } else {
          require_recipient( to );
