@@ -8,6 +8,22 @@ cleos wallet unlock -n bostest  --password PW5KajM5kmn6YSckdg3hWregB1bGQ3VMKeUpS
 	"privateKey": "5JU2y3M9pJgxDDntRvdG1GxkyeuHLMopdt7NHYKrRTnTZhbKZ2k",
 	"publicKey": "EOS6VqjyRiJZWUDFErcnX7CkhDkkBKjaZCsLfGJXPJEEe5DNbW2KW"}
 
+"name":"bitsfleabos1",
+ "owner":{
+	 "privateKey":"5KGjukETyCvJWkre8ymJSoYZmPZqqRCuXLqygUAYMYvotGyqJZo",
+	 "publicKey":"EOS7iqTfAwasMHjoiiJYEERNJMvUujvWjxZ2SqNsFv1K25YuhM8Ec"},
+ "active":{
+	 "privateKey":"5J1oJusETmWndwpAyxhcRonvsayoH5iFgu8Qz2VCMGaazQQVBP5",
+	 "publicKey":"EOS6gtS1cjWFkqTV8WYNGx5W2awAPQw6DcwmDo5mBd4decAebMgPj"}}
+
+"name":"bitsfleatest",
+"owner":{
+	"privateKey":"5JchN3wfj1ACas8amEQTSEGhLXaasGgNGU3ABky2Ky5TwDecsCi",
+	"publicKey":"EOS7CWPMvx4qi18RpngyLCEiPvjRxZakvH61Up3BpMr3n9cXgAuMe"},
+"active":{
+	"privateKey":"5HyFMDLiaY3TG2tbNgxD8pNcXk3nv5p7LSTcQatzR7nJjdWuRQ3",
+	"publicKey":"EOS6RqCkXZMkevBrbApMJLqyZntPErav8PQvP1NeNTJawHkTC4bzd"}}
+
 "name":"fleagateways",
 "owner":{
 	"privateKey":"5KeJCY6mtCjnJNBnjRfdBXU4hqBSqJ9VuPC9CJKpA4cMuYSQi99",

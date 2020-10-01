@@ -137,12 +137,6 @@ namespace rareteam {
         otheraddr_index addrs_table( _self, _self.value );
         clear_table( addrs_table );
 
-        balances rb_table( _self, name("reviewer1111").value);
-        clear_table(rb_table);
-
-        balances bb_table( _self, name("bitsflea1111").value);
-        clear_table(bb_table);
-        
         symbol eos = symbol(symbol_code("EOS"), 4);
         tokenStats eos_table( _self, eos.code().raw() );
         clear_table(eos_table);
