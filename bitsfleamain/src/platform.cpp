@@ -32,6 +32,7 @@ namespace rareteam {
         
         auto u_itr = _user_table.emplace( _self, [&]( auto& u){
             u.uid = _user_table.available_primary_key();
+            u.uid = u.uid == 0 ? u.uid + 1 : u.uid;
             u.eosid = eosid;
             u.nickname = nickname;
             u.phone_hash = phone_hash;
