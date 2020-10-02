@@ -32,7 +32,7 @@ namespace rareteam {
         
         auto u_itr = _user_table.emplace( _self, [&]( auto& u){
             u.uid = _user_table.available_primary_key();
-            u.uid = u.uid == 0 ? u.uid + 1 : u.uid;
+            u.uid = u.uid == 0 ? 1 : u.uid;
             u.eosid = eosid;
             u.nickname = nickname;
             u.phone_hash = phone_hash;
@@ -98,6 +98,7 @@ namespace rareteam {
 
         rev_table.emplace( _self, [&]( auto& r ){
             r.id = rev_table.available_primary_key();
+            r.id = r.id == 0 ? 1 : r.id;
             r.uid = uid;
             r.eosid = eosid;
             r.voted_count = 0;
@@ -208,6 +209,7 @@ namespace rareteam {
         arbitration_index arbit_table( _self, _self.value );
         arbit_table.emplace( _self, [&](auto& a){
             a.id = arbit_table.available_primary_key();
+            a.id = a.id == 0 ? 1 : a.id;
             a.plaintiff = plaintiff_uid;
             a.pid = arbitration.pid;
             a.order_id = arbitration.order_id;
@@ -517,6 +519,7 @@ namespace rareteam {
         if( !is_exists ) {
             oa_table.emplace( _self, [&](auto& o){
                 o.id = oa_table.available_primary_key();
+                o.id = o.id == 0 ? 1 : o.id;
                 o.uid = uid;
                 o.coin_type = sym;
                 o.addr = addr;

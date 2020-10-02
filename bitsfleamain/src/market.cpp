@@ -24,6 +24,7 @@ namespace rareteam {
         product_index pro_table( _self, _self.value );
         auto pro_itr = pro_table.emplace( _self, [&]( auto& p ) {
             p.pid = pro_table.available_primary_key();
+            p.pid = p.pid == 0 ? 1 : p.pid;
             p.uid = uid;
             p.title = product.title;
             p.description = product.description;
@@ -47,6 +48,7 @@ namespace rareteam {
                 auction_index pa_table( _self, _self.value );
                 pa_table.emplace( _self, [&]( auto& pa_item ) {
                     pa_item.id = pa_table.available_primary_key();
+                    pa_item.id = pa_item.id == 0 ? 1 : pa_item.id;
                     pa_item.pid = pro_itr->pid;
                     pa_item.security = tpa.security;
                     pa_item.markup = tpa.markup;
@@ -99,6 +101,7 @@ namespace rareteam {
             proaudit_index audit_table( _self, _self.value );
             audit_table.emplace( _self, [&]( auto& a ){
                 a.id = audit_table.available_primary_key();
+                a.id = a.id == 0 ? 1 : a.id;
                 a.pid = pid;
                 a.reviewer_uid = reviewer_uid;
                 a.is_delisted = is_delisted;
@@ -113,6 +116,7 @@ namespace rareteam {
                     SubCredit( pro_itr->uid, 5 );//delisted sub 5 credit 
                 } else {
                     p.status = ProductStatus::NORMAL;
+                    AddCredit( pro_itr->uid, 1 );//not delisted  add 1 credit
                 }
                 p.reviewer = reviewer_uid;
                 AddTableLog("products"_n, OpType::OT_UPDATE, p.pid );
@@ -308,8 +312,8 @@ namespace rareteam {
 
             othersettle_index os_table( _self, _self.value );
             os_table.emplace( _self, [&](auto& os){
-                auto oid = os_table.available_primary_key();
-                os.id = oid == 0 ? 1 : oid;
+                os.id = os_table.available_primary_key();
+                os.id = os.id == 0 ? 1 : os.id;
                 os.uid = user_itr->uid;
                 os.order_id = 0;
                 os.amount = quantity - coin.fee; //Withdrawal fees have been deducted
@@ -439,8 +443,8 @@ namespace rareteam {
                 string memo = "complete order " + stroid;
                 othersettle_index os_table( _self, _self.value );
                 os_table.emplace( _self, [&](auto& os){
-                    auto oid = os_table.available_primary_key();
-                    os.id = oid == 0 ? 1 : oid;
+                    os.id = os_table.available_primary_key();
+                    os.id = os.id == 0 ? 1 : os.id;
                     os.uid = order.seller_uid;
                     os.order_id = order.id;
                     os.amount = amount;
@@ -694,6 +698,7 @@ namespace rareteam {
         proreturn_index res_table( _self, _self.value );
         res_table.emplace( _self, [&](auto& r){
             r.id = res_table.available_primary_key();
+            r.id = r.id == 0 ? 1 : r.id;
             r.order_id = order_id;
             r.pid = order.pid;
             r.order_price = order.price;
