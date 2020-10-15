@@ -22,6 +22,62 @@ namespace rareteam {
         check( cat_itr != category_table.end(), "Invalid product category" );
 
         product_index pro_table( _self, _self.value );
+        auction_index pa_table( _self, _self.value );
+
+        if( product.pid > 0 ){
+            auto& o_product = pro_table.get( product.pid, "Product does not exist.");
+            check( o_product.status == ProductStatus::DELISTED, "Only modify items that have been delisted.");
+            pro_table.modify( o_product, same_payer, [&]( auto& p){
+                p.title = product.title;
+                p.description = product.description;
+                p.photos = product.photos;
+                p.category = product.category;
+                p.status = ProductStatus::PUBLISH;
+                p.is_new = product.is_new;
+                p.is_returns = product.is_returns;
+                p.sale_method = product.sale_method;
+                p.price = product.price;
+                p.transaction_method = product.transaction_method;
+                p.postage = product.postage;
+                p.position = product.position;
+                p.release_time = time_point_sec(current_time_point().sec_since_epoch());
+                AddTableLog("products"_n, OpType::OT_UPDATE, p.pid );
+            });
+            if( product.sale_method == 1 ){
+                check( pa.has_value(), "Please provide auction information." );
+                auto& tpa = pa.value();
+                auto auction_pid_index = pa_table.get_index<"bypid"_n>();
+                auto api_itr = auction_pid_index.find( product.pid );
+                if( api_itr ==  auction_pid_index.end() ){
+                    auto tpa = pa.value();
+                    pa_table.emplace( _self, [&]( auto& pa_item ) {
+                        pa_item.id = pa_table.available_primary_key();
+                        pa_item.id = pa_item.id == 0 ? 1 : pa_item.id;
+                        pa_item.pid = product.pid;
+                        pa_item.security = tpa.security;
+                        pa_item.markup = tpa.markup;
+                        pa_item.current_price = product.price;
+                        pa_item.auction_times = 0;
+                        pa_item.last_price_user = 0;
+                        pa_item.start_time = tpa.start_time;
+                        pa_item.end_time = tpa.end_time;
+                        AddTableLog( "proauction"_n, OpType::OT_INSERT, pa_item.id );
+                    });
+                } else {
+                    auction_pid_index.modify( api_itr, same_payer, [&]( auto& pa_item ){
+                        pa_item.security = tpa.security;
+                        pa_item.markup = tpa.markup;
+                        pa_item.current_price = product.price;
+                        pa_item.auction_times = 0;
+                        pa_item.last_price_user = 0;
+                        pa_item.start_time = tpa.start_time;
+                        pa_item.end_time = tpa.end_time;
+                        AddTableLog( "proauction"_n, OpType::OT_UPDATE, pa_item.id );
+                    });
+                }
+            }
+            return;
+        }
         auto pro_itr = pro_table.emplace( _self, [&]( auto& p ) {
             p.pid = pro_table.available_primary_key();
             p.pid = p.pid == 0 ? 1 : p.pid;
@@ -43,23 +99,20 @@ namespace rareteam {
         });
         if( pro_itr->sale_method == 1 ) {
             check( pa.has_value(), "Please provide auction information" );
-            if( pa.has_value() ) {
-                auto tpa = pa.value();
-                auction_index pa_table( _self, _self.value );
-                pa_table.emplace( _self, [&]( auto& pa_item ) {
-                    pa_item.id = pa_table.available_primary_key();
-                    pa_item.id = pa_item.id == 0 ? 1 : pa_item.id;
-                    pa_item.pid = pro_itr->pid;
-                    pa_item.security = tpa.security;
-                    pa_item.markup = tpa.markup;
-                    pa_item.current_price = product.price;
-                    pa_item.auction_times = 0;
-                    pa_item.last_price_user = 0;
-                    pa_item.start_time = tpa.start_time;
-                    pa_item.end_time = tpa.end_time;
-                    AddTableLog( "proauction"_n, OpType::OT_INSERT, pa_item.pid );
-                });
-            }
+            auto tpa = pa.value();
+            pa_table.emplace( _self, [&]( auto& pa_item ) {
+                pa_item.id = pa_table.available_primary_key();
+                pa_item.id = pa_item.id == 0 ? 1 : pa_item.id;
+                pa_item.pid = pro_itr->pid;
+                pa_item.security = tpa.security;
+                pa_item.markup = tpa.markup;
+                pa_item.current_price = product.price;
+                pa_item.auction_times = 0;
+                pa_item.last_price_user = 0;
+                pa_item.start_time = tpa.start_time;
+                pa_item.end_time = tpa.end_time;
+                AddTableLog( "proauction"_n, OpType::OT_INSERT, pa_item.id );
+            });
         }
     }
 
