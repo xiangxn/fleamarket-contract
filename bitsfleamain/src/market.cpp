@@ -114,6 +114,10 @@ namespace rareteam {
                 AddTableLog( "proauction"_n, OpType::OT_INSERT, pa_item.id );
             });
         }
+        _user_table.modify( user, same_payer, [&](auto& u){
+            u.posts_total += 1;
+        });
+        AddTableLog("users"_n, OpType::OT_UPDATE, user.uid);
     }
 
     void bitsfleamain::pulloff( uint64_t seller_uid, const name& seller_eosid, uint32_t pid )
@@ -184,10 +188,6 @@ namespace rareteam {
                     ).send();
                     _global.transaction_pool -= _global.gift_publish_product;
                 }
-                _user_table.modify( publisher, same_payer, [&](auto& u){
-                    u.posts_total += 1;
-                });
-                AddTableLog("users"_n, OpType::OT_UPDATE, publisher.uid);
             }
             // reviewer salary
             if( _global.salary_pool.amount >= _global.review_salary_product.amount ) {
