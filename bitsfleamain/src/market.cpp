@@ -176,7 +176,8 @@ namespace rareteam {
                     SubCredit( pro_itr->uid, 5 );//delisted sub 5 credit 
                 } else {
                     p.status = ProductStatus::NORMAL;
-                    AddCredit( pro_itr->uid, 1 );//not delisted  add 1 credit
+                    if( is_reward )
+                        AddCredit( pro_itr->uid, 1 );//not delisted  add 1 credit
                 }
                 p.reviewer = reviewer_uid;
                 AddTableLog("products"_n, OpType::OT_UPDATE, p.pid );
