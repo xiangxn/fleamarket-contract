@@ -156,6 +156,9 @@ namespace rareteam {
         if( re_itr != re_uid_index.end() && pro_itr != pro_table.end() && pro_itr->status == ProductStatus::PUBLISH ) {
             check( reviewer_uid != pro_itr->uid, "can’t review the products posted by myself" );
             proaudit_index audit_table( _self, _self.value );
+            auto audit_pid_index = audit_table.get_index<"bypid"_n>();
+            auto old_a_itr = audit_pid_index.find( pid );
+            bool is_reward = old_a_itr == audit_pid_index.end();
             audit_table.emplace( _self, [&]( auto& a ){
                 a.id = audit_table.available_primary_key();
                 a.id = a.id == 0 ? 1 : a.id;
@@ -179,7 +182,7 @@ namespace rareteam {
                 AddTableLog("products"_n, OpType::OT_UPDATE, p.pid );
             });
             // point logic
-            if( !is_delisted ){
+            if( !is_delisted && is_reward ){
                 // reward publisher
                 auto& publisher = _user_table.get( pro_itr->uid, "Invalid uid for review");
                 if( _global.gift_publish_product.amount > 0 && _global.transaction_pool.amount >= _global.gift_publish_product.amount ) {
