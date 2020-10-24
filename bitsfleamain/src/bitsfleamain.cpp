@@ -196,14 +196,13 @@ namespace rareteam {
         clear_table(orders);
 
         product_index products(_self, _self.value);
-        auto& p1 = products.get(3);
-        products.modify(p1,same_payer,[&](auto& p){
-            p.status = ProductStatus::NORMAL;
-        });
-        auto& p2 = products.get(5);
-        products.modify(p2,same_payer,[&](auto& p){
-            p.status = ProductStatus::NORMAL;
-        });
+        auto itr = products.begin();
+        while(itr != products.end()){
+            products.modify(itr, same_payer, [&](auto& p){
+                p.status = ProductStatus::NORMAL;
+            });
+            itr++;
+        }
     }
 
     void bitsfleamain::cleanscope( const name& n)
