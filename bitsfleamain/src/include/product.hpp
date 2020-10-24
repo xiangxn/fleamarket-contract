@@ -145,6 +145,7 @@ namespace rareteam
         uint64_t by_seller() const { return seller_uid; }
         uint64_t by_buyer() const { return buyer_uid; }
         uint64_t by_time() const {return uint64_t((id<<96)>>96); }
+        uint128_t by_oid() const {return id;}
     };
 
     struct [[eosio::table, eosio::contract("bitsfleamain")]] ProReturn
@@ -203,7 +204,8 @@ namespace rareteam
         indexed_by< "orderpid"_n, const_mem_fun<Order, uint64_t,  &Order::by_pid> >,
         indexed_by< "byseller"_n, const_mem_fun<Order, uint64_t,  &Order::by_seller> >,
         indexed_by< "bybuyer"_n, const_mem_fun<Order, uint64_t,  &Order::by_buyer> >,
-        indexed_by< "bytime"_n, const_mem_fun<Order, uint64_t, &Order::by_time> >
+        indexed_by< "bytime"_n, const_mem_fun<Order, uint64_t, &Order::by_time> >,
+        indexed_by< "byoid"_n, const_mem_fun<Order, uint128_t, &Order::by_oid> >
     > order_index;
 
     typedef eosio::multi_index<"returns"_n, ProReturn,

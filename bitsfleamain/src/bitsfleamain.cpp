@@ -169,6 +169,7 @@ namespace rareteam {
 
     void bitsfleamain::test(const string& para)
     {
+        require_auth( _self );
         // string str = "05FBED483A974456708EF12FCF3D278276E982234D775ECEE0DFA5CB49B8B492";
         // auto hash = hex_to_sha256(str);
         // string result = sha256_to_hex(hash);
@@ -181,15 +182,28 @@ namespace rareteam {
         
         //check(false,result);
 
-        product_index pro_table( _self, _self.value );
-        auto pro_itr = pro_table.begin();
-        while(pro_itr!=pro_table.end()){
-            pro_table.modify(pro_itr, same_payer, [&](auto& p){
-                if(p.status!=ProductStatus::NORMAL)
-                    p.status=ProductStatus::PUBLISH;
-            });
-            pro_itr++;
-        }
+        // product_index pro_table( _self, _self.value );
+        // auto pro_itr = pro_table.begin();
+        // while(pro_itr!=pro_table.end()){
+        //     pro_table.modify(pro_itr, same_payer, [&](auto& p){
+        //         if(p.status!=ProductStatus::NORMAL)
+        //             p.status=ProductStatus::PUBLISH;
+        //     });
+        //     pro_itr++;
+        // }
+
+        order_index orders(_self,_self.value);
+        clear_table(orders);
+
+        product_index products(_self, _self.value);
+        auto& p1 = products.get(3);
+        products.modify(p1,same_payer,[&](auto& p){
+            p.status = ProductStatus::NORMAL;
+        });
+        auto& p2 = products.get(5);
+        products.modify(p2,same_payer,[&](auto& p){
+            p.status = ProductStatus::NORMAL;
+        });
     }
 
     void bitsfleamain::cleanscope( const name& n)
