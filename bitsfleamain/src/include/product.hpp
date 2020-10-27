@@ -140,6 +140,8 @@ namespace rareteam
          */ 
         uint32_t delayed_count = 0;
 
+        uint32_t to_addr = 0;
+
         uint128_t primary_key() const { return id; }
         uint64_t by_pid() const { return uint64_t(pid); }
         uint64_t by_seller() const { return seller_uid; }

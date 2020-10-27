@@ -231,13 +231,34 @@ namespace rareteam {
         });
     }
 
-    void bitsfleamain::placeorder( uint64_t buyer_uid, const name& buyer_eosid, uint32_t pid, const uint128_t& order_id)
+    void bitsfleamain::cancelorder( uint64_t buyer_uid, const name& buyer_eosid, const uint128_t& order_id)
+    {
+        require_auth( buyer_eosid );
+
+        order_index order_table( _self, _self.value );
+        auto order_index = order_table.get_index<"byoid"_n>();
+        auto order_itr = order_index.find( order_id );
+        check( order_itr != order_index.end(), "Invalid order id" );
+        check( (order_itr->status == OrderStatus::OS_PENDING_PAYMENT || order_itr->status == OrderStatus::OS_CANCELLED), "Invalid order status");
+        check( order_itr->buyer_uid == buyer_uid, "The order does not belong to you" );
+
+        product_index pro_table( _self, _self.value );
+        auto& product = pro_table.get( order_itr->pid, "Invalid product pid" );
+        pro_table.modify( product, same_payer, [&](auto& p){
+            p.status = ProductStatus::NORMAL;
+        });
+        AddTableLog("products"_n, OpType::OT_UPDATE, product.pid );
+        AddTableLog( "orders"_n, OpType::OT_DELETE, order_itr->id );
+        order_index.erase( order_itr );
+    }
+
+    void bitsfleamain::placeorder( uint64_t buyer_uid, const name& buyer_eosid, uint32_t pid, const uint128_t& order_id, uint32_t to_addr)
     {
         require_auth( buyer_eosid );
         if( order_id > 0 ) {
             require_auth( _self );
         }
-        check( is_account( buyer_eosid ), "Invalid account buyer_eosid" );
+        // check( is_account( buyer_eosid ), "Invalid account buyer_eosid" );
         auto& user = _user_table.get( buyer_uid, "Invalid account buyer_uid" );
         check( IsLockUser( user ) == false, "Account is locked" );
 
@@ -257,8 +278,9 @@ namespace rareteam {
             }
         }
         order_index order_table( _self, _self.value );
-        auto order_itr = order_table.find( oid );
-        check( order_itr == order_table.end(), "Order number already exists" );
+        auto order_index = order_table.get_index<"byoid"_n>();
+        auto order_itr = order_index.find( oid );
+        check( order_itr == order_index.end(), "Order number already exists" );
         //create order
         //fixed price
         order_table.emplace( _self, [&](auto& o){
@@ -270,6 +292,7 @@ namespace rareteam {
             o.price = product.price;
             o.postage = product.postage;
             o.status = OrderStatus::OS_PENDING_PAYMENT;
+            o.to_addr = to_addr;
             o.create_time = time_point_sec(ct);
             o.pay_time_out = time_point_sec(ct + _global.pay_time_out);
             AddTableLog( "orders"_n, OpType::OT_INSERT, o.id );
@@ -284,7 +307,10 @@ namespace rareteam {
     void bitsfleamain::PayOrder( uint128_t order_id, const asset& quantity )
     {
         order_index order_table( _self, _self.value );
-        auto& order = order_table.get( order_id, "PayOrder:Invalid order id" );
+        auto order_index = order_table.get_index<"byoid"_n>();
+        auto order_itr = order_index.find( order_id );
+        check( order_itr != order_index.end(), "PayOrder:Invalid order id" );
+        auto& order = (*order_itr);
         check( order.price.symbol == quantity.symbol, "Invalid order symbol" );
         check( quantity.amount == (order.postage + order.price).amount, "Invalid order amount" );
         check( order.status == OrderStatus::OS_PENDING_PAYMENT, "Invalid order status");
@@ -292,7 +318,7 @@ namespace rareteam {
         time_point_sec pay_time = time_point_sec(current_time_point().sec_since_epoch());
         check( pay_time < order.pay_time_out, "Order has expired");
         if( pay_time < order.pay_time_out ) {
-            order_table.modify( order, same_payer, [&](auto& o){
+            order_index.modify( order_itr, same_payer, [&](auto& o){
                 o.status = OrderStatus::OS_PENDING_SHIPMENT;
                 o.pay_time = pay_time;
                 o.ship_time_out = time_point_sec(current_time_point().sec_since_epoch() + _global.ship_time_out);
@@ -308,7 +334,7 @@ namespace rareteam {
             AddTableLog("products"_n, OpType::OT_UPDATE, product.pid );
             AddTableLog( "orders"_n, OpType::OT_DELETE, order.id );
             order_table.erase( order );
-            check( false, "Order has expired");
+            // check( false, "Order has expired");
         }
     }
 
