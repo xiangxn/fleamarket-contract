@@ -118,7 +118,8 @@ namespace rareteam
 
     struct [[eosio::table, eosio::contract("bitsfleamain")]] Order
     {
-        uint128_t id;
+        uint64_t id;
+        uint128_t oid;
         uint32_t pid;
         uint64_t seller_uid;
         uint64_t buyer_uid;
@@ -142,12 +143,12 @@ namespace rareteam
 
         uint32_t to_addr = 0;
 
-        uint128_t primary_key() const { return id; }
+        uint64_t primary_key() const { return id; }
         uint64_t by_pid() const { return uint64_t(pid); }
         uint64_t by_seller() const { return seller_uid; }
         uint64_t by_buyer() const { return buyer_uid; }
-        uint64_t by_time() const {return uint64_t((id<<96)>>96); }
-        uint128_t by_oid() const {return id;}
+        uint64_t by_time() const {return uint64_t((oid<<96)>>96); }
+        uint128_t by_oid() const {return oid;}
     };
 
     struct [[eosio::table, eosio::contract("bitsfleamain")]] ProReturn

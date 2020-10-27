@@ -284,8 +284,9 @@ namespace rareteam {
         //create order
         //fixed price
         order_table.emplace( _self, [&](auto& o){
-            o.id = oid;
-            //o.id = pro_table.available_primary_key();
+            o.id = order_table.available_primary_key();
+            if( o.id == 0 ) o.id += 1;
+            o.oid = oid;
             o.pid = pid;
             o.seller_uid = product.uid;
             o.buyer_uid = buyer_uid;
@@ -420,8 +421,10 @@ namespace rareteam {
         auto repro_order_index = repro_table.get_index<"byorderid"_n>();
         auto& repro = repro_order_index.get( order_id, "invalid order id" );
         order_index order_table( _self, _self.value );
-        auto& order = order_table.get( order_id, "Invalid order id" );
-        check( buyer_uid == order.buyer_uid, "This order does not belong to you" );
+        auto order_oid_index = order_table.get_index<"byoid"_n>();
+        auto order_itr = order_oid_index.find( order_id );
+        check( order_itr != order_oid_index.end(), "Invalid order id" );
+        check( buyer_uid == order_itr->buyer_uid, "This order does not belong to you" );
         check( repro.status == ReturnStatus::RS_PENDING_SHIPMENT, "This order is not ready for shipment" );
 
         time_point_sec current_time = time_point_sec(current_time_point().sec_since_epoch());
@@ -445,12 +448,15 @@ namespace rareteam {
         check( number.length() <= 50, "number too long" );
 
         order_index order_table( _self, _self.value );
-        auto& order = order_table.get( order_id, "Invalid order id" );
+        auto order_oid_index = order_table.get_index<"byoid"_n>();
+        auto order_itr = order_oid_index.find( order_id );
+        check( order_itr != order_oid_index.end(), "Invalid order id" );
+        auto& order = *order_itr;
         check( seller_uid == order.seller_uid, "This order does not belong to you" );
         check( order.status == OrderStatus::OS_PENDING_SHIPMENT, "This order is not ready for shipment" );
 
         time_point_sec current_time = time_point_sec(current_time_point().sec_since_epoch());
-        order_table.modify( order, same_payer, [&](auto& o){
+        order_oid_index.modify( order_itr, same_payer, [&](auto& o){
             o.shipment_number = number;
             o.ship_time = current_time;
             o.status = OrderStatus::OS_PENDING_RECEIPT;
@@ -645,12 +651,15 @@ namespace rareteam {
         require_auth( buyer_eosid );
 
         order_index order_table( _self, _self.value );
-        auto& order = order_table.get( order_id, "Invalid order id" );
+        auto order_oid_index = order_table.get_index<"byoid"_n>();
+        auto order_itr = order_oid_index.find( order_id );
+        check( order_itr != order_oid_index.end(), "Invalid order id" );
+        auto& order = *order_itr;
         check( buyer_uid == order.buyer_uid, "This order does not belong to you" );
         check( order.status == OrderStatus::OS_PENDING_RECEIPT, "The order status is not OS_PENDING_RECEIPT" );
 
         time_point_sec current_time = time_point_sec(current_time_point().sec_since_epoch());
-        order_table.modify( order, same_payer, [&](auto& o){
+        order_oid_index.modify( order_itr, same_payer, [&](auto& o){
             o.receipt_time = current_time;
             o.status = OrderStatus::OS_COMPLETED;
             o.end_time = current_time;
@@ -697,7 +706,10 @@ namespace rareteam {
         require_auth( seller_eosid );
 
         order_index order_table( _self, _self.value );
-        auto& order = order_table.get( order_id, "Invalid order id" );
+        auto order_oid_index = order_table.get_index<"byoid"_n>();
+        auto order_itr = order_oid_index.find( order_id );
+        check( order_itr != order_oid_index.end(), "Invalid order id" );
+        auto& order = *order_itr;
         check( seller_uid == order.seller_uid, "This order does not belong to you" );
 
         proreturn_index repro_table( _self, _self.value );
@@ -725,11 +737,14 @@ namespace rareteam {
         require_auth( user_eosid );
 
         order_index order_table( _self, _self.value );
-        auto& order = order_table.get( order_id, "Invalid order id" );
+        auto order_oid_index = order_table.get_index<"byoid"_n>();
+        auto order_itr = order_oid_index.find( order_id );
+        check( order_itr != order_oid_index.end(), "Invalid order id" );
+        auto& order = *order_itr;
         check( order.buyer_uid == user_uid, "This order does not belong to you" );
         check( order.delayed_count < _global.max_deferr_times, "Has been postponed three times" );
 
-        order_table.modify( order, same_payer, [&](auto& o){
+        order_oid_index.modify( order_itr, same_payer, [&](auto& o){
             o.receipt_time_out = time_point_sec( current_time_point().sec_since_epoch() + _global.receipt_time_out );
             o.delayed_count += 1;
             AddTableLog( "orders"_n, OpType::OT_UPDATE, o.id );
@@ -742,7 +757,12 @@ namespace rareteam {
 
         order_index order_table( _self, _self.value );
         proreturn_index proreturn_table( _self, _self.value );
-        auto& order = order_table.get( order_id, "Invalid order id" );
+
+        auto order_oid_index = order_table.get_index<"byoid"_n>();
+        auto order_itr = order_oid_index.find( order_id );
+        check( order_itr != order_oid_index.end(), "Invalid order id" );
+        auto& order = *order_itr;
+        
         auto proreturn_order_index = proreturn_table.get_index<"byorderid"_n>();
         auto& proreturn = proreturn_order_index.get( order_id, "Invalid order id for returns table" );
         check( order.seller_uid == user_uid, "This order does not belong to you" );
@@ -764,7 +784,10 @@ namespace rareteam {
         check( reasons.length() <= 300, "reasons too long" );
 
         order_index order_table( _self, _self.value );
-        auto& order = order_table.get( order_id, "Invalid order id" );
+        auto order_oid_index = order_table.get_index<"byoid"_n>();
+        auto order_itr = order_oid_index.find( order_id );
+        check( order_itr != order_oid_index.end(), "Invalid order id" );
+        auto& order = *order_itr;
         check( order.buyer_uid == buyer_uid, "Invalid buyer uid" );
         check( order.status == OrderStatus::OS_PENDING_RECEIPT, "product already received can be returned" );
 
@@ -773,7 +796,7 @@ namespace rareteam {
         auto& product = pro_table.get( order.pid, "Invalid product id" );
         check( product.is_returns, "This item does not support returns" );
 
-        order_table.modify( order, same_payer, [&](auto& o){
+        order_oid_index.modify( order_itr, same_payer, [&](auto& o){
             o.status = OrderStatus::OS_RETURN;
             AddTableLog( "orders"_n, OpType::OT_UPDATE, o.id );
         });

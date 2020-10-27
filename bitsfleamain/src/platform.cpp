@@ -179,10 +179,11 @@ namespace rareteam {
         if( arbitration.type == ArbitType::AT_ORDER ) {
             //Usually initiated by the buyer
             order_index order_table( _self, _self.value );
-            auto order_itr = order_table.find( arbitration.order_id );
-            if( order_itr != order_table.end() ) {
+            auto order_oid_index = order_table.get_index<"byoid"_n>();
+            auto order_itr = order_oid_index.find( arbitration.order_id );
+            if( order_itr != order_oid_index.end() ) {
                 check( order_itr->status == OrderStatus::OS_PENDING_RECEIPT, "apply for arbitration until payment has been made and order is not completed");
-                order_table.modify( order_itr, same_payer, [&](auto& o){
+                order_oid_index.modify( order_itr, same_payer, [&](auto& o){
                     o.status = OrderStatus::OS_ARBITRATION;
                     AddTableLog( "orders"_n, OpType::OT_UPDATE, o.id );
                 });
@@ -275,7 +276,8 @@ namespace rareteam {
             //order: Processing funds if there are orders
             if( c_arbit.type == ArbitType::AT_ORDER ) {
                 time_point_sec current_time = time_point_sec(current_time_point().sec_since_epoch());
-                order_index order_table( _self, _self.value );
+                order_index orders( _self, _self.value );
+                auto order_table = orders.get_index<"byoid"_n>();
                 auto order_itr = order_table.find( c_arbit.order_id );
                 if( order_itr != order_table.end() ) {
                     auto& order = (*order_itr);
@@ -302,7 +304,7 @@ namespace rareteam {
                             AddTableLog("products"_n, OpType::OT_UPDATE, product.pid );
                             Refund( order );
                         } else { //initiated by the buyer
-                            order_table.modify( order, same_payer, [&](auto& o){
+                            order_table.modify( order_itr, same_payer, [&](auto& o){
                                 o.status = OrderStatus::OS_RETURN;
                                 AddTableLog( "orders"_n, OpType::OT_UPDATE, o.id );
                             });
@@ -556,9 +558,11 @@ namespace rareteam {
     {
         require_auth( _self );
         check( addr.length()>0 && addr.length()<=200, "Invalid addr" );
-        order_index order_table( _self, _self.value );
-        auto& order = order_table.get( order_id, "Invalid order_id" );
-        order_table.modify( order, same_payer, [&](auto& o){
+        order_index orders( _self, _self.value );
+        auto order_table = orders.get_index<"byoid"_n>();
+        auto order_itr = order_table.find( order_id );
+        check( order_itr != order_table.end(), "Invalid order_id" );
+        order_table.modify( order_itr, same_payer, [&](auto& o){
             o.pay_addr = addr;
             AddTableLog( "orders"_n, OpType::OT_UPDATE, o.id );
         });
