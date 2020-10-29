@@ -252,7 +252,7 @@ namespace rareteam {
         order_index.erase( order_itr );
     }
 
-    void bitsfleamain::placeorder( uint64_t buyer_uid, const name& buyer_eosid, uint32_t pid, const uint128_t& order_id, uint32_t to_addr)
+    void bitsfleamain::placeorder( uint64_t buyer_uid, const name& buyer_eosid, uint32_t pid, const uint128_t& order_id, uint32_t to_addr, optional<string>& pay_addr)
     {
         require_auth( buyer_eosid );
         if( order_id > 0 ) {
@@ -294,6 +294,9 @@ namespace rareteam {
             o.postage = product.postage;
             o.status = OrderStatus::OS_PENDING_PAYMENT;
             o.to_addr = to_addr;
+            if( pay_addr.has_value() ) {
+                o.pay_addr = pay_addr.value();
+            }
             o.create_time = time_point_sec(ct);
             o.pay_time_out = time_point_sec(ct + _global.pay_time_out);
             AddTableLog( "orders"_n, OpType::OT_INSERT, o.id );

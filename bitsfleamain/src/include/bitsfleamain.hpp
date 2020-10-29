@@ -124,7 +124,7 @@ namespace rareteam {
         /**
          * 下单(需要用户、平台签名)
          */ 
-        ACTION placeorder( uint64_t buyer_uid, const name& buyer_eosid, uint32_t pid, const uint128_t& order_id, uint32_t to_addr);
+        ACTION placeorder( uint64_t buyer_uid, const name& buyer_eosid, uint32_t pid, const uint128_t& order_id, uint32_t to_addr, optional<string>& pay_addr);
         /**
          * 取消订单
          */ 
