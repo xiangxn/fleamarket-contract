@@ -148,7 +148,7 @@ namespace rareteam {
         /**
          * 买家发起退货(需要用户签名)
          */ 
-        ACTION returns( uint64_t buyer_uid, const name& buyer_eosid, uint128_t order_id, const string& reasons );
+        ACTION returns( uint64_t buyer_uid, const name& buyer_eosid, uint128_t order_id, const string& reasons, uint32_t to_addr );
         /**
          * 申请仲裁(需要用户签名)
          */ 

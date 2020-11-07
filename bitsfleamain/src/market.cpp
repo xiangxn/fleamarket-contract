@@ -779,7 +779,7 @@ namespace rareteam {
 
     }
 
-    void bitsfleamain::returns( uint64_t buyer_uid, const name& buyer_eosid, uint128_t order_id, const string& reasons )
+    void bitsfleamain::returns( uint64_t buyer_uid, const name& buyer_eosid, uint128_t order_id, const string& reasons, uint32_t to_addr )
     {
         require_auth( buyer_eosid );
 
@@ -813,6 +813,7 @@ namespace rareteam {
             r.order_price = order.price;
             r.status = ReturnStatus::RS_PENDING_SHIPMENT;
             r.reasons = reasons;
+            r.to_addr = to_addr;
             r.create_time = time_point_sec(current_time_point().sec_since_epoch());
             r.ship_time_out = time_point_sec(current_time_point().sec_since_epoch() + _global.ship_time_out);
             AddTableLog( "returns"_n, OpType::OT_INSERT, r.order_id );

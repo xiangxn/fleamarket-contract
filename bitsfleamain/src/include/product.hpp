@@ -170,6 +170,7 @@ namespace rareteam
          * Delayed receipts times 
          */ 
         uint32_t delayed_count = 0;
+        uint32_t to_addr = 0;
 
         uint64_t primary_key() const { return uint64_t(id); }
         uint128_t by_order_id() const { return order_id; }
