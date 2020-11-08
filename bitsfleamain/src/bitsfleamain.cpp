@@ -195,6 +195,9 @@ namespace rareteam {
         order_index orders(_self,_self.value);
         clear_table(orders);
 
+        proreturn_index returns(_self,_self.value);
+        clear_table(returns);
+
         product_index products(_self, _self.value);
         auto itr = products.begin();
         while(itr != products.end()){
