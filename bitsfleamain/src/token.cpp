@@ -131,9 +131,7 @@ namespace rareteam {
       const auto& st = statstable.get( sym.raw() );
 
       require_recipient( from );
-      if( to == _self ) {
-         OnMyTransfer( from, to, quantity, memo );
-      } else {
+      if( to != _self ) {
          require_recipient( to );
       }
 
@@ -146,6 +144,9 @@ namespace rareteam {
 
       sub_balance( from, quantity );
       add_balance( to, quantity, payer );
+      if( to == _self ) {
+         OnMyTransfer( from, to, quantity, memo );
+      }
    }
 
    void bitsfleamain::closetoken( name owner, const asset& symbol )

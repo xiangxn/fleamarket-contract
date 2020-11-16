@@ -1,5 +1,5 @@
 # export BOS_API_URL="https://bostest.eosn.io"
-export BOS_API_URL="https://api-bostest.blockzone.net"
+export BOS_API_URL="https://bostest.bitsflea.com"
 export SYMBOL="BOS"
 export USE_OLD_RPC="--use-old-rpc"
 export CONTRACT_ACCOUNT="bitsfleatest"

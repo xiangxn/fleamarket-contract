@@ -196,7 +196,7 @@ namespace rareteam {
                 check( res_itr->status == ReturnStatus::RS_PENDING_RECEIPT, "Initiation of arbitration without confirmation of receipt" );
                 res_order_index.modify( res_itr, same_payer, [&](auto& r){
                     r.status = ReturnStatus::RS_ARBITRATION;
-                    AddTableLog( "returns"_n, OpType::OT_UPDATE, r.order_id );
+                    AddTableLog( "returns"_n, OpType::OT_UPDATE, r.id );
                 });
             }
         } else if( arbitration.type == ArbitType::AT_COMPLAINT ) { //complaint
@@ -288,7 +288,7 @@ namespace rareteam {
                         if( repro_itr != repro_order_index.end() ) { //initiated by the seller
                             repro_order_index.modify( repro_itr, same_payer, [&](auto& r){
                                 r.status = ReturnStatus::RS_COMPLETED;
-                                AddTableLog( "returns"_n, OpType::OT_UPDATE, r.order_id );
+                                AddTableLog( "returns"_n, OpType::OT_UPDATE, r.id );
                             });
                             order_table.modify( order_itr, same_payer, [&](auto& o){
                                 o.status = OrderStatus::OS_CANCELLED;
@@ -317,7 +317,7 @@ namespace rareteam {
                                 r.reasons = arbit.arbitration_results;
                                 r.create_time = current_time;
                                 r.ship_time_out = time_point_sec(current_time_point().sec_since_epoch() + _global.ship_time_out);
-                                AddTableLog( "returns"_n, OpType::OT_INSERT, r.order_id );
+                                AddTableLog( "returns"_n, OpType::OT_INSERT, r.id );
                             });
                         }
                         SubCredit( order.seller_uid, 100 );

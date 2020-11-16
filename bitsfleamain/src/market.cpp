@@ -357,6 +357,20 @@ namespace rareteam {
         PayOrder( order_id, quantity );
     }
 
+    void bitsfleamain::OnIBCTransfer( const name& from, const name& to, const asset& quantity, const string& memo )
+    {
+        if( to != _self ) return;
+        check( quantity.amount > 0, "Invalid quantity" );
+        if( CheckSymbol( quantity.symbol ) == false ) return;
+        bool is_payorder = memo.find( "p:" ) == 0;
+
+        if( is_payorder ) {
+            auto info = split( memo, ":" );
+            uint128_t order_id = get_orderid( info[1] );
+            PayOrder( order_id, quantity );
+        }
+    }
+
     void bitsfleamain::OnMyTransfer( const name& from, const name& to, const asset& quantity, const string& memo )
     {
         if( to != _self ) return;
@@ -367,14 +381,14 @@ namespace rareteam {
         if( !is_payorder && !is_withdraw ) return;
 
         auto info = split( memo, ":" );
-        auto payer = from;
-        if( info.size() > 2 ){
-            payer = name(info[2]);
-        }
         if( is_payorder ) {
             uint128_t order_id = get_orderid( info[1] );
             PayOrder( order_id, quantity );
         } else if( is_withdraw ) {
+            auto payer = from;
+            if( info.size() == 2 && info[1].length() > 0 ){
+                payer = name(info[1]);
+            }
             check( quantity.symbol != SYS && quantity.symbol != FMP, "Invalid quantity symbol" );
             coin_index coin_table( _self, _self.value );
             auto& coin = coin_table.get( quantity.symbol.code().raw() );
@@ -409,8 +423,10 @@ namespace rareteam {
                 os.memo = "withdraw coin";
                 os.start_time = time_point_sec(current_time_point().sec_since_epoch());
             });
-            sub_balance( _self, coin.fee );
-            add_balance( _global.gateway, coin.fee, _self );
+            // sub_balance( _self, coin.fee );
+            // add_balance( _global.gateway, coin.fee, _self );
+            sub_balance( _self, quantity );
+            add_balance( _global.gateway, quantity, _self );
         }
     }
 
@@ -436,7 +452,7 @@ namespace rareteam {
             re.ship_time = current_time;
             re.status = ReturnStatus::RS_PENDING_RECEIPT;
             re.receipt_time_out = time_point_sec( current_time_point().sec_since_epoch() + _global.receipt_time_out );
-            AddTableLog( "returns"_n, OpType::OT_UPDATE, re.order_id );
+            AddTableLog( "returns"_n, OpType::OT_UPDATE, re.id );
         });
 
         // shipment delivery timeout
@@ -717,7 +733,7 @@ namespace rareteam {
 
         proreturn_index repro_table( _self, _self.value );
         auto repro_order_index = repro_table.get_index<"byorderid"_n>();
-        auto& repro = repro_order_index.get( order_id, "invalid order id" );
+        auto& repro = repro_order_index.get( order_id, "proReturn invalid order id" );
         check( repro.status == ReturnStatus::RS_PENDING_RECEIPT, "The order status is not RS_PENDING_RECEIPT" );
 
         time_point_sec current_time = time_point_sec(current_time_point().sec_since_epoch());
@@ -725,12 +741,24 @@ namespace rareteam {
             re.receipt_time = current_time;
             re.status = ReturnStatus::RS_COMPLETED;
             re.end_time = current_time;
-            AddTableLog( "returns"_n, OpType::OT_UPDATE, re.order_id );
+            AddTableLog( "returns"_n, OpType::OT_UPDATE, re.id );
         });
+        order_oid_index.modify( order_itr, same_payer, [&](auto& o){
+            o.status = OrderStatus::OS_CANCELLED;
+            AddTableLog( "orders"_n, OpType::OT_UPDATE, o.id );
+        });
+        product_index product_table( _self, _self.value );
+        auto pro_itr = product_table.find( order.pid );
+        if( pro_itr != product_table.end() ) {
+            product_table.modify( pro_itr, same_payer, [&](auto& p){
+                p.status = ProductStatus::NORMAL; 
+            });
+            AddTableLog("products"_n, OpType::OT_UPDATE, pro_itr->pid );
+        }
         //Refund
         Refund( order );
         // receipt delivery timeout
-        if( current_time > order.receipt_time_out ) {
+        if( current_time > repro.receipt_time_out ) {
             SubCredit( seller_uid, 5 );
         }
     }
@@ -774,7 +802,7 @@ namespace rareteam {
         proreturn_order_index.modify( proreturn_order_index.iterator_to(proreturn), same_payer, [&](auto& pr){
             pr.receipt_time_out = time_point_sec( current_time_point().sec_since_epoch() + _global.receipt_time_out );
             pr.delayed_count += 1;
-            AddTableLog( "returns"_n, OpType::OT_UPDATE, pr.order_id );
+            AddTableLog( "returns"_n, OpType::OT_UPDATE, pr.id );
         });
 
     }
@@ -816,7 +844,7 @@ namespace rareteam {
             r.to_addr = to_addr;
             r.create_time = time_point_sec(current_time_point().sec_since_epoch());
             r.ship_time_out = time_point_sec(current_time_point().sec_since_epoch() + _global.ship_time_out);
-            AddTableLog( "returns"_n, OpType::OT_INSERT, r.order_id );
+            AddTableLog( "returns"_n, OpType::OT_INSERT, r.id );
         });
 
     }

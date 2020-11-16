@@ -207,10 +207,17 @@ namespace rareteam {
         void OnEOSTransfer( const name& from, const name& to, const asset& quantity, const string& memo );
         /**
          * 接收下单或提现
-         * 下单memo格式如: p:36893488153296537970:player1
-         * 提现memo格式如: w:
+         * 下单memo格式如: p:36893488153296537970
+         * 提现memo格式如: w:player1
          */ 
         void OnMyTransfer( const name& from, const name& to, const asset& quantity, const string& memo );
+
+        /**
+         * 跨链支付
+         * 
+         */ 
+        [[eosio::on_notify("bosibc.io::transfer")]]
+        void OnIBCTransfer( const name& from, const name& to, const asset& quantity, const string& memo );
 
 
     public:
