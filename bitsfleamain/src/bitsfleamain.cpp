@@ -32,7 +32,7 @@ namespace rareteam {
         _global.ref_pool = asset( 1000000000000, FMP );
         _global.transaction_pool = asset( 3500000000000, FMP );
         _global.salary_pool = asset( 2000000000000, FMP );
-        _global.encrypt_key = str_to_pub("EOS5BiYrPwXwFmrjLQ3ZUa3BX9crdomJNfYdu6uC863XAXrHNyWbo");
+        _global.encrypt_key = str_to_pub("EOS6xf3J5cLnEzTvsXjSncremGV7s1CBk8S3ovLnimuLs9q2k5BKz");
 
         //init Category
         string v[] = {"数码","玩具","美妆","居家","服装","图书","虚拟","其他"};
