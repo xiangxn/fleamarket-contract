@@ -624,9 +624,9 @@ namespace rareteam {
             o.status = OtherSettleStatus::OSS_PAID;
             o.trx_id = trx_id;
         });
-        action( permission_level{_self, ACTIVE_PERMISSION}, _self, ACTION_NAME_TRANSFER,
-            std::make_tuple( _self, _global.gateway, os.amount, os.memo )
-        ).send();
+        // action( permission_level{_self, ACTIVE_PERMISSION}, _self, ACTION_NAME_TRANSFER,
+        //     std::make_tuple( _self, _global.gateway, os.amount, os.memo )
+        // ).send();
         uint32_t count = get_size( os_table );
         if( count > 500 ) {
             auto itr = os_table.begin();
