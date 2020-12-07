@@ -36,3 +36,5 @@ cleos -u $BOS_API_URL set action permission -p $CONTRACT_ACCOUNT $USE_OLD_RPC $C
 cleos -u $BOS_API_URL set action permission -p $CONTRACT_ACCOUNT $USE_OLD_RPC $CONTRACT_ACCOUNT $CONTRACT_ACCOUNT transfer allot
 cleos -u $BOS_API_URL set action permission -p $CONTRACT_ACCOUNT $USE_OLD_RPC $CONTRACT_ACCOUNT bosibc.io transfer allot
 
+# cleos -u $BOS_API_URL push action -p $CONTRACT_ACCOUNT $USE_OLD_RPC $CONTRACT_ACCOUNT updatecoin '["5,BTS","1.00000 BTS",true,"1000000000.00000 BTS"]'
+

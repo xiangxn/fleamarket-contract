@@ -57,27 +57,24 @@ namespace rareteam {
             c.sym = SYS;
             c.fee = asset(0, SYS);
         });
-        symbol eos = symbol(symbol_code("EOS"), 4);
-        if( SYS != eos ) {
+        if( SYS != EOS ) {
             //EOS
             coin_table.emplace( _self, [&](auto& c){
                 c.sym = eos;
                 c.fee = asset(1000, eos);
                 c.is_out = true;
             });
-            create( _self, asset( 10000000000000, eos ), 0 );
+            // create( _self, asset( 10000000000000, eos ), 0 );
         }
         // BTS
-        // symbol BTS = symbol(symbol_code("BTS"), 5);
-        // coin_table.emplace( _self, [&](auto& c){
-        //     c.sym = BTS;
-        //     c.fee = asset(100000, BTS);
-        //     c.is_out = true;
-        // });
-        // create( _self, asset( 100000000000000, BTS ), 0 );
+        coin_table.emplace( _self, [&](auto& c){
+            c.sym = BTS;
+            c.fee = asset(100000, BTS);
+            c.is_out = true;
+        });
+        create( _self, asset( 100000000000000, BTS ), 0 );
 
         // NULS
-        symbol NULS = symbol(symbol_code("NULS"),8);
         coin_table.emplace( _self, [&](auto& c){
             c.sym = NULS;
             c.fee = asset(50000000, NULS);
@@ -95,7 +92,6 @@ namespace rareteam {
         // create( _self, asset(10000000000000000, ETH ), 0 );
 
         //USDT
-        symbol USDT = symbol(symbol_code("USDT"), 8);
         coin_table.emplace( _self, [&](auto& c){
             c.sym = USDT;
             c.fee = asset(130000000, USDT);

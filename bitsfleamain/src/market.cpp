@@ -529,59 +529,12 @@ namespace rareteam {
         } else {
             comm = asset( 0, income.symbol );
         }
-        if( order.price.symbol == SYS ) {
+        if( order.price.symbol == SYS ) {   // eosio.token transfer
             PayCoin( stroid, order, seller, buyer, amount, devops_income, comm, NAME_EOSIO_TOKEN );
-        } else {
-            //other blockchain
-            otheraddr_index oa_table( _self, _self.value );
-            auto uid_idx = oa_table.get_index<"byuid"_n>();
-            bool is_bind = false;
-            string addr = "";
-            auto oa_itr = uid_idx.find( order.seller_uid );
-            while ( oa_itr != uid_idx.end() && oa_itr->uid == order.seller_uid )
-            {
-                if( order.price.symbol == oa_itr->coin_type && oa_itr->addr.length() != 0 ) {
-                    is_bind = true;
-                    addr = oa_itr->addr;
-                    break;
-                }
-                oa_itr++;
-            }
-            if( is_bind ) { // create settle log
-                string memo = "complete order " + stroid;
-                othersettle_index os_table( _self, _self.value );
-                os_table.emplace( _self, [&](auto& os){
-                    os.id = os_table.available_primary_key();
-                    os.id = os.id == 0 ? 1 : os.id;
-                    os.uid = order.seller_uid;
-                    os.order_id = order.id;
-                    os.amount = amount;
-                    os.status = OtherSettleStatus::OSS_NORMAL;
-                    os.addr = addr;
-                    os.memo = memo;
-                    os.start_time = time_point_sec(current_time_point().sec_since_epoch());
-                });
-                transaction trx;
-                if( devops_income.amount > 0 ) {
-                    action a1 = action( permission_level{_self, ACTIVE_PERMISSION}, _self, ACTION_NAME_TRANSFER,
-                        std::make_tuple( _self, _global.devops, devops_income, memo )
-                    );
-                    trx.actions.emplace_back( a1 );
-                }
-                if( buyer.referrer > 0 && comm.amount > 0 ){
-                    auto& referrer = _user_table.get( buyer.referrer, "Invalid order referrer uid" );
-                    action a2 = action( permission_level{_self, ACTIVE_PERMISSION}, _self, ACTION_NAME_TRANSFER,
-                        std::make_tuple( _self, referrer.eosid, comm, "Referral commission" + stroid )
-                    );
-                    trx.actions.emplace_back( a2 );
-                }
-                if( trx.actions.size() > 0 ) {
-                    trx.delay_sec = 5;
-                    trx.send( (uint128_t(("settle"_n).value) << 64) | uint64_t(current_time_point().sec_since_epoch()) , _self, false);
-                }
-            } else { // bitsfleamain transfer
-                PayCoin( stroid, order, seller, buyer, amount, devops_income, comm, _self );
-            }
+        } else if ( order.price.symbol == EOS || order.price.symbol == USDT ) { //bosibc.io transfer
+            PayCoin( stroid, order, seller, buyer, amount, devops_income, comm, NAME_BOSIBC_TOKEN );
+        } else {    // bitsfleamain transfer
+            PayCoin( stroid, order, seller, buyer, amount, devops_income, comm, _self );
         }
 
         auto itr = find_if( _global.income.begin(), _global.income.end(), [&](asset& a){

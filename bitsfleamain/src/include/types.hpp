@@ -14,8 +14,13 @@ namespace rareteam {
 
    #define FMP symbol(symbol_code("FMP"), 4)
    #define SYS symbol(symbol_code("BOS"), 4)
+   #define EOS symbol(symbol_code("EOS"), 4)
+   #define BTS symbol(symbol_code("BTS"), 5)
+   #define NULS symbol(symbol_code("NULS"),8)
+   #define USDT symbol(symbol_code("USDT"), 8)
 
    #define NAME_EOSIO_TOKEN name("eosio.token")
+   #define NAME_BOSIBC_TOKEN name("bosibc.io")
 
    #define ACTIVE_PERMISSION name("active")
    #define ACTION_NAME_TRANSFER name("transfer")
