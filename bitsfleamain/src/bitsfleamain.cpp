@@ -60,11 +60,11 @@ namespace rareteam {
         if( SYS != EOS ) {
             //EOS
             coin_table.emplace( _self, [&](auto& c){
-                c.sym = eos;
-                c.fee = asset(1000, eos);
+                c.sym = EOS;
+                c.fee = asset(1000, EOS);
                 c.is_out = true;
             });
-            // create( _self, asset( 10000000000000, eos ), 0 );
+            // create( _self, asset( 10000000000000, EOS ), 0 );
         }
         // BTS
         coin_table.emplace( _self, [&](auto& c){
@@ -133,30 +133,26 @@ namespace rareteam {
         otheraddr_index addrs_table( _self, _self.value );
         clear_table( addrs_table );
 
-        symbol eos = symbol(symbol_code("EOS"), 4);
-        tokenStats eos_table( _self, eos.code().raw() );
-        clear_table(eos_table);
+        if( SYS != EOS ) {
+            tokenStats eos_table( _self, EOS.code().raw() );
+            clear_table(eos_table);
+        }
 
         tokenStats fmp_table( _self, FMP.code().raw() );
         clear_table(fmp_table);
 
-        symbol BTS = symbol(symbol_code("BTS"), 5);
         tokenStats bts_table( _self, BTS.code().raw() );
         clear_table(bts_table);
 
-        symbol NULS = symbol(symbol_code("NULS"),8);
         tokenStats nuls_table( _self, NULS.code().raw() );
         clear_table(nuls_table);
 
-        symbol ETH = symbol(symbol_code("ETH"), 8);
         tokenStats eth_table( _self, ETH.code().raw() );
         clear_table(eth_table);
 
-        symbol USDT = symbol(symbol_code("USDT"), 8);
         tokenStats usdt_table( _self, USDT.code().raw() );
         clear_table(usdt_table);
 
-        symbol CNY = symbol(symbol_code("CNY"), 4);
         tokenStats cny_table( _self, CNY.code().raw() );
         clear_table(cny_table);
 
@@ -188,20 +184,22 @@ namespace rareteam {
         //     pro_itr++;
         // }
 
-        order_index orders(_self,_self.value);
-        clear_table(orders);
+        // order_index orders(_self,_self.value);
+        // clear_table(orders);
 
-        proreturn_index returns(_self,_self.value);
-        clear_table(returns);
+        // proreturn_index returns(_self,_self.value);
+        // clear_table(returns);
 
-        product_index products(_self, _self.value);
-        auto itr = products.begin();
-        while(itr != products.end()){
-            products.modify(itr, same_payer, [&](auto& p){
-                p.status = ProductStatus::NORMAL;
-            });
-            itr++;
-        }
+        // product_index products(_self, _self.value);
+        // auto itr = products.begin();
+        // while(itr != products.end()){
+        //     products.modify(itr, same_payer, [&](auto& p){
+        //         p.status = ProductStatus::NORMAL;
+        //     });
+        //     itr++;
+        // }
+        // tokenStats eos_table( _self, USDT.code().raw() );
+        // clear_table(eos_table);
     }
 
     void bitsfleamain::cleanscope( const name& n)

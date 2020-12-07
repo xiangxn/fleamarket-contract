@@ -16,8 +16,10 @@ namespace rareteam {
    #define SYS symbol(symbol_code("BOS"), 4)
    #define EOS symbol(symbol_code("EOS"), 4)
    #define BTS symbol(symbol_code("BTS"), 5)
-   #define NULS symbol(symbol_code("NULS"),8)
+   #define NULS symbol(symbol_code("NULS"), 8)
    #define USDT symbol(symbol_code("USDT"), 8)
+   #define ETH symbol(symbol_code("ETH"), 8)
+   #define CNY symbol(symbol_code("CNY"), 4)
 
    #define NAME_EOSIO_TOKEN name("eosio.token")
    #define NAME_BOSIBC_TOKEN name("bosibc.io")
