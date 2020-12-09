@@ -265,6 +265,7 @@ namespace rareteam {
         product_index pro_table( _self, _self.value );
         auto& product = pro_table.get( pid, "Invalid product pid" );
         check( product.status == ProductStatus::NORMAL, "This product cannot be traded" );
+        check( product.uid != buyer_uid, "You don’t need to buy self-published products" );
 
         uint128_t oid = 0;
         auto ct = current_time_point().sec_since_epoch();
