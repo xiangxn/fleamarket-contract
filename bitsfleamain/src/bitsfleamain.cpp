@@ -51,7 +51,7 @@ namespace rareteam {
             c.sym = FMP;
             c.fee = asset(0, FMP);
         });
-        create( _self, asset( 10000000000000, FMP ), 30 );
+        create( _self, asset( 10000000000000, FMP ), 35 );
         //create SYS
         coin_table.emplace( _self, [&](auto& c){
             c.sym = SYS;
@@ -159,47 +159,10 @@ namespace rareteam {
         _global_table.remove();
     }
 
-    void bitsfleamain::test(const string& para)
+    void bitsfleamain::update(const string& para)
     {
         require_auth( _self );
-        // string str = "05FBED483A974456708EF12FCF3D278276E982234D775ECEE0DFA5CB49B8B492";
-        // auto hash = hex_to_sha256(str);
-        // string result = sha256_to_hex(hash);
-        //check(false,result);
-        //set_zero( hash );
-        //check(is_zero( hash ),"is_zero Error");
-        //result = sha256_to_hex(hash);
-        //check(false,result);
-        //auto num = get_uint64(hash);
         
-        //check(false,result);
-
-        // product_index pro_table( _self, _self.value );
-        // auto pro_itr = pro_table.begin();
-        // while(pro_itr!=pro_table.end()){
-        //     pro_table.modify(pro_itr, same_payer, [&](auto& p){
-        //         if(p.status!=ProductStatus::NORMAL)
-        //             p.status=ProductStatus::PUBLISH;
-        //     });
-        //     pro_itr++;
-        // }
-
-        // order_index orders(_self,_self.value);
-        // clear_table(orders);
-
-        // proreturn_index returns(_self,_self.value);
-        // clear_table(returns);
-
-        // product_index products(_self, _self.value);
-        // auto itr = products.begin();
-        // while(itr != products.end()){
-        //     products.modify(itr, same_payer, [&](auto& p){
-        //         p.status = ProductStatus::NORMAL;
-        //     });
-        //     itr++;
-        // }
-        // tokenStats eos_table( _self, USDT.code().raw() );
-        // clear_table(eos_table);
     }
 
     void bitsfleamain::cleanscope( const name& n)

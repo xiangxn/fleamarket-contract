@@ -657,7 +657,14 @@ namespace rareteam {
         }
         // points
         int64_t val = int64_t(double(order.price.amount) * _global.transaction_gift_rate);
-        if( val > 1 && val <= (_global.transaction_pool.amount * 2) ) {
+        uint8_t price_precision = order.price.symbol.precision();
+        uint8_t fmp_precision = FMP.precision();
+        if ( price_precision > fmp_precision ) {
+            val = int64_t(double(val) / ( pow(10, price_precision - fmp_precision)));
+        } else if ( fmp_precision > price_precision ) {
+            val = int64_t(double(val) * ( pow(10, fmp_precision - price_precision)));
+        }
+        if( val > 1 && (val * 2) <= _global.transaction_pool.amount ) {
             auto& seller = _user_table.get( order.seller_uid, "Invalid seller uid for conreceipt" );
             asset point = asset( val, FMP );
             transaction trx;
@@ -671,6 +678,7 @@ namespace rareteam {
             trx.actions.emplace_back( a2 );
             trx.delay_sec = 5;
             trx.send( (uint128_t(("conreceipt"_n).value) << 64) | uint64_t(current_time_point().sec_since_epoch()) , _self, false);
+            _global.transaction_pool -= point * 2;
         }
     }
 
