@@ -77,7 +77,7 @@ namespace rareteam {
             auto reviewer_uid_index = reviewer_table.get_index<"byuid"_n>();
             auto itr = reviewer_uid_index.find( reviewer_uid );
             if( itr != reviewer_uid_index.end() ) {
-                AddTableLog("reviewers"_n, OpType::OT_DELETE, itr->id);
+                AddTableLog("reviewers"_n, OpType::OT_DELETE, itr->uid);
                 reviewer_uid_index.erase( itr );
             }
             return false;
@@ -104,7 +104,7 @@ namespace rareteam {
             r.voted_count = 0;
             r.create_time = time_point_sec(current_time_point().sec_since_epoch());
             r.last_active_time = time_point_sec(current_time_point().sec_since_epoch());
-            AddTableLog("reviewers"_n, OpType::OT_INSERT, r.id);
+            AddTableLog("reviewers"_n, OpType::OT_INSERT, r.uid);
         });
     }
 
@@ -148,7 +148,7 @@ namespace rareteam {
                     AddTableLog("users"_n, OpType::OT_UPDATE, user.uid);
                 }
             }
-            AddTableLog("reviewers"_n, OpType::OT_UPDATE, reviewer.id);
+            AddTableLog("reviewers"_n, OpType::OT_UPDATE, reviewer.uid);
         });
         // point logic
         if( _global.gift_vote.amount > 0 && _global.transaction_pool.amount >= _global.gift_vote.amount ) {
@@ -378,7 +378,7 @@ namespace rareteam {
                 auto reviewer_uid_index = reviewer_table.get_index<"byuid"_n>();
                 auto rev_itr = reviewer_uid_index.find( u.uid );
                 if( rev_itr != reviewer_uid_index.end() ) {
-                    AddTableLog("reviewers"_n, OpType::OT_DELETE, rev_itr->id);
+                    AddTableLog("reviewers"_n, OpType::OT_DELETE, rev_itr->uid);
                     reviewer_uid_index.erase( rev_itr );
                 }
                 
