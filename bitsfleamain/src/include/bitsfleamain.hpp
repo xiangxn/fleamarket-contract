@@ -75,7 +75,7 @@ namespace rareteam {
 
         /*****fleamain management*****/
         ACTION init();
-        ACTION reset();
+        // ACTION reset();
         ACTION update(const string& para);
         ACTION cleanscope( const name& n);
 

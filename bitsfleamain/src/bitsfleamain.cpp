@@ -109,55 +109,11 @@ namespace rareteam {
         // create( _self, asset(10000000000000, CNY ), 0 );
     }
 
-    void bitsfleamain::reset()
-    {
-        require_auth( _self );
+    // void bitsfleamain::reset()
+    // {
+    //     require_auth( _self );
 
-        clear_table(_user_table);
-
-        coin_index coin_table( _self, _self.value );
-        clear_table(coin_table);
-
-        Category_index cate_table( _self, _self.value );
-        clear_table(cate_table);
-
-        product_index product_table( _self, _self.value );
-        clear_table(product_table);
-
-        proaudit_index proaudit_table( _self, _self.value );
-        clear_table(proaudit_table);
-
-        reviewer_index reviewer_table( _self, _self.value );
-        clear_table(reviewer_table);
-
-        otheraddr_index addrs_table( _self, _self.value );
-        clear_table( addrs_table );
-
-        if( SYS != EOS ) {
-            tokenStats eos_table( _self, EOS.code().raw() );
-            clear_table(eos_table);
-        }
-
-        tokenStats fmp_table( _self, FMP.code().raw() );
-        clear_table(fmp_table);
-
-        tokenStats bts_table( _self, BTS.code().raw() );
-        clear_table(bts_table);
-
-        tokenStats nuls_table( _self, NULS.code().raw() );
-        clear_table(nuls_table);
-
-        tokenStats eth_table( _self, ETH.code().raw() );
-        clear_table(eth_table);
-
-        tokenStats usdt_table( _self, USDT.code().raw() );
-        clear_table(usdt_table);
-
-        tokenStats cny_table( _self, CNY.code().raw() );
-        clear_table(cny_table);
-
-        _global_table.remove();
-    }
+    // }
 
     void bitsfleamain::update(const string& para)
     {
