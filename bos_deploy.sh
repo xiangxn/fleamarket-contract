@@ -29,6 +29,7 @@ cleos -u $BOS_API_URL set action permission -p $CONTRACT_ACCOUNT $USE_OLD_RPC $C
 cleos -u $BOS_API_URL set action permission -p $CONTRACT_ACCOUNT $USE_OLD_RPC $CONTRACT_ACCOUNT $CONTRACT_ACCOUNT endsync execute
 cleos -u $BOS_API_URL set action permission -p $CONTRACT_ACCOUNT $USE_OLD_RPC $CONTRACT_ACCOUNT $CONTRACT_ACCOUNT updatecoin execute
 cleos -u $BOS_API_URL set action permission -p $CONTRACT_ACCOUNT $USE_OLD_RPC $CONTRACT_ACCOUNT $CONTRACT_ACCOUNT deletelog execute
+cleos -u $BOS_API_URL set action permission -p $CONTRACT_ACCOUNT $USE_OLD_RPC $CONTRACT_ACCOUNT $CONTRACT_ACCOUNT cleanorder execute
 
 #授权平台分发收益权限
 cleos -u $BOS_API_URL set account permission -p $CONTRACT_ACCOUNT $USE_OLD_RPC $CONTRACT_ACCOUNT allot 'EOS8Ce7ePDFh1tDEvxW1D59NeV1LHu4qPso52mP7Fz2oDpWAeNLTi' active 

@@ -130,6 +130,10 @@ namespace rareteam {
          */ 
         ACTION cancelorder( uint64_t buyer_uid, const name& buyer_eosid, const uint128_t& order_id);
         /**
+         * 清除过期订单
+         */ 
+        ACTION cleanorder( uint64_t start_id );
+        /**
          * 发货(需要用户签名)
          */ 
         ACTION shipment( uint64_t seller_uid, const name& seller_eosid, uint128_t order_id, const string& number );
@@ -194,6 +198,9 @@ namespace rareteam {
          */ 
         ACTION setpayaddr( const uint128_t& order_id, const string& addr );
 
+        /**
+         * 删除同步日志
+         */ 
         ACTION deletelog( uint64_t id);
         
         

@@ -252,6 +252,38 @@ namespace rareteam {
         order_index.erase( order_itr );
     }
 
+    void bitsfleamain::cleanorder( uint64_t start_id )
+    {
+        require_auth( _self );
+        
+        int sum = 50;
+        int count = 0;
+        uint32_t expire_sum = 86400;
+        product_index pro_table( _self, _self.value );
+        order_index order_table( _self, _self.value );
+        auto order_itr = order_table.find( start_id );
+        while ( order_itr != order_table.end() && count < sum )
+        {
+            if ( order_itr->status == OrderStatus::OS_PENDING_PAYMENT ) {
+                auto ct = time_point_sec(current_time_point().sec_since_epoch());
+                auto expire = time_point_sec(order_itr->pay_time_out.sec_since_epoch() + expire_sum);
+                if( ct >= expire ) {
+                    auto& product = pro_table.get( order_itr->pid, "Invalid product pid" );
+                    pro_table.modify( product, same_payer, [&](auto& p){
+                        p.status = ProductStatus::NORMAL;
+                    });
+                    AddTableLog("products"_n, OpType::OT_UPDATE, product.pid );
+                    AddTableLog( "orders"_n, OpType::OT_DELETE, order_itr->id );
+                    order_itr = order_table.erase( order_itr );
+                    count++;
+                    continue;
+                }
+            }
+            order_itr++;
+            count++;
+        }
+    }
+
     void bitsfleamain::placeorder( uint64_t buyer_uid, const name& buyer_eosid, uint32_t pid, const uint128_t& order_id, uint32_t to_addr, optional<string>& pay_addr)
     {
         require_auth( buyer_eosid );
