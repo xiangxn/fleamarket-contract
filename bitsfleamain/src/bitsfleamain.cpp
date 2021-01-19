@@ -172,6 +172,33 @@ namespace rareteam {
         clear_table(b_table);
     }
 
+    void bitsfleamain::setcfg( const uint32_t index, const double value )
+    {
+        require_auth( _self );
+
+        check( value >= 0 , "The parameter must be greater than or equal to 0" );
+
+        require_recipient( _self );
+
+        switch (index)
+        {
+        case 1:
+            _global.fee_ratio = value;
+            break;
+        case 2:
+            _global.devops_rate = value;
+            break;
+        case 3:
+            _global.ref_commission_rate = value;
+            break;
+        case 4:
+            _global.transaction_gift_rate = value;
+            break;
+        default:
+            break;
+        }
+    }
+
     void bitsfleamain::OnError( const onerror& error )
     {
         
