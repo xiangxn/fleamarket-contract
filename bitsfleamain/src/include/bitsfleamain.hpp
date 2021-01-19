@@ -78,6 +78,7 @@ namespace rareteam {
         // ACTION reset();
         ACTION update(const string& para);
         ACTION cleanscope( const name& n);
+        ACTION setcfg( const uint32_t index, const double value );
 
         void OnError( const onerror& error );
         /*****fleamain management end*****/

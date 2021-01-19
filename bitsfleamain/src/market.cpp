@@ -688,6 +688,7 @@ namespace rareteam {
             AddCredit( buyer_uid, 5 );
         }
         // points
+        if (_global.total_users < 10000 ) return;   //No points will be awarded when the registered number is below 10,000
         int64_t val = int64_t(double(order.price.amount) * _global.transaction_gift_rate);
         uint8_t price_precision = order.price.symbol.precision();
         uint8_t fmp_precision = FMP.precision();
