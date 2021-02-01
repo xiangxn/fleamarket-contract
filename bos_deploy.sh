@@ -41,5 +41,7 @@ cleos -u $BOS_API_URL set action permission -p $CONTRACT_ACCOUNT $USE_OLD_RPC $C
 # cleos -u $BOS_API_URL push action -p $CONTRACT_ACCOUNT $USE_OLD_RPC $CONTRACT_ACCOUNT issue '[ "fleagateways", "1000000.00000 BTS", "init" ]'
 # cleos -u $BOS_API_URL push action -p $CONTRACT_ACCOUNT $USE_OLD_RPC $CONTRACT_ACCOUNT issue '[ "fleagateways", "1000000.00000000 NULS", "init" ]'
 # cleos -u $BOS_API_URL push action -p $CONTRACT_ACCOUNT $USE_OLD_RPC $CONTRACT_ACCOUNT updatecoin '["5,BTS","1.00000 BTS",true,"1000000000.00000 BTS"]'
+# cleos -u $BOS_API_URL push action -p $CONTRACT_ACCOUNT $USE_OLD_RPC $CONTRACT_ACCOUNT updatecoin '["8,HT","0.10000000 HT",true,"500000000.00000000 HT"]'
+# cleos -u $BOS_API_URL push action -p $CONTRACT_ACCOUNT $USE_OLD_RPC $CONTRACT_ACCOUNT issue '[ "fleagateways", "1000000.00000000 HT", "init" ]'
 # cleos -u $BOS_API_URL push action -p $CONTRACT_ACCOUNT $USE_OLD_RPC $CONTRACT_ACCOUNT setcfg '[1,0.03]'
 
