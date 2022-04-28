@@ -1,0 +1,26 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "/Users/necklace/work/eos/eosio.cdt/libraries/libc++/libcxx/include",
+                "/Users/necklace/work/eos/eosio.cdt/libraries/libc/musl/include",
+                "/Users/necklace/work/eos/eosio.cdt/libraries/eosiolib/contracts",
+                "/Users/necklace/work/eos/eosio.cdt/libraries/eosiolib/core",
+                "/Users/necklace/work/eos/eosio.cdt/libraries/eosiolib",
+                "/Users/necklace/work/eos/eos/libraries/testing/include",
+                "${workspaceFolder}/bitsfleamain/src/include"
+            ],
+            "defines": [],
+            "macFrameworkPath": [
+                "/System/Library/Frameworks",
+                "/Library/Frameworks"
+            ],
+            "compilerPath": "/usr/local/opt/llvm@8/bin/clang",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "clang-x64"
+        }
+    ],
+    "version": 4
+}
